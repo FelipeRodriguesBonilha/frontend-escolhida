@@ -1,0 +1,105 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">Controle de Estoque</h1>
+          <p class="text-gray-600">Gerencie o inventário dos seus produtos</p>
+        </div>
+        @if (!isLoading) {
+          <div class="text-right">
+            <p class="text-sm text-gray-600">Itens com estoque baixo</p>
+            <p class="text-3xl font-bold text-orange-600">{{ getLowStockCount() }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="flex items-center justify-center py-12">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else {
+      <mat-card class="shadow-sm">
+        <mat-card-content class="p-0">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="stocks" class="w-full">
+              <ng-container matColumnDef="product">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Produto</th>
+                <td mat-cell *matCellDef="let stock">
+                  <div class="py-2">
+                    <p class="font-medium text-gray-800">{{ stock.product?.name || 'N/A' }}</p>
+                    <p class="text-sm text-gray-500">{{ stock.product?.barcode || '-' }}</p>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Quantidade</th>
+                <td mat-cell *matCellDef="let stock">
+                  <span class="text-lg font-semibold" 
+                        [class.text-red-600]="getStockStatus(stock) === 'out'"
+                        [class.text-orange-600]="getStockStatus(stock) === 'low'"
+                        [class.text-green-600]="getStockStatus(stock) === 'ok'">
+                    {{ stock.quantity }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="minQuantity">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Estoque Mínimo</th>
+                <td mat-cell *matCellDef="let stock">
+                  <span class="text-gray-600">{{ stock.minQuantity }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Status</th>
+                <td mat-cell *matCellDef="let stock">
+                  <mat-chip 
+                    [class.bg-red-100]="getStockStatus(stock) === 'out'"
+                    [class.text-red-700]="getStockStatus(stock) === 'out'"
+                    [class.bg-orange-100]="getStockStatus(stock) === 'low'"
+                    [class.text-orange-700]="getStockStatus(stock) === 'low'"
+                    [class.bg-green-100]="getStockStatus(stock) === 'ok'"
+                    [class.text-green-700]="getStockStatus(stock) === 'ok'">
+                    {{ getStockStatusLabel(stock) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="updatedAt">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Última Atualização</th>
+                <td mat-cell *matCellDef="let stock">
+                  <span class="text-sm text-gray-600">{{ stock.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Ações</th>
+                <td mat-cell *matCellDef="let stock">
+                  <button type="button"
+                          (click)="openAdjustDialog(stock)"
+                          title="Ajustar Estoque"
+                          class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+            </table>
+          </div>
+
+          @if (stocks.length === 0) {
+            <div class="text-center py-12">
+              <mat-icon class="text-gray-400 text-6xl mb-4">inventory_2</mat-icon>
+              <p class="text-gray-500 text-lg">Nenhum item no estoque</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

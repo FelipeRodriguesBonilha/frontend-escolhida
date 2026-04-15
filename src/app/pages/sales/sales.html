@@ -1,0 +1,410 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Vendas</h1>
+      <p class="text-gray-600">Gerencie suas vendas de forma rápida e eficiente</p>
+    </div>
+
+    <mat-tab-group [(selectedIndex)]="activeTab" (selectedIndexChange)="onTabChange($event)" class="bg-white rounded-xl shadow-sm">
+      <mat-tab label="Ponto de Venda">
+        <div class="p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-1 space-y-4">
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Buscar Produtos</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="searchForm" class="space-y-4">
+              <mat-form-field class="w-full">
+                <mat-label>Nome do Produto</mat-label>
+                <input matInput 
+                       formControlName="searchQuery"
+                       placeholder="Digite para buscar..."
+                       (keyup.enter)="onProductSelected()">
+                @if (searchForm.get('searchQuery')?.value) {
+                  <button matSuffix type="button" (click)="searchForm.get('searchQuery')?.setValue('')" class="w-6 h-6 flex items-center justify-center">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                } @else {
+                  <mat-icon matSuffix>search</mat-icon>
+                }
+              </mat-form-field>
+
+              @if (filteredProducts.length > 0) {
+                <div class="h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                  @for (product of filteredProducts; track product.id) {
+                    <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                         (click)="selectProduct(product)">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <h4 class="font-medium text-gray-800">{{ product.name }}</h4>
+                          <p class="text-sm text-gray-500">Categoria: {{ product.category?.name || 'Sem categoria' }}</p>
+                          <p class="text-sm text-gray-500">Marca: {{ product.brand?.name || 'Sem categoria' }}</p>
+                          @if (product.barcode) {
+                            <p class="text-xs text-gray-400">Cód: {{ product.barcode }}</p>
+                          }
+                        </div>
+                        <div class="text-right">
+                          <p class="font-semibold text-pink-600">R$ {{ product.price.toFixed(2) }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <button type="button"
+                      (click)="onProductSelected()"
+                      [disabled]="!selectedProduct"
+                      class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <mat-icon>add_shopping_cart</mat-icon>
+                <span>Adicionar ao Carrinho</span>
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Código de Barras</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="searchForm" class="space-y-4">
+              <mat-form-field class="w-full">
+                <mat-label>Código de Barras</mat-label>
+                <input matInput 
+                       formControlName="barcode"
+                       placeholder="Digite o código..."
+                       (keyup.enter)="searchByBarcode()">
+                <mat-icon matSuffix>qr_code</mat-icon>
+              </mat-form-field>
+
+              <button type="button"
+                      (click)="searchByBarcode()"
+                      [disabled]="!searchForm.get('barcode')?.value"
+                      class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <mat-icon>qr_code_scanner</mat-icon>
+                <span>Buscar por Código</span>
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="lg:col-span-1 space-y-4">
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800 flex items-center justify-between">
+              <span>Carrinho de Compras</span>
+              @if (cartItems.length > 0) {
+                <span class="bg-pink-100 text-pink-800 text-sm font-medium px-2 py-1 rounded-full">
+                  {{ cartItems.length }} itens
+                </span>
+              }
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (cartItems.length === 0) {
+              <div class="text-center py-8 text-gray-500">
+                <mat-icon class="text-4xl mb-2">shopping_cart_outlined</mat-icon>
+                <p>Carrinho vazio</p>
+                <p class="text-sm">Adicione produtos para começar</p>
+              </div>
+            } @else {
+              <div class="h-96 overflow-y-auto">
+                <table mat-table [dataSource]="cartItems" class="w-full">
+                  <ng-container matColumnDef="product">
+                    <th mat-header-cell *matHeaderCellDef>Produto</th>
+                    <td mat-cell *matCellDef="let item">
+                      <div>
+                        <p class="font-medium text-gray-800">{{ item.product.name }}</p>
+                        <p class="text-xs text-gray-500">ID: {{ item.product.categoryId }}</p>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="price">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Preço</th>
+                    <td mat-cell *matCellDef="let item" class="text-right">
+                      R$ {{ item.product.price.toFixed(2) }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="quantity">
+                    <th mat-header-cell *matHeaderCellDef class="text-center">Qtd</th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="text-center">
+                      <div class="flex items-center justify-center gap-1">
+                        <button type="button"
+                                (click)="updateQuantity(i, item.quantity - 1)"
+                                class="w-8 h-8 text-gray-600 hover:text-pink-600 rounded-lg transition-colors flex items-center justify-center">
+                          <mat-icon>remove</mat-icon>
+                        </button>
+                        <span class="w-8 text-center font-medium">{{ item.quantity }}</span>
+                        <button type="button"
+                                (click)="updateQuantity(i, item.quantity + 1)"
+                                class="w-8 h-8 text-gray-600 hover:text-pink-600 rounded-lg transition-colors flex items-center justify-center">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="subtotal">
+                    <th mat-header-cell *matHeaderCellDef class="text-right">Subtotal</th>
+                    <td mat-cell *matCellDef="let item" class="text-right font-medium text-pink-600">
+                      R$ {{ item.subtotal.toFixed(2) }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"></th>
+                    <td mat-cell *matCellDef="let item; let i = index" class="text-center">
+                      <button type="button"
+                              (click)="removeFromCart(i)"
+                              class="w-8 h-8 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+              </div>
+
+              <mat-divider class="my-4"></mat-divider>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Subtotal:</span>
+                  <span class="font-medium">R$ {{ subtotal.toFixed(2) }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Desconto:</span>
+                  <span class="font-medium text-red-600">-R$ {{ discount.toFixed(2) }}</span>
+                </div>
+                <div class="flex justify-between text-lg font-semibold text-gray-800 pt-2 border-t">
+                  <span>Total:</span>
+                  <span class="text-pink-600">R$ {{ total.toFixed(2) }}</span>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <button type="button"
+                        (click)="clearCart()"
+                        [disabled]="cartItems.length === 0"
+                        class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <mat-icon>clear</mat-icon>
+                  <span>Limpar Carrinho</span>
+                </button>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="lg:col-span-1 space-y-4">
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Finalizar Venda</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="saleForm" class="space-y-4">
+              <mat-form-field class="w-full">
+                <mat-label>Método de Pagamento</mat-label>
+                <mat-select formControlName="paymentMethodId">
+                  @for (method of paymentMethods; track method.id) {
+                    <mat-option [value]="method.id">{{ method.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field class="w-full">
+                <mat-label>Desconto</mat-label>
+                <input matInput 
+                       formControlName="discount"
+                       appCurrencyMask
+                       placeholder="0,00">
+                <mat-icon matSuffix>discount</mat-icon>
+                <mat-hint>Valor de desconto na venda</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field class="w-full">
+                <mat-label>Valor Pago</mat-label>
+                <input matInput 
+                       formControlName="amountPaid"
+                       appCurrencyMask
+                       placeholder="0,00">
+                <mat-icon matSuffix>payments</mat-icon>
+                <mat-hint>Valor recebido do cliente</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field class="w-full">
+                <mat-label>Parcelas</mat-label>
+                <input matInput 
+                       formControlName="installments"
+                       type="number"
+                       placeholder="Apenas para cartão de crédito">
+                <mat-icon matSuffix>credit_card</mat-icon>
+                <mat-hint>Número de parcelas (cartão de crédito)</mat-hint>
+              </mat-form-field>
+
+              @if (saleForm.value.amountPaid && saleForm.value.amountPaid > total) {
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-green-800 font-medium">Troco:</span>
+                    <span class="text-green-600 font-bold text-lg">
+                      R$ {{ (saleForm.value.amountPaid - total).toFixed(2) }}
+                    </span>
+                  </div>
+                </div>
+              }
+
+              <mat-form-field class="w-full">
+                <mat-label>Observações</mat-label>
+                <textarea matInput 
+                          formControlName="notes"
+                          placeholder="Observações sobre a venda..."
+                          rows="3"></textarea>
+              </mat-form-field>
+
+              <button type="button"
+                      (click)="simulateSale()"
+                      [disabled]="cartItems.length === 0 || saleForm.invalid || isLoading"
+                      class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (isLoading) {
+                  <span class="flex items-center justify-center">
+                    <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+                    Validando...
+                  </span>
+                } @else {
+                  <span class="flex items-center justify-center">
+                    <mat-icon class="mr-2 text-base">calculate</mat-icon>
+                    Validar Venda
+                  </span>
+                }
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        @if (cartItems.length > 0) {
+          <mat-card class="shadow-sm bg-gradient-to-br from-pink-50 to-pink-100">
+            <mat-card-content class="p-4">
+              <h3 class="font-semibold text-gray-800 mb-3">Resumo da Venda</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Itens:</span>
+                  <span class="font-medium">{{ cartItems.length }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Total:</span>
+                  <span class="font-bold text-pink-600">R$ {{ total.toFixed(2) }}</span>
+                </div>
+                @if (getPaymentMethodName()) {
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Pagamento:</span>
+                    <span class="font-medium">
+                      {{ getPaymentMethodName() }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+          }
+        </div>
+      </div>
+    </div>
+      </mat-tab>
+
+      <mat-tab label="Vendas Realizadas">
+        <div class="p-6">
+          @if (isLoadingSales) {
+            <div class="flex justify-center items-center py-12">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span class="ml-3 text-gray-600">Carregando vendas...</span>
+            </div>
+          } @else if (sales.length === 0) {
+            <div class="text-center py-12">
+              <mat-icon class="text-6xl text-gray-300 mb-4">receipt_long</mat-icon>
+              <h3 class="text-lg font-semibold text-gray-600 mb-2">Nenhuma venda realizada</h3>
+              <p class="text-gray-500 mb-6">As vendas finalizadas aparecerão aqui</p>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="sales" class="w-full">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Data</th>
+                  <td mat-cell *matCellDef="let sale">
+                    <div>
+                      <p class="font-medium text-gray-800">{{ sale.createdAt | date:'dd/MM/yyyy' }}</p>
+                      <p class="text-xs text-gray-500">{{ sale.createdAt | date:'HH:mm' }}</p>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="items">
+                  <th mat-header-cell *matHeaderCellDef>Itens</th>
+                  <td mat-cell *matCellDef="let sale">
+                    <div class="flex flex-col gap-1">
+                      @for (item of sale.items; track item.id) {
+                        <span class="text-sm text-gray-700">
+                          {{ item.quantity }}x {{ item.product.name }}
+                        </span>
+                      }
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="total">
+                  <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+                  <td mat-cell *matCellDef="let sale" class="text-right">
+                    <div>
+                      <p class="font-semibold text-pink-600">R$ {{ sale.total.toFixed(2) }}</p>
+                      @if (sale.change > 0) {
+                        <p class="text-xs text-gray-500">Troco: R$ {{ sale.change.toFixed(2) }}</p>
+                      }
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="payment">
+                  <th mat-header-cell *matHeaderCellDef>Pagamento</th>
+                  <td mat-cell *matCellDef="let sale">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {{ sale.paymentMethod?.name || 'N/A' }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef class="text-center">Ações</th>
+                  <td mat-cell *matCellDef="let sale" class="text-center">
+                    <button type="button" (click)="viewSaleDetails(sale.id)" class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="salesColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: salesColumns;" class="hover:bg-gray-50"></tr>
+              </table>
+            </div>
+
+            <mat-paginator 
+              [length]="totalSales"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              [pageIndex]="currentPage - 1"
+              (page)="onPageChange($event)"
+              showFirstLastButtons
+              class="border-t border-gray-200">
+            </mat-paginator>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

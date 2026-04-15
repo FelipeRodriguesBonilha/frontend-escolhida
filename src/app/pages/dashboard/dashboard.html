@@ -1,0 +1,181 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
+      <p class="text-gray-600">Visão geral do seu negócio</p>
+    </div>
+
+    @if (isLoading) {
+      <div class="flex items-center justify-center py-12">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Vendas Hoje</p>
+                <p class="text-3xl font-bold text-pink-600">{{ todayReport?.totalSales || 0 }}</p>
+              </div>
+              <div class="bg-pink-100 p-3 rounded-full">
+                <mat-icon class="text-pink-600">shopping_cart</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Receita Hoje</p>
+                <p class="text-3xl font-bold text-green-600">R$ {{ (todayReport?.totalRevenue || 0).toFixed(2) }}</p>
+              </div>
+              <div class="bg-green-100 p-3 rounded-full">
+                <mat-icon class="text-green-600">attach_money</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Produtos Vendidos</p>
+                <p class="text-3xl font-bold text-blue-600">{{ getTotalProductsSold() }}</p>
+              </div>
+              <div class="bg-blue-100 p-3 rounded-full">
+                <mat-icon class="text-blue-600">inventory_2</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+          <mat-card-content class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 mb-1">Estoque Baixo</p>
+                <p class="text-3xl font-bold text-orange-600">{{ lowStockCount }}</p>
+              </div>
+              <div class="bg-orange-100 p-3 rounded-full">
+                <mat-icon class="text-orange-600">warning</mat-icon>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Forma de Pagamento</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (getPaymentMethodsArray().length > 0) {
+              <div class="space-y-3">
+                @for (item of getPaymentMethodsArray(); track item.method) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium text-gray-700">{{ item.method }}</span>
+                    <span class="text-pink-600 font-semibold">R$ {{ item.amount.toFixed(2) }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-gray-500 text-center py-8">Nenhuma venda hoje</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Produtos Mais Vendidos Hoje</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (todayReport && todayReport.topProducts && todayReport.topProducts.length > 0) {
+              <div class="space-y-3">
+                @for (product of todayReport.topProducts.slice(0, 5); track product.productId) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-800">{{ product.name }}</p>
+                      <p class="text-sm text-gray-500">{{ product.quantity }} unidades</p>
+                    </div>
+                    <span class="text-green-600 font-semibold">R$ {{ product.revenue.toFixed(2) }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-gray-500 text-center py-8">Nenhum produto vendido hoje</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <div class="flex items-center justify-between w-full">
+              <mat-card-title class="text-lg font-semibold text-gray-800">Evolução de Vendas</mat-card-title>
+              <div class="flex gap-2">
+                <button type="button"
+                        (click)="changePeriod('quarter')"
+                        [class.bg-pink-100]="selectedPeriod === 'quarter'"
+                        class="px-3 py-1.5 text-sm rounded-lg hover:bg-pink-50 transition-colors">
+                  Trimestre
+                </button>
+                <button type="button"
+                        (click)="changePeriod('semester')"
+                        [class.bg-pink-100]="selectedPeriod === 'semester'"
+                        class="px-3 py-1.5 text-sm rounded-lg hover:bg-pink-50 transition-colors">
+                  Semestre
+                </button>
+                <button type="button"
+                        (click)="changePeriod('annual')"
+                        [class.bg-pink-100]="selectedPeriod === 'annual'"
+                        class="px-3 py-1.5 text-sm rounded-lg hover:bg-pink-50 transition-colors">
+                  Anual
+                </button>
+              </div>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="h-80">
+              <canvas #salesChartCanvas id="salesChart"></canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="shadow-sm">
+          <mat-card-header class="pb-3">
+            <mat-card-title class="text-lg font-semibold text-gray-800">Top 15 Produtos do Mês</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="h-80">
+              <canvas #topProductsChartCanvas id="topProductsChart"></canvas>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-card class="shadow-sm">
+        <mat-card-header class="pb-3">
+          <mat-card-title class="text-lg font-semibold text-gray-800">Ações Rápidas</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @for (action of quickActions; track action.path) {
+              <button type="button"
+                      [routerLink]="action.path"
+                      class="h-20 px-6 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2">
+                <mat-icon>{{ action.icon }}</mat-icon>
+                <span>{{ action.label }}</span>
+              </button>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

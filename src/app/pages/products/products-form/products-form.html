@@ -1,0 +1,278 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center gap-4">
+        <button type="button"
+                (click)="cancel()"
+                class="px-4 py-2 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ title }}</h1>
+          <p class="text-gray-600">
+            @if (isEditing) {
+              Edite os dados do produto existente
+            } @else {
+              Cadastre um novo produto no sistema
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+    <mat-card class="shadow-sm">
+      <mat-card-content class="p-6">
+        @if (isLoading && isEditing) {
+          <div class="flex justify-center items-center py-12">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-3 text-gray-600">Carregando produto...</span>
+          </div>
+        } @else {
+          <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Dados Básicos</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field>
+                  <mat-label>Nome do Produto *</mat-label>
+                  <input matInput 
+                         formControlName="name"
+                         placeholder="Digite o nome do produto..."
+                         required>
+                  <mat-icon matSuffix>inventory_2</mat-icon>
+                  @if (productForm.get('name')?.invalid && productForm.get('name')?.touched) {
+                    <mat-error>{{ getErrorMessage('name') }}</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Código de Barras</mat-label>
+                  <input matInput 
+                         formControlName="barcode"
+                         placeholder="Digite o código de barras...">
+                  <mat-icon matSuffix>qr_code</mat-icon>
+                  @if (productForm.get('barcode')?.invalid && productForm.get('barcode')?.touched) {
+                    <mat-error>{{ getErrorMessage('barcode') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <mat-form-field class="w-full">
+                <mat-label>Descrição</mat-label>
+                <textarea matInput 
+                         formControlName="description"
+                         placeholder="Descreva o produto..."
+                         rows="3"></textarea>
+                @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
+                  <mat-error>{{ getErrorMessage('description') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Imagem do Produto</h3>
+              <div class="flex flex-col md:flex-row gap-4 items-start">
+                @if (getProductImageUrl()) {
+                  <div class="relative">
+                    <img [src]="getProductImageUrl()" 
+                         alt="Preview do produto"
+                         class="w-48 h-48 object-cover rounded-lg border-2 border-gray-200">
+                    <button type="button"
+                            (click)="removeImage()"
+                            class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white hover:bg-red-600 rounded-full flex items-center justify-center transition-colors">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+                <div class="flex-1">
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-500 transition-colors">
+                    <input type="file"
+                           #fileInput
+                           (change)="onImageSelected($event)"
+                           accept="image/*"
+                           class="hidden">
+                    <button type="button"
+                            (click)="fileInput.click()"
+                            class="px-4 py-2 border-2 border-pink-500 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors flex items-center gap-2">
+                      <mat-icon>cloud_upload</mat-icon>
+                      {{ getProductImageUrl() ? 'Alterar Imagem' : 'Selecionar Imagem' }}
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">
+                      PNG, JPG, GIF até 5MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Preços</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field>
+                  <mat-label>Preço de Venda *</mat-label>
+                  <input matInput 
+                         formControlName="price"
+                         appCurrencyMask
+                         placeholder="0,00"
+                         required>
+                  <mat-icon matSuffix>attach_money</mat-icon>
+                  @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
+                    <mat-error>{{ getErrorMessage('price') }}</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Preço de Custo *</mat-label>
+                  <input matInput 
+                         formControlName="costPrice"
+                         appCurrencyMask
+                         placeholder="0,00"
+                         required>
+                  <mat-icon matSuffix>shopping_cart</mat-icon>
+                  @if (productForm.get('costPrice')?.invalid && productForm.get('costPrice')?.touched) {
+                    <mat-error>{{ getErrorMessage('costPrice') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium text-gray-700">Margem de Lucro:</span>
+                  <span class="text-sm font-bold" [ngClass]="getProfitMarginColor()">
+                    {{ getProfitMargin().toFixed(1) }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Classificação</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <mat-form-field>
+                  <mat-label>Categoria *</mat-label>
+                  <mat-select formControlName="categoryId">
+                    <mat-option value="">Selecione...</mat-option>
+                    @for (category of categories; track category.id) {
+                      <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (productForm.get('categoryId')?.invalid && productForm.get('categoryId')?.touched) {
+                    <mat-error>Campo obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Marca *</mat-label>
+                  <mat-select formControlName="brandId">
+                    <mat-option value="">Selecione...</mat-option>
+                    @for (brand of brands; track brand.id) {
+                      <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (productForm.get('brandId')?.invalid && productForm.get('brandId')?.touched) {
+                    <mat-error>Campo obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Fornecedor</mat-label>
+                  <mat-select formControlName="supplierId">
+                    <mat-option value="">Nenhum</mat-option>
+                    @for (supplier of suppliers; track supplier.id) {
+                      <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (productForm.get('supplierId')?.invalid && productForm.get('supplierId')?.touched) {
+                    <mat-error>{{ getErrorMessage('supplierId') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+            @if (!isEditing) {
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Estoque</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field>
+                    <mat-label>Estoque Inicial</mat-label>
+                    <input matInput 
+                           formControlName="initialStock"
+                           type="number"
+                           placeholder="0">
+                    <mat-icon matSuffix>inventory</mat-icon>
+                    @if (productForm.get('initialStock')?.invalid && productForm.get('initialStock')?.touched) {
+                      <mat-error>{{ getErrorMessage('initialStock') }}</mat-error>
+                    }
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-label>Estoque Mínimo</mat-label>
+                    <input matInput 
+                           formControlName="minQuantity"
+                           type="number"
+                           placeholder="0">
+                    <mat-icon matSuffix>warning</mat-icon>
+                    @if (productForm.get('minQuantity')?.invalid && productForm.get('minQuantity')?.touched) {
+                      <mat-error>{{ getErrorMessage('minQuantity') }}</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
+            }
+            @if (isEditing) {
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <mat-checkbox formControlName="active" color="primary">
+                  <span class="text-gray-700 font-medium">Produto Ativo</span>
+                </mat-checkbox>
+                <p class="text-sm text-gray-500">Produtos inativos não aparecem nas vendas</p>
+              </div>
+            }
+            <div class="flex gap-3 pt-4 border-t border-gray-200">
+              <button type="button"
+                      (click)="cancel()"
+                      [disabled]="isLoading"
+                      class="flex-1 px-4 py-3 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <mat-icon>cancel</mat-icon>
+                <span>Cancelar</span>
+              </button>
+              <button type="submit"
+                      [disabled]="productForm.invalid || isLoading"
+                      class="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (isLoading) {
+                  <ng-container>
+                    <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+                    Processando...
+                  </ng-container>
+                } @else {
+                  <ng-container>
+                    <mat-icon>
+                      @if (isEditing) {
+                        save
+                      } @else {
+                        add
+                      }
+                    </mat-icon>
+                    {{ submitButtonText }}
+                  </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="shadow-sm mt-6 bg-gradient-to-br from-pink-50 to-pink-100">
+      <mat-card-content class="p-4">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <mat-icon class="text-pink-600">info</mat-icon>
+          Dicas de Preenchimento
+        </h3>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Use nomes descritivos e fáceis de identificar</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Mantenha uma margem de lucro saudável (acima de 30%)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Defina estoque mínimo para evitar rupturas</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Código de barras ajuda na identificação rápida</span>
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

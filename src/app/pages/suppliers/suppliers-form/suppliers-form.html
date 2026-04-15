@@ -1,0 +1,166 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center gap-4">
+        <button type="button"
+                (click)="cancel()"
+                class="px-4 py-2 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ title }}</h1>
+          <p class="text-gray-600">
+            @if (isEditing) {
+              Edite os dados do fornecedor existente
+            } @else {
+              Cadastre um novo fornecedor no sistema
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+    <mat-card class="shadow-sm">
+      <mat-card-content class="p-6">
+        @if (isLoading && isEditing) {
+          <div class="flex justify-center items-center py-12">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-3 text-gray-600">Carregando fornecedor...</span>
+          </div>
+        } @else {
+          <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Dados Básicos</h3>
+              <mat-form-field  class="w-full">
+                <mat-label>Nome do Fornecedor *</mat-label>
+                <input matInput 
+                       formControlName="name"
+                       placeholder="Digite o nome do fornecedor..."
+                       required>
+                <mat-icon matSuffix>business</mat-icon>
+                @if (supplierForm.get('name')?.invalid && supplierForm.get('name')?.touched) {
+                  <mat-error>{{ getErrorMessage('name') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Documentos</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field>
+                  <mat-label>CNPJ</mat-label>
+                  <input matInput 
+                         formControlName="cnpj"
+                         placeholder="XX.XXX.XXX/XXXX-XX"
+                         (input)="onCNPJInput($event)">
+                  <mat-icon matSuffix>badge</mat-icon>
+                  @if (supplierForm.get('cnpj')?.invalid && supplierForm.get('cnpj')?.touched) {
+                    <mat-error>{{ getErrorMessage('cnpj') }}</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Telefone</mat-label>
+                  <input matInput 
+                         formControlName="phone"
+                         placeholder="(XX) XXXXX-XXXX"
+                         (input)="onPhoneInput($event)">
+                  <mat-icon matSuffix>phone</mat-icon>
+                  @if (supplierForm.get('phone')?.invalid && supplierForm.get('phone')?.touched) {
+                    <mat-error>{{ getErrorMessage('phone') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Contato</h3>
+              <mat-form-field  class="w-full">
+                <mat-label>Email</mat-label>
+                <input matInput 
+                       formControlName="email"
+                       placeholder="email@fornecedor.com"
+                       type="email">
+                <mat-icon matSuffix>email</mat-icon>
+                @if (supplierForm.get('email')?.invalid && supplierForm.get('email')?.touched) {
+                  <mat-error>{{ getErrorMessage('email') }}</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field  class="w-full">
+                <mat-label>Endereço</mat-label>
+                <textarea matInput 
+                         formControlName="address"
+                         placeholder="Digite o endereço completo..."
+                         rows="3"></textarea>
+                <mat-icon matSuffix>location_on</mat-icon>
+                @if (supplierForm.get('address')?.invalid && supplierForm.get('address')?.touched) {
+                  <mat-error>{{ getErrorMessage('address') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            @if (isEditing) {
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <mat-checkbox formControlName="active" color="primary">
+                  <span class="text-gray-700 font-medium">Fornecedor Ativo</span>
+                </mat-checkbox>
+                <p class="text-sm text-gray-500">Fornecedores inativos não aparecem nas listagens</p>
+              </div>
+            }
+            <div class="flex gap-3 pt-4 border-t border-gray-200">
+              <button type="button"
+                      (click)="cancel()"
+                      [disabled]="isLoading"
+                      class="flex-1 px-4 py-3 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <mat-icon>cancel</mat-icon>
+                <span>Cancelar</span>
+              </button>
+              <button type="submit"
+                      [disabled]="supplierForm.invalid || isLoading"
+                      class="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (isLoading) {
+                  <ng-container>
+                    <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+                    Processando...
+                  </ng-container>
+                } @else {
+                  <ng-container>
+                    <mat-icon>
+                      @if (isEditing) {
+                        save
+                      } @else {
+                        add
+                      }
+                    </mat-icon>
+                    {{ submitButtonText }}
+                  </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="shadow-sm mt-6 bg-gradient-to-br from-pink-50 to-pink-100">
+      <mat-card-content class="p-4">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <mat-icon class="text-pink-600">info</mat-icon>
+          Dicas de Preenchimento
+        </h3>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Use nomes descritivos e fáceis de identificar</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>CNPJ e telefone são formatados automaticamente</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Endereço completo facilita contato e entregas</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Fornecedores podem ser desativados sem serem excluídos</span>
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

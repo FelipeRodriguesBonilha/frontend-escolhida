@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-pink-800 mb-2">A ESCOLHIDA</h1>
+      <p class="text-pink-600">Faça login para continuar</p>
+    </div>
+
+    <form [formGroup]="loginForm" class="space-y-6" (ngSubmit)="onLogin()">
+      <mat-form-field  class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput 
+               type="email" 
+               placeholder="seu@email.com"
+               formControlName="email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-hint>Informe seu email</mat-hint>
+        @if (email?.touched && email?.invalid) {
+          <mat-error>{{ getErrorMessage(email) }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field  class="w-full">
+        <mat-label>Senha</mat-label>
+        <input matInput 
+               [type]="showPassword ? 'text' : 'password'" 
+               placeholder="Digite sua senha"
+               formControlName="password">
+        <mat-icon matSuffix 
+                 (click)="togglePasswordVisibility()"
+                 class="cursor-pointer">
+          {{ showPassword ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+        <mat-hint>Digite sua senha</mat-hint>
+        @if (password?.touched && password?.invalid) {
+          <mat-error>{{ getErrorMessage(password) }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="flex justify-end">
+        <a href="#" class="text-pink-600 hover:text-pink-800 text-sm font-medium transition-colors">
+          Esqueceu a senha?
+        </a>
+      </div>
+
+      <button type="submit"
+              class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white font-medium rounded-lg hover:from-pink-700 hover:to-pink-900 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="isLoading">
+        @if (!isLoading) {
+          <span>Entrar</span>
+        } @else {
+          <span class="flex items-center justify-center">
+            <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+            Entrando...
+          </span>
+        }
+      </button>
+    </form>
+  </div>
+</div>

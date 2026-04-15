@@ -1,0 +1,128 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center gap-4">
+        <button type="button"
+                (click)="cancel()"
+                class="px-4 py-2 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ title }}</h1>
+          <p class="text-gray-600">
+            @if (isEditing) {
+              Edite os dados da marca existente
+            } @else {
+              Cadastre uma nova marca no sistema
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+    <mat-card class="shadow-sm">
+      <mat-card-content class="p-6">
+        @if (isLoading && isEditing) {
+          <div class="flex justify-center items-center py-12">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-3 text-gray-600">Carregando marca...</span>
+          </div>
+        } @else {
+          <form [formGroup]="brandForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <mat-form-field  class="w-full">
+              <mat-label>Nome da Marca *</mat-label>
+              <input matInput 
+                     formControlName="name"
+                     placeholder="Digite o nome da marca..."
+                     required>
+              <mat-icon matSuffix>branding_watermark</mat-icon>
+              @if (brandForm.get('name')?.invalid && brandForm.get('name')?.touched) {
+                <mat-error>{{ getErrorMessage('name') }}</mat-error>
+              }
+            </mat-form-field>
+            @if (isEditing) {
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <mat-checkbox formControlName="active" color="primary">
+                  <span class="text-gray-700 font-medium">Marca Ativa</span>
+                </mat-checkbox>
+                <p class="text-sm text-gray-500">Marcas inativas não aparecem nas listagens</p>
+              </div>
+            }
+            @if (isEditing && brand) {
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="text-sm font-semibold text-blue-800 mb-2">Informações da Marca</h3>
+                <div class="space-y-1 text-sm">
+                  <p class="text-blue-700">
+                    <span class="font-medium">ID:</span> {{ brand.id }}
+                  </p>
+                  <p class="text-blue-700">
+                    <span class="font-medium">Criado em:</span> {{ brand.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  </p>
+                  <p class="text-blue-700">
+                    <span class="font-medium">Status:</span> 
+                    @if (brand.active) {
+                      <span class="text-green-600">Ativo</span>
+                    } @else {
+                      <span class="text-red-600">Inativo</span>
+                    }
+                  </p>
+                </div>
+              </div>
+            }
+            <div class="flex gap-3 pt-4 border-t border-gray-200">
+              <button type="button"
+                      (click)="cancel()"
+                      [disabled]="isLoading"
+                      class="flex-1 px-4 py-3 border-2 border-gray-600 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <mat-icon>cancel</mat-icon>
+                <span>Cancelar</span>
+              </button>
+              <button type="submit"
+                      [disabled]="brandForm.invalid || isLoading"
+                      class="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (isLoading) {
+                  <ng-container>
+                    <mat-spinner diameter="20" class="mr-2"></mat-spinner>
+                    Processando...
+                  </ng-container>
+                } @else {
+                  <ng-container>
+                    <mat-icon>
+                      @if (isEditing) {
+                        save
+                      } @else {
+                        add
+                      }
+                    </mat-icon>
+                    {{ submitButtonText }}
+                  </ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="shadow-sm mt-6 bg-gradient-to-br from-pink-50 to-pink-100">
+      <mat-card-content class="p-4">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <mat-icon class="text-pink-600">info</mat-icon>
+          Dicas de Preenchimento
+        </h3>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Use nomes descritivos e fáceis de identificar</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Evite nomes muito genéricos como "Outros" ou "Diversos"</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-pink-500 text-sm mt-0.5">check_circle</mat-icon>
+            <span>Marcas podem ser desativadas sem serem excluídas</span>
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

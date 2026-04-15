@@ -1,0 +1,71 @@
+<mat-sidenav-container class="h-screen">
+    <mat-sidenav [opened]="isExpanded" [mode]="isMobile ? 'over' : 'side'" [disableClose]="!isMobile"
+        class="bg-gradient-to-b from-pink-600 to-pink-800 text-white shadow-2xl" style="width: 280px;">
+
+        <div class="p-6 border-b border-pink-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-pink-500">
+                    <mat-icon class="text-white !text-white">store</mat-icon>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg text-white">A ESCOLHIDA</h3>
+                    <p class="text-sm text-pink-200">Sistema de Gestão</p>
+                </div>
+                <button type="button" (click)="toggleSidebar()" class="w-10 h-10 text-white hover:text-pink-200 rounded-lg transition-colors flex items-center justify-center">
+                    <mat-icon class="text-white !text-white">menu</mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <mat-nav-list class="p-2">
+            @for (item of menuItems; track $index) {
+            <a mat-list-item [routerLink]="item.path" 
+                [style.background-color]="isActive(item.path) ? 'var(--primary-color)' : ''"
+                class="rounded-lg mb-1 hover:bg-gray-700 transition-all duration-200 hover:translate-x-1 !text-white">
+                <mat-icon matListItemIcon class="text-white !text-white">{{ item.icon }}</mat-icon>
+                <div matListItemTitle class="text-white font-medium !text-white">{{ item.label }}</div>
+            </a>
+            }
+        </mat-nav-list>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pink-700 bg-gradient-to-b from-pink-700/20 to-pink-800/40">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg bg-pink-500">
+                    <mat-icon class="text-white !text-white">person</mat-icon>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">Administrador</p>
+                    <p class="text-xs text-pink-200">admin@escolhida.com</p>
+                </div>
+            </div>
+            <a mat-list-item (click)="logout()"
+                [style.background-color]="isActive('/logout') ? 'var(--primary-color)' : ''"
+                class="rounded-lg mb-1 hover:bg-gray-700 transition-all duration-200 hover:translate-x-1 cursor-pointer !text-white">
+                <mat-icon matListItemIcon class="text-white !text-white">logout</mat-icon>
+                <div matListItemTitle class="text-white font-medium !text-white">Sair</div>
+            </a>
+        </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="bg-gray-100">
+        <mat-toolbar class="bg-white shadow-md border-b border-gray-200 sticky top-0 z-10">
+            <button type="button" (click)="toggleSidebar()" class="mr-3 w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center">
+                <mat-icon>menu</mat-icon>
+            </button>
+            <span class="flex-1 text-gray-800 font-medium">Dashboard</span>
+
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: var(--primary-color);">
+                        <mat-icon class="text-white text-sm">person</mat-icon>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">Admin</span>
+                </div>
+            </div>
+        </mat-toolbar>
+
+        <div class="p-6">
+            <router-outlet></router-outlet>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>
