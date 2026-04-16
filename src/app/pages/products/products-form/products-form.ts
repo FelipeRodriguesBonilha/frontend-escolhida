@@ -44,6 +44,7 @@ export class ProductsForm implements OnInit {
 
   selectedImage: File | null = null;
   imagePreview: string | null = null;
+  secureImageUrl: string | null = null;
 
   categories: ReturnCategoryDto[] = [];
   brands: ReturnBrandDto[] = [];
@@ -134,6 +135,12 @@ export class ProductsForm implements OnInit {
             supplierId: product.supplierId,
             active: product.active
           });
+          
+          if (product.imageUrl) {
+            this.uploadService.getSecureImageUrl(product.imageUrl).subscribe(url => {
+              this.secureImageUrl = url;
+            });
+          }
         } else {
           console.error('Product not found');
           this.router.navigate(['/produtos']);
@@ -303,15 +310,14 @@ export class ProductsForm implements OnInit {
   removeImage(): void {
     this.selectedImage = null;
     this.imagePreview = null;
-
   }
 
   getProductImageUrl(): string {
     if (this.imagePreview) {
       return this.imagePreview;
     }
-    if (this.product?.imageUrl) {
-      return this.uploadService.getImageUrl(this.product.imageUrl);
+    if (this.secureImageUrl) {
+      return this.secureImageUrl;
     }
     return '';
   }

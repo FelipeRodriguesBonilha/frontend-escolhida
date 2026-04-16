@@ -20,6 +20,7 @@ import { ReturnProductDto } from '../../core/models/products/return-product.inte
 import { PaymentMethods as PaymentMethodService } from '../../core/services/payment-methods/payment-methods';
 import { Products as ProductService } from '../../core/services/products/products';
 import { PaginatedSalesResponse, Sales as SaleService } from '../../core/services/sales/sales';
+import { ToastService } from '../../core/services/toast/toast.service';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
@@ -88,7 +89,8 @@ export class Sales implements OnInit {
     private saleService: SaleService,
     private productService: ProductService,
     private paymentMethodService: PaymentMethodService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private toastService: ToastService
   ) {
     this.searchForm = this.fb.group({
       searchQuery: [''],
@@ -328,6 +330,8 @@ export class Sales implements OnInit {
       },
       error: (error) => {
         console.error('Error simulating sale:', error);
+        const errorMessage = error?.error?.message || 'Erro ao validar venda. Tente novamente.';
+        this.toastService.error(errorMessage);
         this.isLoading = false;
       }
     });
@@ -364,12 +368,15 @@ export class Sales implements OnInit {
         if (dialogRef) {
           dialogRef.close();
         }
+        this.toastService.success('Venda realizada com sucesso!');
         this.clearCart();
         this.loadSales();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error completing sale:', error);
+        const errorMessage = error?.error?.message || 'Erro ao finalizar venda. Tente novamente.';
+        this.toastService.error(errorMessage);
         this.isLoading = false;
       }
     });

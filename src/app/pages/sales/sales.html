@@ -362,7 +362,7 @@
                   <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
                   <td mat-cell *matCellDef="let sale" class="text-right">
                     <div>
-                      <p class="font-semibold text-pink-600">R$ {{ sale.total.toFixed(2) }}</p>
+                      <p class="font-semibold text-pink-600">R$ {{ sale.finalTotal.toFixed(2) }}</p>
                       @if (sale.change > 0) {
                         <p class="text-xs text-gray-500">Troco: R$ {{ sale.change.toFixed(2) }}</p>
                       }

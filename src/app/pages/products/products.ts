@@ -39,6 +39,7 @@ export class Products implements OnInit {
   products: ReturnProductDto[] = [];
   filteredProducts: ReturnProductDto[] = [];
   isLoading = false;
+  productImageUrls = new Map<string, string>();
 
   displayedColumns: string[] = ['name', 'price', 'stock', 'category', 'brand', 'supplier', 'createdAt', 'actions'];
 
@@ -71,12 +72,23 @@ export class Products implements OnInit {
       next: (products) => {
         this.products = products;
         this.filteredProducts = [...products];
+        this.loadProductImages(products);
         this.isLoading = false;
 
       },
       error: (error) => {
         console.error('Error loading products:', error);
         this.isLoading = false;
+      }
+    });
+  }
+
+  private loadProductImages(products: ReturnProductDto[]): void {
+    products.forEach(product => {
+      if (product.imageUrl) {
+        this.uploadService.getSecureImageUrl(product.imageUrl).subscribe(url => {
+          this.productImageUrls.set(product.id, url);
+        });
       }
     });
   }
@@ -173,10 +185,7 @@ export class Products implements OnInit {
   }
 
   getProductImageUrl(product: ReturnProductDto): string {
-    if (product.imageUrl) {
-      return this.uploadService.getImageUrl(product.imageUrl);
-    }
-    return '';
+    return this.productImageUrls.get(product.id) || '';
   }
 
   clearSearch(): void {
