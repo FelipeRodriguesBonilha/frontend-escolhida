@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <mat-nav-list class="p-2">
+        <mat-nav-list class="p-2 overflow-y-auto overflow-x-hidden" style="max-height: calc(100vh - 200px);">
             @for (item of menuItems; track $index) {
             <a mat-list-item [routerLink]="item.path" 
                 [style.background-color]="isActive(item.path) ? 'var(--primary-color)' : ''"

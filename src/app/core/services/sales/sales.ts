@@ -24,10 +24,14 @@ export class Sales {
     return this.http.post<ReturnSaleDto>(`${this.apiUrl}/sales`, saleData);
   }
 
-  getAllSales(page: number = 1, limit: number = 20): Observable<PaginatedSalesResponse> {
-    const params = new HttpParams()
+  getAllSales(page: number = 1, limit: number = 20, date?: string): Observable<PaginatedSalesResponse> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
+    
+    if (date) {
+      params = params.set('date', date);
+    }
     
     return this.http.get<PaginatedSalesResponse>(`${this.apiUrl}/sales`, { params });
   }

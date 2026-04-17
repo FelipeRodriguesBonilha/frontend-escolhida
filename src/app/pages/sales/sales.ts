@@ -21,6 +21,7 @@ import { PaymentMethods as PaymentMethodService } from '../../core/services/paym
 import { Products as ProductService } from '../../core/services/products/products';
 import { PaginatedSalesResponse, Sales as SaleService } from '../../core/services/sales/sales';
 import { ToastService } from '../../core/services/toast/toast.service';
+import { Upload } from '../../core/services/upload/upload';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
 import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
@@ -57,11 +58,13 @@ interface CartItem {
 export class Sales implements OnInit {
   searchForm: FormGroup;
   saleForm: FormGroup;
+  salesFilterForm: FormGroup;
 
   products: ReturnProductDto[] = [];
   paymentMethods: ReturnPaymentMethodDto[] = [];
   cartItems: CartItem[] = [];
   filteredProducts: ReturnProductDto[] = [];
+  productImageUrls = new Map<string, string>();
 
   selectedProduct: ReturnProductDto | null = null;
   isLoading = false;
@@ -90,7 +93,8 @@ export class Sales implements OnInit {
     private productService: ProductService,
     private paymentMethodService: PaymentMethodService,
     private dialog: MatDialog,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private uploadService: Upload
   ) {
     this.searchForm = this.fb.group({
       searchQuery: [''],
@@ -103,6 +107,15 @@ export class Sales implements OnInit {
       amountPaid: [0, [Validators.required, Validators.min(0.01)]],
       installments: [{ value: null, disabled: true }],
       notes: ['']
+    });
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    this.salesFilterForm = this.fb.group({
+      date: [todayStr]
     });
   }
 
@@ -148,7 +161,8 @@ export class Sales implements OnInit {
 
   loadSales(page: number = this.currentPage, limit: number = this.pageSize): void {
     this.isLoadingSales = true;
-    this.saleService.getAllSales(page, limit).subscribe({
+    const date = this.salesFilterForm.get('date')?.value;
+    this.saleService.getAllSales(page, limit, date).subscribe({
       next: (response: PaginatedSalesResponse) => {
         this.sales = response.data;
         this.totalSales = response.total;
@@ -188,6 +202,7 @@ export class Sales implements OnInit {
       next: (products) => {
         this.products = products;
         this.filteredProducts = products;
+        products.forEach(product => this.loadProductImage(product));
       },
       error: (error) => console.error('Error loading products:', error)
     });
@@ -318,64 +333,18 @@ export class Sales implements OnInit {
         this.simulationResult = simulation;
         this.finalTotal = simulation.summary.total;
 
-        const dialogRef = this.dialog.open(SimulationDialog, {
+        this.dialog.open(SimulationDialog, {
           width: '900px',
           maxHeight: '90vh',
           disableClose: true,
           data: {
-            simulationResult: simulation,
-            onConfirm: () => this.executeCompleteSale(dialogRef)
+            simulationResult: simulation
           }
         });
       },
       error: (error) => {
         console.error('Error simulating sale:', error);
         const errorMessage = error?.error?.message || 'Erro ao validar venda. Tente novamente.';
-        this.toastService.error(errorMessage);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  completeSale(): void {
-    if (this.cartItems.length === 0 || this.saleForm.invalid) return;
-
-    if (!this.simulationResult || !this.simulationResult.canFinalize) {
-      this.simulateSale();
-      return;
-    }
-
-    this.executeCompleteSale();
-  }
-
-  private executeCompleteSale(dialogRef?: any): void {
-    this.isLoading = true;
-
-    const saleData: CreateSaleDto = {
-      items: this.cartItems.map(item => ({
-        productId: item.product.id,
-        quantity: item.quantity
-      })),
-      paymentMethodId: this.saleForm.value.paymentMethodId!,
-      discount: this.saleForm.value.discount || 0,
-      amountPaid: this.saleForm.value.amountPaid!,
-      installments: this.saleForm.value.installments || undefined,
-      notes: this.saleForm.value.notes || undefined
-    };
-
-    this.saleService.createSale(saleData).subscribe({
-      next: (sale) => {
-        if (dialogRef) {
-          dialogRef.close();
-        }
-        this.toastService.success('Venda realizada com sucesso!');
-        this.clearCart();
-        this.loadSales();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error completing sale:', error);
-        const errorMessage = error?.error?.message || 'Erro ao finalizar venda. Tente novamente.';
         this.toastService.error(errorMessage);
         this.isLoading = false;
       }
@@ -413,5 +382,26 @@ export class Sales implements OnInit {
 
     const method = this.paymentMethods.find(m => m.id === paymentMethodId);
     return method?.name || '';
+  }
+
+  setTodayFilter(): void {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    this.salesFilterForm.patchValue({ date: todayStr });
+  }
+
+  getProductImageUrl(product: ReturnProductDto): string {
+    return this.productImageUrls.get(product.id) || '';
+  }
+
+  private loadProductImage(product: ReturnProductDto): void {
+    if (product.imageUrl && !this.productImageUrls.has(product.id)) {
+      this.uploadService.getSecureImageUrl(product.imageUrl).subscribe(url => {
+        this.productImageUrls.set(product.id, url);
+      });
+    }
   }
 }
