@@ -333,18 +333,53 @@ export class Sales implements OnInit {
         this.simulationResult = simulation;
         this.finalTotal = simulation.summary.total;
 
-        this.dialog.open(SimulationDialog, {
+        const dialogRef = this.dialog.open(SimulationDialog, {
           width: '900px',
           maxHeight: '90vh',
           disableClose: true,
           data: {
-            simulationResult: simulation
+            simulationResult: simulation,
+            onConfirm: () => this.executeCompleteSale(dialogRef)
           }
         });
       },
       error: (error) => {
         console.error('Error simulating sale:', error);
         const errorMessage = error?.error?.message || 'Erro ao validar venda. Tente novamente.';
+        this.toastService.error(errorMessage);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private executeCompleteSale(dialogRef?: any): void {
+    this.isLoading = true;
+
+    const saleData: CreateSaleDto = {
+      items: this.cartItems.map(item => ({
+        productId: item.product.id,
+        quantity: item.quantity
+      })),
+      paymentMethodId: this.saleForm.value.paymentMethodId!,
+      discount: this.saleForm.value.discount || 0,
+      amountPaid: this.saleForm.value.amountPaid!,
+      installments: this.saleForm.value.installments || undefined,
+      notes: this.saleForm.value.notes || undefined
+    };
+
+    this.saleService.createSale(saleData).subscribe({
+      next: (sale) => {
+        if (dialogRef) {
+          dialogRef.close();
+        }
+        this.toastService.success('Venda realizada com sucesso!');
+        this.clearCart();
+        this.loadSales();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error completing sale:', error);
+        const errorMessage = error?.error?.message || 'Erro ao finalizar venda. Tente novamente.';
         this.toastService.error(errorMessage);
         this.isLoading = false;
       }
