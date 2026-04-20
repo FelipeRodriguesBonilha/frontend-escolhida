@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SimulationResult } from '../../../core/models';
+import { BrlCurrencyPipe } from '../../../shared/pipes/brl-currency.pipe';
 
 @Component({
   selector: 'app-simulation-dialog',
@@ -12,7 +13,8 @@ import { SimulationResult } from '../../../core/models';
     CommonModule,
     MatDialogModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    BrlCurrencyPipe
   ],
   templateUrl: './simulation-dialog.html',
   styleUrl: './simulation-dialog.scss'

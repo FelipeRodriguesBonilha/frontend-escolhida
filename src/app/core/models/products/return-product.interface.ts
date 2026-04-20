@@ -2,6 +2,7 @@ import { ReturnBrandDto } from "../brands/return-brand.interface";
 import { ReturnCategoryDto } from "../categories/return-category.interface";
 import { ReturnStockDto } from "../stock/return-stock.interface";
 import { ReturnSupplierDto } from "../suppliers/return-supplier.interface";
+import { ReturnProductColorDto } from "./return-product-color.interface";
 
 
 export interface ReturnProductDto {
@@ -22,4 +23,5 @@ export interface ReturnProductDto {
   brand?: ReturnBrandDto;
   supplier?: ReturnSupplierDto;
   stock?: ReturnStockDto;
+  colors: ReturnProductColorDto[];
 }

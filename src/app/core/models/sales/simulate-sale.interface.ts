@@ -3,10 +3,14 @@ export interface SimulateSaleItemDto {
   quantity: number;
 }
 
+export interface SimulatePaymentDto {
+  paymentMethodId: string;
+  amount: number;
+  installments?: number;
+}
+
 export interface SimulateSaleDto {
   items: SimulateSaleItemDto[];
-  paymentMethodId: string;
+  payments: SimulatePaymentDto[];
   discount: number;
-  installments?: number;
-  amountPaid?: number;
 }

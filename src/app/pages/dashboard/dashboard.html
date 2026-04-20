@@ -30,7 +30,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 mb-1">Receita Hoje</p>
-                <p class="text-3xl font-bold text-green-600">R$ {{ (todayReport?.totalRevenue || 0).toFixed(2) }}</p>
+                <p class="text-3xl font-bold text-green-600">{{ (todayReport?.totalRevenue || 0) | brl }}</p>
               </div>
               <div class="bg-green-100 p-3 rounded-full">
                 <mat-icon class="text-green-600">attach_money</mat-icon>
@@ -79,7 +79,7 @@
                 @for (item of getPaymentMethodsArray(); track item.method) {
                   <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <span class="font-medium text-gray-700">{{ item.method }}</span>
-                    <span class="text-pink-600 font-semibold">R$ {{ item.amount.toFixed(2) }}</span>
+                    <span class="text-pink-600 font-semibold">{{ item.amount | brl }}</span>
                   </div>
                 }
               </div>
@@ -102,7 +102,7 @@
                       <p class="font-medium text-gray-800">{{ product.name }}</p>
                       <p class="text-sm text-gray-500">{{ product.quantity }} unidades</p>
                     </div>
-                    <span class="text-green-600 font-semibold">R$ {{ product.revenue.toFixed(2) }}</span>
+                    <span class="text-green-600 font-semibold">{{ product.revenue | brl }}</span>
                   </div>
                 }
               </div>

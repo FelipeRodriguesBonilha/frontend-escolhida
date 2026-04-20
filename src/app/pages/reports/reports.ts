@@ -11,6 +11,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ReturnDailyReportDto, ReturnMonthlyReportDto } from '../../core/models';
 import { Reports as ReportsService } from '../../core/services/reports/reports';
 import { ToastService } from '../../core/services/toast/toast.service';
+import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 
 @Component({
   selector: 'app-reports',
@@ -23,7 +24,8 @@ import { ToastService } from '../../core/services/toast/toast.service';
     MatSelectModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatTabsModule
+    MatTabsModule,
+    BrlCurrencyPipe
   ],
   templateUrl: './reports.html',
   styleUrl: './reports.scss',

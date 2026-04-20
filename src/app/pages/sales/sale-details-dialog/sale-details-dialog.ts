@@ -3,6 +3,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ReturnSaleDto } from '../../../core/models';
+import { BrlCurrencyPipe } from '../../../shared/pipes/brl-currency.pipe';
 
 @Component({
   selector: 'app-sale-details-dialog',
@@ -10,7 +11,8 @@ import { ReturnSaleDto } from '../../../core/models';
   imports: [
     CommonModule,
     MatDialogModule,
-    MatIconModule
+    MatIconModule,
+    BrlCurrencyPipe
   ],
   templateUrl: './sale-details-dialog.html',
   styleUrl: './sale-details-dialog.scss',

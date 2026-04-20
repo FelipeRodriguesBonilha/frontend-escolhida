@@ -10,38 +10,47 @@
         <p class="font-medium text-gray-800">{{ data.sale.id }}</p>
       </div>
       <div>
-        <span class="text-gray-600">Método de Pagamento:</span>
-        <p class="font-medium text-gray-800">{{ data.sale.paymentMethod.name || 'N/A' }}</p>
-      </div>
-      <div>
         <span class="text-gray-600">Subtotal:</span>
-        <p class="font-medium text-gray-800">R$ {{ data.sale.total.toFixed(2) }}</p>
+        <p class="font-medium text-gray-800">{{ data.sale.total | brl }}</p>
       </div>
       @if (data.sale.discount > 0) {
         <div>
           <span class="text-gray-600">Desconto:</span>
-          <p class="font-medium text-red-600">-R$ {{ data.sale.discount.toFixed(2) }}</p>
+          <p class="font-medium text-red-600">-{{ data.sale.discount | brl }}</p>
         </div>
       }
       <div>
         <span class="text-gray-600">Total:</span>
-        <p class="font-medium text-pink-600 font-semibold">R$ {{ data.sale.finalTotal.toFixed(2) }}</p>
+        <p class="font-medium text-pink-600 font-semibold">{{ data.sale.finalTotal | brl }}</p>
       </div>
-      @if (data.sale.installments) {
-        <div>
-          <span class="text-gray-600">Parcelas:</span>
-          <p class="font-medium text-blue-600">{{ data.sale.installments }}x de R$ {{ data.sale.installmentValue?.toFixed(2) || (data.sale.finalTotal / data.sale.installments).toFixed(2) }}</p>
-        </div>
-      }
       <div>
         <span class="text-gray-600">Valor Pago:</span>
-        <p class="font-medium text-green-600">R$ {{ data.sale.amountPaid.toFixed(2) }}</p>
+        <p class="font-medium text-green-600">{{ data.sale.amountPaid | brl }}</p>
       </div>
       <div>
         <span class="text-gray-600">Troco:</span>
-        <p class="font-medium text-gray-800">R$ {{ data.sale.change.toFixed(2) }}</p>
+        <p class="font-medium text-gray-800">{{ data.sale.change | brl }}</p>
       </div>
     </div>
+
+    @if (data.sale.payments && data.sale.payments.length > 0) {
+      <div class="mt-4">
+        <span class="text-sm text-gray-600 font-semibold">Métodos de Pagamento:</span>
+        <div class="mt-2 space-y-2">
+          @for (payment of data.sale.payments; track payment.id) {
+            <div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
+              <div>
+                <span class="text-sm font-medium text-blue-800">{{ payment.paymentMethod.name }}</span>
+                @if (payment.installments) {
+                  <span class="text-xs text-blue-600 ml-2">{{ payment.installments }}x de {{ payment.installmentValue | brl }}</span>
+                }
+              </div>
+              <span class="text-sm font-semibold text-blue-700">{{ payment.amount | brl }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
     @if (data.sale.notes) {
       <div class="mt-3">
         <span class="text-gray-600">Observações:</span>
@@ -69,8 +78,8 @@
                 <p class="font-medium text-gray-800">{{ item.product?.name || 'Produto não encontrado' }}</p>
               </td>
               <td class="px-4 py-3 text-center text-gray-700">{{ item.quantity }}</td>
-              <td class="px-4 py-3 text-right text-gray-700">R$ {{ item.unitPrice.toFixed(2) }}</td>
-              <td class="px-4 py-3 text-right font-medium text-pink-600">R$ {{ item.subtotal.toFixed(2) }}</td>
+              <td class="px-4 py-3 text-right text-gray-700">{{ item.unitPrice | brl }}</td>
+              <td class="px-4 py-3 text-right font-medium text-pink-600">{{ item.subtotal | brl }}</td>
             </tr>
           }
         </tbody>
@@ -83,16 +92,16 @@
       @if (data.sale.discount > 0) {
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Subtotal:</span>
-          <span class="font-medium">R$ {{ data.sale.total.toFixed(2) }}</span>
+          <span class="font-medium">{{ data.sale.total | brl }}</span>
         </div>
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Desconto:</span>
-          <span class="font-medium text-red-600">-R$ {{ data.sale.discount.toFixed(2) }}</span>
+          <span class="font-medium text-red-600">-{{ data.sale.discount | brl }}</span>
         </div>
       }
       <div class="flex justify-between items-center pt-2 border-t border-pink-200">
         <span class="text-lg font-semibold text-gray-800">Total da Venda</span>
-        <span class="text-2xl font-bold text-pink-600">R$ {{ data.sale.finalTotal.toFixed(2) }}</span>
+        <span class="text-2xl font-bold text-pink-600">{{ data.sale.finalTotal | brl }}</span>
       </div>
     </div>
   </div>

@@ -56,8 +56,8 @@
             <p class="text-xs text-gray-500">{{ item.category }} {{ item.brand ? '• ' + item.brand : '' }}</p>
           </div>
           <div class="text-right">
-            <p class="text-sm text-gray-600">{{ item.quantity }}x R$ {{ item.unitPrice.toFixed(2) }}</p>
-            <p class="font-semibold text-pink-600">R$ {{ item.subtotal.toFixed(2) }}</p>
+            <p class="text-sm text-gray-600">{{ item.quantity }}x {{ item.unitPrice | brl }}</p>
+            <p class="font-semibold text-pink-600">{{ item.subtotal | brl }}</p>
           </div>
         </div>
       }
@@ -76,34 +76,42 @@
       </div>
       <div class="flex justify-between text-sm">
         <span class="text-gray-600">Subtotal:</span>
-        <span class="font-medium">R$ {{ data.simulationResult.summary.subtotal.toFixed(2) }}</span>
+        <span class="font-medium">{{ data.simulationResult.summary.subtotal | brl }}</span>
       </div>
       @if (data.simulationResult.summary.discount > 0) {
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Desconto:</span>
-          <span class="font-medium text-red-600">-R$ {{ data.simulationResult.summary.discount.toFixed(2) }}</span>
+          <span class="font-medium text-red-600">-{{ data.simulationResult.summary.discount | brl }}</span>
         </div>
       }
       <div class="flex justify-between items-center pt-2 border-t border-pink-200">
         <span class="text-lg font-semibold text-gray-800">Total:</span>
-        <span class="text-2xl font-bold text-pink-600">R$ {{ data.simulationResult.summary.total.toFixed(2) }}</span>
+        <span class="text-2xl font-bold text-pink-600">{{ data.simulationResult.summary.total | brl }}</span>
       </div>
-      @if (data.simulationResult.summary.installments) {
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Parcelas:</span>
-          <span class="font-medium text-blue-600">{{ data.simulationResult.summary.installments }}x de R$ {{ data.simulationResult.summary.installmentValue?.toFixed(2) }}</span>
+      @if (data.simulationResult.summary.payments.length > 0) {
+        <div class="pt-2 border-t border-pink-200 space-y-1">
+          <span class="text-xs font-semibold text-gray-500 uppercase">Pagamentos</span>
+          @for (payment of data.simulationResult.summary.payments; track payment.paymentMethodId) {
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">
+                {{ payment.paymentMethodName }}
+                @if (payment.installments) {
+                  <span class="text-blue-600"> ({{ payment.installments }}x de {{ payment.installmentValue | brl }})</span>
+                }
+              </span>
+              <span class="font-medium text-green-600">{{ payment.amount | brl }}</span>
+            </div>
+          }
         </div>
       }
-      @if (data.simulationResult.summary.amountPaid !== null) {
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Valor Pago:</span>
-          <span class="font-medium text-green-600">R$ {{ data.simulationResult.summary.amountPaid.toFixed(2) }}</span>
-        </div>
-      }
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-600">Total Pago:</span>
+        <span class="font-medium text-green-600">{{ data.simulationResult.summary.amountPaid | brl }}</span>
+      </div>
       @if (data.simulationResult.summary.change !== null && data.simulationResult.summary.change > 0) {
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Troco:</span>
-          <span class="font-medium">R$ {{ data.simulationResult.summary.change.toFixed(2) }}</span>
+          <span class="font-medium">{{ data.simulationResult.summary.change | brl }}</span>
         </div>
       }
     </div>

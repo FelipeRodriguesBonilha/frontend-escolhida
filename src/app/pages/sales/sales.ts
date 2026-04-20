@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -23,6 +23,7 @@ import { PaginatedSalesResponse, Sales as SaleService } from '../../core/service
 import { ToastService } from '../../core/services/toast/toast.service';
 import { Upload } from '../../core/services/upload/upload';
 import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
+import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
 
@@ -50,7 +51,8 @@ interface CartItem {
     MatDialogModule,
     MatChipsModule,
     MatTabsModule,
-    CurrencyMaskDirective
+    CurrencyMaskDirective,
+    BrlCurrencyPipe
   ],
   templateUrl: './sales.html',
   styleUrl: './sales.scss'
@@ -102,10 +104,9 @@ export class Sales implements OnInit {
     });
 
     this.saleForm = this.fb.group({
-      paymentMethodId: ['', Validators.required],
+      payments: this.fb.array([this.createPaymentGroup()]),
+      discountType: ['value'],
       discount: [0, [Validators.min(0)]],
-      amountPaid: [0, [Validators.required, Validators.min(0.01)]],
-      installments: [{ value: null, disabled: true }],
       notes: ['']
     });
 
@@ -117,11 +118,6 @@ export class Sales implements OnInit {
     this.salesFilterForm = this.fb.group({
       date: [todayStr]
     });
-  }
-
-  ngOnInit(): void {
-    this.loadProducts();
-    this.loadPaymentMethods();
 
     this.searchForm.get('searchQuery')?.valueChanges.subscribe(value => {
       this.filterProducts(value);
@@ -134,22 +130,85 @@ export class Sales implements OnInit {
         this.resetSimulation();
       });
 
-    this.saleForm.get('amountPaid')?.valueChanges
-      .pipe(debounceTime(0))
-      .subscribe(() => {
-        this.resetSimulation();
-      });
-
-    this.saleForm.get('installments')?.valueChanges
-      .pipe(debounceTime(0))
-      .subscribe(() => {
-        this.resetSimulation();
-      });
-
-    this.saleForm.get('paymentMethodId')?.valueChanges.subscribe(value => {
-      this.handlePaymentMethodChange(value);
+    this.saleForm.get('discountType')?.valueChanges.subscribe(() => {
+      this.calculateTotals();
       this.resetSimulation();
     });
+  }
+
+  get paymentsArray(): FormArray {
+    return this.saleForm.get('payments') as FormArray;
+  }
+
+  get paymentControls(): FormGroup[] {
+    return this.paymentsArray.controls as FormGroup[];
+  }
+
+  createPaymentGroup(): FormGroup {
+    const group = this.fb.group({
+      paymentMethodId: ['', Validators.required],
+      amount: [0, [Validators.required, Validators.min(0.01)]],
+      installments: [{ value: null, disabled: true }]
+    });
+
+    group.get('paymentMethodId')?.valueChanges.subscribe(value => {
+      this.handlePaymentMethodChangeForGroup(group, value ?? '');
+      this.resetSimulation();
+    });
+
+    group.get('amount')?.valueChanges.pipe(debounceTime(0)).subscribe(() => {
+      this.resetSimulation();
+    });
+
+    group.get('installments')?.valueChanges.pipe(debounceTime(0)).subscribe(() => {
+      this.resetSimulation();
+    });
+
+    return group;
+  }
+
+  addPayment(): void {
+    this.paymentsArray.push(this.createPaymentGroup());
+    this.resetSimulation();
+  }
+
+  removePayment(index: number): void {
+    if (this.paymentsArray.length > 1) {
+      this.paymentsArray.removeAt(index);
+      this.resetSimulation();
+    }
+  }
+
+  handlePaymentMethodChangeForGroup(group: FormGroup, paymentMethodId: string): void {
+    const paymentMethod = this.paymentMethods.find(pm => pm.id === paymentMethodId);
+    const installmentsControl = group.get('installments');
+    if (!installmentsControl) return;
+
+    if (paymentMethod?.code === 'CREDIT_CARD') {
+      installmentsControl.setValidators([Validators.required, Validators.min(1)]);
+      installmentsControl.enable();
+    } else {
+      installmentsControl.clearValidators();
+      installmentsControl.setValue(null);
+      installmentsControl.disable();
+    }
+    installmentsControl.updateValueAndValidity();
+  }
+
+  get totalAmountPaid(): number {
+    return this.paymentControls.reduce((sum, group) => {
+      return sum + (Number(group.get('amount')?.value) || 0);
+    }, 0);
+  }
+
+  get change(): number {
+    const paid = this.totalAmountPaid;
+    return paid > this.total ? Math.round((paid - this.total) * 100) / 100 : 0;
+  }
+
+  ngOnInit(): void {
+    this.loadProducts();
+    this.loadPaymentMethods();
   }
 
   onTabChange(index: number): void {
@@ -281,34 +340,24 @@ export class Sales implements OnInit {
     this.resetSimulation();
   }
 
+  get discountAmountInReais(): number {
+    const raw = this.saleForm.value.discount ?? 0;
+    const type = this.saleForm.value.discountType ?? 'value';
+    if (type === 'percent') {
+      return Math.round(this.subtotal * (Math.min(raw, 100) / 100) * 100) / 100;
+    }
+    return raw;
+  }
+
   calculateTotals(): void {
     this.subtotal = this.cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-    this.discount = this.saleForm.value.discount ?? 0;
-    this.total = this.subtotal - this.discount;
+    this.discount = this.discountAmountInReais;
+    this.total = Math.max(this.subtotal - this.discount, 0);
     this.finalTotal = this.total;
   }
 
   updateTotals(): void {
     this.calculateTotals();
-  }
-
-  handlePaymentMethodChange(paymentMethodId?: string): void {
-    const id = paymentMethodId ?? this.saleForm.value.paymentMethodId;
-    const paymentMethod = this.paymentMethods.find(pm => pm.id === id);
-    const installmentsControl = this.saleForm.get('installments');
-
-    if (!installmentsControl) return;
-
-    if (paymentMethod?.code === 'CREDIT_CARD') {
-      installmentsControl.setValidators([Validators.min(1)]);
-      installmentsControl.enable();
-    } else {
-      installmentsControl.clearValidators();
-      installmentsControl.setValue(null);
-      installmentsControl.disable();
-    }
-
-    installmentsControl.updateValueAndValidity();
   }
 
   simulateSale(): void {
@@ -321,10 +370,12 @@ export class Sales implements OnInit {
         productId: item.product.id,
         quantity: item.quantity
       })),
-      paymentMethodId: this.saleForm.value.paymentMethodId,
-      discount: this.saleForm.value.discount || 0,
-      installments: this.saleForm.value.installments || undefined,
-      amountPaid: this.saleForm.value.amountPaid || undefined
+      payments: this.paymentControls.map(group => ({
+        paymentMethodId: group.get('paymentMethodId')?.value,
+        amount: Number(group.get('amount')?.value) || 0,
+        installments: group.get('installments')?.enabled ? group.get('installments')?.value || undefined : undefined
+      })),
+      discount: this.discountAmountInReais
     };
 
     this.saleService.simulateSale(simulateData).subscribe({
@@ -360,10 +411,12 @@ export class Sales implements OnInit {
         productId: item.product.id,
         quantity: item.quantity
       })),
-      paymentMethodId: this.saleForm.value.paymentMethodId!,
-      discount: this.saleForm.value.discount || 0,
-      amountPaid: this.saleForm.value.amountPaid!,
-      installments: this.saleForm.value.installments || undefined,
+      payments: this.paymentControls.map(group => ({
+        paymentMethodId: group.get('paymentMethodId')?.value,
+        amount: Number(group.get('amount')?.value) || 0,
+        installments: group.get('installments')?.enabled ? group.get('installments')?.value || undefined : undefined
+      })),
+      discount: this.discountAmountInReais,
       notes: this.saleForm.value.notes || undefined
     };
 
@@ -389,6 +442,9 @@ export class Sales implements OnInit {
   clearCart(): void {
     this.cartItems = [];
     this.calculateTotals();
+    while (this.paymentsArray.length > 1) {
+      this.paymentsArray.removeAt(this.paymentsArray.length - 1);
+    }
     this.saleForm.reset();
     this.searchForm.reset();
     this.simulationResult = null;
@@ -411,12 +467,14 @@ export class Sales implements OnInit {
     }
   }
 
-  getPaymentMethodName(): string {
-    const paymentMethodId = this.saleForm.value.paymentMethodId;
-    if (!paymentMethodId) return '';
-
-    const method = this.paymentMethods.find(m => m.id === paymentMethodId);
-    return method?.name || '';
+  getPaymentMethodNames(): string {
+    return this.paymentControls
+      .map(group => {
+        const id = group.get('paymentMethodId')?.value;
+        return id ? (this.paymentMethods.find(m => m.id === id)?.name || '') : '';
+      })
+      .filter(name => name)
+      .join(', ');
   }
 
   setTodayFilter(): void {

@@ -8,6 +8,7 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { ReturnStockDto } from '../../core/models';
 import { Reports, SalesChartData, TopProductsData } from '../../core/services/reports/reports';
 import { StockService } from '../../core/services/stock/stock';
+import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +17,8 @@ import { StockService } from '../../core/services/stock/stock';
     MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    RouterModule
+    RouterModule,
+    BrlCurrencyPipe
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',

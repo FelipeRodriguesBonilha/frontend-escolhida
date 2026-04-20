@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast/toast.service';
-import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
+import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductColorDto, ReturnProductDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
 import { Brands as BrandService } from '../../../core/services/brands/brands';
 import { Categories as CategoryService } from '../../../core/services/categories/categories';
 import { Products as ProductService } from '../../../core/services/products/products';
@@ -23,6 +23,7 @@ import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatIconModule,
     MatCardModule,
     MatFormFieldModule,
@@ -49,6 +50,23 @@ export class ProductsForm implements OnInit {
   categories: ReturnCategoryDto[] = [];
   brands: ReturnBrandDto[] = [];
   suppliers: ReturnSupplierDto[] = [];
+
+  colors: ReturnProductColorDto[] = [];
+  colorImagePreviews = new Map<string, string>();
+  colorSecureUrls = new Map<string, string>();
+
+  newColorName = '';
+  newColorCode = '';
+  newColorFile: File | null = null;
+  newColorPreview: string | null = null;
+  isAddingColor = false;
+
+  editingColorId: string | null = null;
+  editColorName = '';
+  editColorCode = '';
+  editColorFile: File | null = null;
+  editColorPreview: string | null = null;
+  isSavingColor = false;
 
   constructor(
     private fb: FormBuilder,
@@ -141,6 +159,15 @@ export class ProductsForm implements OnInit {
               this.secureImageUrl = url;
             });
           }
+
+          this.colors = product.colors ?? [];
+          this.colors.forEach(color => {
+            if (color.imageUrl) {
+              this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
+                this.colorSecureUrls.set(color.id, url);
+              });
+            }
+          });
         } else {
           console.error('Product not found');
           this.router.navigate(['/produtos']);
@@ -310,6 +337,138 @@ export class ProductsForm implements OnInit {
   removeImage(): void {
     this.selectedImage = null;
     this.imagePreview = null;
+  }
+
+  onNewColorImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        this.toastService.warning('Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastService.warning('A imagem deve ter no máximo 5MB');
+        return;
+      }
+      this.newColorFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => { this.newColorPreview = e.target?.result as string; };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  addColor(): void {
+    if (!this.productId || !this.newColorName.trim()) return;
+    this.isAddingColor = true;
+    this.productService.addColor(
+      this.productId,
+      this.newColorName.trim(),
+      this.newColorCode.trim() || undefined,
+      this.newColorFile || undefined
+    ).subscribe({
+      next: (color) => {
+        this.colors = [...this.colors, color];
+        if (color.imageUrl) {
+          this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
+            this.colorSecureUrls.set(color.id, url);
+          });
+        }
+        this.newColorName = '';
+        this.newColorCode = '';
+        this.newColorFile = null;
+        this.newColorPreview = null;
+        this.isAddingColor = false;
+        this.toastService.success('Cor adicionada!');
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Erro ao adicionar cor';
+        this.toastService.error(msg);
+        this.isAddingColor = false;
+      }
+    });
+  }
+
+  startEditColor(color: ReturnProductColorDto): void {
+    this.editingColorId = color.id;
+    this.editColorName = color.name;
+    this.editColorCode = color.colorCode ?? '';
+    this.editColorFile = null;
+    this.editColorPreview = this.colorSecureUrls.get(color.id) || null;
+  }
+
+  cancelEditColor(): void {
+    this.editingColorId = null;
+    this.editColorFile = null;
+    this.editColorPreview = null;
+  }
+
+  onEditColorImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        this.toastService.warning('Por favor, selecione apenas arquivos de imagem');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastService.warning('A imagem deve ter no máximo 5MB');
+        return;
+      }
+      this.editColorFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => { this.editColorPreview = e.target?.result as string; };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveColorEdit(): void {
+    if (!this.productId || !this.editingColorId || !this.editColorName.trim()) return;
+    this.isSavingColor = true;
+    const colorId = this.editingColorId;
+    this.productService.updateColor(
+      this.productId,
+      colorId,
+      this.editColorName.trim(),
+      this.editColorCode.trim() || undefined,
+      this.editColorFile || undefined
+    ).subscribe({
+      next: (updated) => {
+        this.colors = this.colors.map(c => c.id === colorId ? updated : c);
+        if (updated.imageUrl) {
+          this.uploadService.getSecureImageUrl(updated.imageUrl).subscribe(url => {
+            this.colorSecureUrls.set(updated.id, url);
+          });
+        }
+        this.cancelEditColor();
+        this.isSavingColor = false;
+        this.toastService.success('Cor atualizada!');
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Erro ao atualizar cor';
+        this.toastService.error(msg);
+        this.isSavingColor = false;
+      }
+    });
+  }
+
+  removeColor(colorId: string): void {
+    if (!this.productId) return;
+    this.productService.removeColor(this.productId, colorId).subscribe({
+      next: () => {
+        this.colors = this.colors.filter(c => c.id !== colorId);
+        this.colorSecureUrls.delete(colorId);
+        this.toastService.success('Cor removida!');
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Erro ao remover cor';
+        this.toastService.error(msg);
+      }
+    });
+  }
+
+  getColorImageUrl(color: ReturnProductColorDto): string {
+    return this.colorSecureUrls.get(color.id) || '';
   }
 
   getProductImageUrl(): string {

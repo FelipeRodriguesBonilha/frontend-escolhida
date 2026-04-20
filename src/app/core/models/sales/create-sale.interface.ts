@@ -3,11 +3,15 @@ export interface SaleItemDto {
   quantity: number;
 }
 
+export interface SalePaymentDto {
+  paymentMethodId: string;
+  amount: number;
+  installments?: number;
+}
+
 export interface CreateSaleDto {
   items: SaleItemDto[];
-  paymentMethodId: string;
+  payments: SalePaymentDto[];
   discount: number;
-  amountPaid: number;
-  installments?: number;
   notes?: string;
 }

@@ -11,16 +11,23 @@ export interface SimulationItemResult {
   willBelowMinStock: boolean;
 }
 
+export interface SimulationPaymentSummary {
+  paymentMethodId: string;
+  paymentMethodName: string;
+  amount: number;
+  installments: number | null;
+  installmentValue: number | null;
+}
+
 export interface SimulationSummary {
   totalItems: number;
   totalProducts: number;
   subtotal: number;
   discount: number;
   total: number;
-  amountPaid: number | null;
+  amountPaid: number;
   change: number | null;
-  installments: number | null;
-  installmentValue: number | null;
+  payments: SimulationPaymentSummary[];
 }
 
 export interface SimulationError {

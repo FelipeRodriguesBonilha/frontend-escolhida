@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateProductDto, ReturnProductDto, UpdateProductDto } from '../../models';
+import { CreateProductDto, ReturnProductColorDto, ReturnProductDto, UpdateProductDto } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +41,26 @@ export class Products {
 
   deleteProduct(id: string): Observable<ReturnProductDto> {
     return this.http.delete<ReturnProductDto>(`${this.apiUrl}/products/${id}`);
+  }
+
+  addColor(productId: string, name: string, colorCode?: string, image?: File): Observable<ReturnProductColorDto> {
+    const formData = new FormData();
+    formData.append('name', name);
+    if (colorCode) formData.append('colorCode', colorCode);
+    if (image) formData.append('image', image);
+    return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors`, formData);
+  }
+
+  updateColor(productId: string, colorId: string, name: string, colorCode?: string, image?: File): Observable<ReturnProductColorDto> {
+    const formData = new FormData();
+    formData.append('name', name);
+    if (colorCode) formData.append('colorCode', colorCode);
+    if (image) formData.append('image', image);
+    return this.http.patch<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/${colorId}`, formData);
+  }
+
+  removeColor(productId: string, colorId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/${productId}/colors/${colorId}`);
   }
 
   private buildFormData(data: CreateProductDto | UpdateProductDto, image?: File): FormData {

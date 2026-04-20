@@ -100,6 +100,183 @@
               </div>
             </div>
             <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Cores do Produto</h3>
+              @if (!isEditing) {
+                <p class="text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
+                  Salve o produto primeiro para adicionar cores com imagens.
+                </p>
+              } @else {
+                <div class="space-y-3">
+                  @for (color of colors; track color.id) {
+                    @if (editingColorId === color.id) {
+                      <div class="border-2 border-pink-300 rounded-lg p-4 space-y-3 bg-white">
+                        <p class="text-sm font-semibold text-pink-700">Editando Cor</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <mat-form-field class="w-full">
+                            <mat-label>Nome da Cor *</mat-label>
+                            <input matInput
+                                   [(ngModel)]="editColorName"
+                                   [ngModelOptions]="{standalone: true}"
+                                   placeholder="Ex: Vermelho, Azul...">
+                            <mat-icon matSuffix>label</mat-icon>
+                          </mat-form-field>
+                          <mat-form-field class="w-full">
+                            <mat-label>Código Hex (opcional)</mat-label>
+                            <input matInput
+                                   [(ngModel)]="editColorCode"
+                                   [ngModelOptions]="{standalone: true}"
+                                   placeholder="#FF0000">
+                            <div matSuffix class="w-5 h-5 rounded border border-gray-300 mr-1"
+                                 [style.background-color]="editColorCode || 'transparent'"></div>
+                          </mat-form-field>
+                        </div>
+                        <div class="flex items-center gap-3">
+                          @if (editColorPreview) {
+                            <div class="relative flex-shrink-0">
+                              <img [src]="editColorPreview"
+                                   class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                              <button type="button"
+                                      (click)="editColorFile = null; editColorPreview = null"
+                                      class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center">
+                                <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+                              </button>
+                            </div>
+                          }
+                          <div class="flex-1">
+                            <input type="file"
+                                   #editColorFileInput
+                                   (change)="onEditColorImageSelected($event)"
+                                   accept="image/*"
+                                   class="hidden">
+                            <button type="button"
+                                    (click)="editColorFileInput.click()"
+                                    class="px-3 py-2 border-2 border-pink-400 text-pink-600 hover:bg-pink-100 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                              <mat-icon class="text-base">cloud_upload</mat-icon>
+                              {{ editColorPreview ? 'Alterar Imagem' : 'Imagem da Cor' }}
+                            </button>
+                          </div>
+                          <div class="flex gap-2 flex-shrink-0">
+                            <button type="button"
+                                    (click)="cancelEditColor()"
+                                    class="px-3 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 text-sm">
+                              <mat-icon class="text-base">close</mat-icon>
+                              Cancelar
+                            </button>
+                            <button type="button"
+                                    (click)="saveColorEdit()"
+                                    [disabled]="!editColorName.trim() || isSavingColor"
+                                    class="px-3 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors flex items-center gap-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                              @if (isSavingColor) {
+                                <mat-spinner diameter="16"></mat-spinner>
+                              } @else {
+                                <mat-icon class="text-base">check</mat-icon>
+                              }
+                              Salvar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                        @if (getColorImageUrl(color)) {
+                          <img [src]="getColorImageUrl(color)"
+                               alt="{{ color.name }}"
+                               class="w-14 h-14 object-cover rounded-lg border border-gray-200 flex-shrink-0">
+                        } @else {
+                          <div class="w-14 h-14 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0"
+                               [style.background-color]="color.colorCode || 'transparent'">
+                            @if (!color.colorCode) {
+                              <mat-icon class="text-gray-400 text-sm">palette</mat-icon>
+                            }
+                          </div>
+                        }
+                        <div class="flex-1 min-w-0">
+                          <p class="font-medium text-gray-800 truncate">{{ color.name }}</p>
+                          @if (color.colorCode) {
+                            <div class="flex items-center gap-1 mt-0.5">
+                              <div class="w-3 h-3 rounded-full border border-gray-300"
+                                   [style.background-color]="color.colorCode"></div>
+                              <span class="text-xs text-gray-500">{{ color.colorCode }}</span>
+                            </div>
+                          }
+                        </div>
+                        <button type="button"
+                                (click)="startEditColor(color)"
+                                class="w-8 h-8 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center flex-shrink-0">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button type="button"
+                                (click)="removeColor(color.id)"
+                                class="w-8 h-8 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center flex-shrink-0">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  }
+
+                  <div class="border-2 border-dashed border-pink-200 rounded-lg p-4 space-y-3 bg-pink-50">
+                    <p class="text-sm font-semibold text-pink-700">Adicionar Nova Cor</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <mat-form-field class="w-full">
+                        <mat-label>Nome da Cor *</mat-label>
+                        <input matInput
+                               [(ngModel)]="newColorName"
+                               [ngModelOptions]="{standalone: true}"
+                               placeholder="Ex: Vermelho, Azul...">
+                        <mat-icon matSuffix>label</mat-icon>
+                      </mat-form-field>
+                      <mat-form-field class="w-full">
+                        <mat-label>Código Hex (opcional)</mat-label>
+                        <input matInput
+                               [(ngModel)]="newColorCode"
+                               [ngModelOptions]="{standalone: true}"
+                               placeholder="#FF0000">
+                        <div matSuffix class="w-5 h-5 rounded border border-gray-300 mr-1"
+                             [style.background-color]="newColorCode || 'transparent'"></div>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      @if (newColorPreview) {
+                        <div class="relative flex-shrink-0">
+                          <img [src]="newColorPreview"
+                               class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                          <button type="button"
+                                  (click)="newColorFile = null; newColorPreview = null"
+                                  class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center">
+                            <mat-icon class="text-xs" style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+                          </button>
+                        </div>
+                      }
+                      <div class="flex-1">
+                        <input type="file"
+                               #colorFileInput
+                               (change)="onNewColorImageSelected($event)"
+                               accept="image/*"
+                               class="hidden">
+                        <button type="button"
+                                (click)="colorFileInput.click()"
+                                class="px-3 py-2 border-2 border-pink-400 text-pink-600 hover:bg-pink-100 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                          <mat-icon class="text-base">cloud_upload</mat-icon>
+                          {{ newColorPreview ? 'Alterar Imagem' : 'Imagem da Cor' }}
+                        </button>
+                      </div>
+                      <button type="button"
+                              (click)="addColor()"
+                              [disabled]="!newColorName.trim() || isAddingColor"
+                              class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
+                        @if (isAddingColor) {
+                          <mat-spinner diameter="16"></mat-spinner>
+                        } @else {
+                          <mat-icon class="text-base">add</mat-icon>
+                        }
+                        Adicionar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="space-y-4">
               <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Preços</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <mat-form-field>
