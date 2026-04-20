@@ -131,6 +131,7 @@ export class Sales implements OnInit {
       });
 
     this.saleForm.get('discountType')?.valueChanges.subscribe(() => {
+      this.saleForm.get('discount')?.setValue(0, { emitEvent: false });
       this.calculateTotals();
       this.resetSimulation();
     });
@@ -193,6 +194,16 @@ export class Sales implements OnInit {
       installmentsControl.disable();
     }
     installmentsControl.updateValueAndValidity();
+
+    if (paymentMethod?.code === 'CASH') {
+      group.get('amount')?.setValue(0, { emitEvent: false });
+    } else {
+      const otherTotal = this.paymentControls
+        .filter(g => g !== group)
+        .reduce((sum, g) => sum + (Number(g.get('amount')?.value) || 0), 0);
+      const remaining = Math.max(0, Math.round((this.total - otherTotal) * 100) / 100);
+      group.get('amount')?.setValue(remaining, { emitEvent: false });
+    }
   }
 
   get totalAmountPaid(): number {
