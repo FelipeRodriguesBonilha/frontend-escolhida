@@ -1,3 +1,4 @@
+export * from './common/paginated-response.interface';
 export * from './auth/login.interface';
 export * from './auth/return-login.interface';
 

@@ -16,7 +16,7 @@ import { Categories as CategoryService } from '../../../core/services/categories
 import { Products as ProductService } from '../../../core/services/products/products';
 import { Suppliers as SupplierService } from '../../../core/services/suppliers/suppliers';
 import { Upload as UploadService } from '../../../core/services/upload/upload';
-import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.directive';
+import { NgxCurrencyDirective } from 'ngx-currency';
 
 @Component({
   selector: 'app-products-form',
@@ -31,7 +31,7 @@ import { CurrencyMaskDirective } from '../../../shared/directives/currency-mask.
     MatSelectModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
-    CurrencyMaskDirective
+    NgxCurrencyDirective
   ],
   templateUrl: './products-form.html',
   styleUrl: './products-form.scss',
@@ -110,28 +110,22 @@ export class ProductsForm implements OnInit {
   }
 
   loadCategories(): void {
-    this.categoryService.getAllCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories.filter(c => c.active);
-      },
+    this.categoryService.getAllCategoriesDropdown().subscribe({
+      next: (categories) => { this.categories = categories; },
       error: (error) => console.error('Error loading categories:', error)
     });
   }
 
   loadBrands(): void {
-    this.brandService.getAllBrands().subscribe({
-      next: (brands) => {
-        this.brands = brands.filter(b => b.active);
-      },
+    this.brandService.getAllBrandsDropdown().subscribe({
+      next: (brands) => { this.brands = brands; },
       error: (error) => console.error('Error loading brands:', error)
     });
   }
 
   loadSuppliers(): void {
-    this.supplierService.getAllSuppliers().subscribe({
-      next: (suppliers) => {
-        this.suppliers = suppliers.filter(s => s.active);
-      },
+    this.supplierService.getAllSuppliersDropdown().subscribe({
+      next: (suppliers) => { this.suppliers = suppliers; },
       error: (error) => console.error('Error loading suppliers:', error)
     });
   }

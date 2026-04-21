@@ -133,8 +133,7 @@
                             <mat-label>Valor</mat-label>
                             <input matInput
                                    formControlName="amount"
-                                   appCurrencyMask
-                                   placeholder="0,00">
+                                   currencyMask>
                             <mat-icon matSuffix>payments</mat-icon>
                           </mat-form-field>
 
@@ -156,9 +155,8 @@
                       <mat-label>Desconto</mat-label>
                       @if (saleForm.get('discountType')?.value === 'value') {
                         <input matInput
-                               appCurrencyMask
-                               formControlName="discount"
-                               placeholder="R$ 0,00">
+                               currencyMask
+                               formControlName="discount">
                       } @else {
                         <input matInput
                                formControlName="discount"

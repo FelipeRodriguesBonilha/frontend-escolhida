@@ -283,8 +283,7 @@
                   <mat-label>Preço de Venda *</mat-label>
                   <input matInput 
                          formControlName="price"
-                         appCurrencyMask
-                         placeholder="0,00"
+                         currencyMask
                          required>
                   <mat-icon matSuffix>attach_money</mat-icon>
                   @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
@@ -295,8 +294,7 @@
                   <mat-label>Preço de Custo *</mat-label>
                   <input matInput 
                          formControlName="costPrice"
-                         appCurrencyMask
-                         placeholder="0,00"
+                         currencyMask
                          required>
                   <mat-icon matSuffix>shopping_cart</mat-icon>
                   @if (productForm.get('costPrice')?.invalid && productForm.get('costPrice')?.touched) {

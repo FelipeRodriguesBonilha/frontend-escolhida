@@ -7,10 +7,12 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ReturnProductDto } from '../../core/models';
 import { Products as ProductService } from '../../core/services/products/products';
 import { Upload } from '../../core/services/upload/upload';
@@ -30,16 +32,21 @@ import { ConfirmationDialog } from '../../shared/components/confirmation-dialog/
     MatDialogModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    MatPaginatorModule
   ],
   templateUrl: './products.html',
   styleUrl: './products.scss',
 })
 export class Products implements OnInit {
   products: ReturnProductDto[] = [];
-  filteredProducts: ReturnProductDto[] = [];
   isLoading = false;
   productImageUrls = new Map<string, string>();
+  total = 0;
+  currentPage = 1;
+  pageSize = 20;
+  pageSizeOptions = [10, 20, 50];
+  showInactive = false;
 
   displayedColumns: string[] = ['name', 'price', 'stock', 'category', 'brand', 'supplier', 'createdAt', 'actions'];
 
@@ -61,20 +68,24 @@ export class Products implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
 
-    this.searchForm.get('searchQuery')?.valueChanges.subscribe(value => {
-      this.filterProducts(value);
+    this.searchForm.get('searchQuery')?.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.loadProducts();
     });
   }
 
   loadProducts(): void {
     this.isLoading = true;
-    this.productService.getAllProducts().subscribe({
-      next: (products) => {
-        this.products = products;
-        this.filteredProducts = [...products];
-        this.loadProductImages(products);
+    const search = this.searchForm.get('searchQuery')?.value || undefined;
+    this.productService.getAllProducts(this.currentPage, this.pageSize, search, this.showInactive).subscribe({
+      next: (res) => {
+        this.products = res.data;
+        this.total = res.total;
+        this.loadProductImages(res.data);
         this.isLoading = false;
-
       },
       error: (error) => {
         console.error('Error loading products:', error);
@@ -93,21 +104,57 @@ export class Products implements OnInit {
     });
   }
 
-  filterProducts(query: string): void {
-    if (!query) {
-      this.filteredProducts = [...this.products];
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadProducts();
+  }
 
-      return;
-    }
+  toggleInactiveFilter(): void {
+    this.showInactive = !this.showInactive;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
 
-    this.filteredProducts = this.products.filter(product =>
-      product.name.toLowerCase().includes(query.toLowerCase()) ||
-      (product.barcode && product.barcode.includes(query)) ||
-      (product.description && product.description.toLowerCase().includes(query.toLowerCase())) ||
-      (product.category && product.category.name.toLowerCase().includes(query.toLowerCase())) ||
-      (product.brand && product.brand.name.toLowerCase().includes(query.toLowerCase())) ||
-      (product.supplier && product.supplier.name.toLowerCase().includes(query.toLowerCase()))
-    );
+  reactivateProduct(product: ReturnProductDto): void {
+    this.isLoading = true;
+    this.productService.reactivateProduct(product.id).subscribe({
+      next: () => {
+        this.toastService.success(`Produto "${product.name}" reativado!`);
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.toastService.error(err?.error?.message || 'Erro ao reativar');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  permanentDeleteProduct(product: ReturnProductDto): void {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      width: '400px',
+      data: {
+        title: 'Excluir Permanentemente',
+        message: `ATENÇÃO: Isso excluirá o produto "${product.name}" definitivamente do banco de dados. Esta ação é irreversível!`,
+        confirmText: 'Excluir Definitivamente',
+        cancelText: 'Cancelar'
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.isLoading = true;
+        this.productService.permanentDeleteProduct(product.id).subscribe({
+          next: () => {
+            this.toastService.success('Produto excluído permanentemente!');
+            this.loadProducts();
+          },
+          error: (err) => {
+            this.toastService.error(err?.error?.message || 'Erro ao excluir permanentemente');
+            this.isLoading = false;
+          }
+        });
+      }
+    });
   }
 
   createProduct(): void {
@@ -122,9 +169,9 @@ export class Products implements OnInit {
     const dialogRef = this.dialog.open(ConfirmationDialog, {
       width: '400px',
       data: {
-        title: 'Confirmar Exclusão',
-        message: `Tem certeza que deseja excluir o produto "${product.name}"? Esta ação não pode ser desfeita.`,
-        confirmText: 'Excluir',
+        title: 'Confirmar Inativação',
+        message: `Tem certeza que deseja inativar o produto "${product.name}"? Ele não aparecerá mais nas listagens ativas.`,
+        confirmText: 'Inativar',
         cancelText: 'Cancelar'
       }
     });

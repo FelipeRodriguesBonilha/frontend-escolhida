@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CreateSaleDto, ReturnSaleDto, SimulateSaleDto, SimulationResult } from '../../core/models';
 import { ReturnPaymentMethodDto } from '../../core/models/payment-methods/return-payment-method.interface';
 import { ReturnProductDto } from '../../core/models/products/return-product.interface';
@@ -22,7 +22,7 @@ import { Products as ProductService } from '../../core/services/products/product
 import { PaginatedSalesResponse, Sales as SaleService } from '../../core/services/sales/sales';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { Upload } from '../../core/services/upload/upload';
-import { CurrencyMaskDirective } from '../../shared/directives/currency-mask.directive';
+import { NgxCurrencyDirective } from 'ngx-currency';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
@@ -51,7 +51,7 @@ interface CartItem {
     MatDialogModule,
     MatChipsModule,
     MatTabsModule,
-    CurrencyMaskDirective,
+    NgxCurrencyDirective,
     BrlCurrencyPipe
   ],
   templateUrl: './sales.html',
@@ -119,8 +119,11 @@ export class Sales implements OnInit {
       date: [todayStr]
     });
 
-    this.searchForm.get('searchQuery')?.valueChanges.subscribe(value => {
-      this.filterProducts(value);
+    this.searchForm.get('searchQuery')?.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe((value: string) => {
+      this.loadProducts(value || undefined);
     });
 
     this.saleForm.get('discount')?.valueChanges
@@ -267,12 +270,12 @@ export class Sales implements OnInit {
     });
   }
 
-  loadProducts(): void {
-    this.productService.getAllProducts().subscribe({
-      next: (products) => {
-        this.products = products;
-        this.filteredProducts = products;
-        products.forEach(product => this.loadProductImage(product));
+  loadProducts(search?: string): void {
+    this.productService.getAllProducts(1, 30, search).subscribe({
+      next: (res) => {
+        this.products = res.data;
+        this.filteredProducts = res.data;
+        res.data.forEach(product => this.loadProductImage(product));
       },
       error: (error) => console.error('Error loading products:', error)
     });
@@ -292,7 +295,6 @@ export class Sales implements OnInit {
       this.filteredProducts = this.products;
       return;
     }
-
     const lowerQuery = query.toLowerCase();
     this.filteredProducts = this.products.filter(product =>
       product.name.toLowerCase().includes(lowerQuery) ||

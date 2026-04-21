@@ -21,7 +21,27 @@
       </div>
     } @else {
       <mat-card class="shadow-sm">
-        <mat-card-content class="p-0">
+        <mat-card-content class="p-4">
+          <div class="mb-4 space-y-3">
+            <form [formGroup]="searchForm" class="flex gap-3">
+              <mat-form-field class="flex-1">
+                <mat-label>Buscar produto no estoque...</mat-label>
+                <input matInput formControlName="searchQuery" placeholder="Nome, código, categoria, marca...">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              <button type="button" (click)="toggleInactiveFilter()"
+                      [class]="showInactive ? 'px-4 py-2 bg-orange-100 border-2 border-orange-500 text-orange-700 rounded-lg font-medium flex items-center gap-2' : 'px-4 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg font-medium flex items-center gap-2'">
+                <mat-icon>{{ showInactive ? 'visibility_off' : 'visibility' }}</mat-icon>
+                <span>{{ showInactive ? 'Ver Ativos' : 'Ver Inativos' }}</span>
+              </button>
+            </form>
+            @if (showInactive) {
+              <div class="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-700">
+                <mat-icon class="text-sm">info</mat-icon>
+                Exibindo produtos inativos no estoque. Use <strong>Excluir Definitivamente</strong> para remover permanentemente.
+              </div>
+            }
+          </div>
           <div class="overflow-x-auto">
             <table mat-table [dataSource]="stocks" class="w-full">
               <ng-container matColumnDef="product">
@@ -78,12 +98,25 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Ações</th>
                 <td mat-cell *matCellDef="let stock">
-                  <button type="button"
-                          (click)="openAdjustDialog(stock)"
-                          title="Ajustar Estoque"
-                          class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">
-                    <mat-icon>edit</mat-icon>
-                  </button>
+                  @if (!showInactive) {
+                    <button type="button" (click)="openAdjustDialog(stock)" title="Ajustar Estoque"
+                            class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  } @else {
+                    <div class="flex gap-1">
+                      <button type="button" (click)="reactivateStockProduct(stock)" title="Reativar produto"
+                              class="px-3 py-1 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex items-center gap-1">
+                        <mat-icon class="text-sm">restore</mat-icon>
+                        <span>Reativar</span>
+                      </button>
+                      <button type="button" (click)="permanentDeleteStockProduct(stock)" title="Excluir permanentemente"
+                              class="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors flex items-center gap-1">
+                        <mat-icon class="text-sm">delete_forever</mat-icon>
+                        <span>Excluir</span>
+                      </button>
+                    </div>
+                  }
                 </td>
               </ng-container>
 
@@ -98,6 +131,15 @@
               <p class="text-gray-500 text-lg">Nenhum item no estoque</p>
             </div>
           }
+
+          <mat-paginator
+            [length]="total"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="currentPage - 1"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
         </mat-card-content>
       </mat-card>
     }

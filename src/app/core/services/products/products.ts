@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateProductDto, ReturnProductColorDto, ReturnProductDto, UpdateProductDto } from '../../models';
+import { CreateProductDto, PaginatedResponse, ReturnProductColorDto, ReturnProductDto, UpdateProductDto } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -17,9 +17,11 @@ export class Products {
     return this.http.post<ReturnProductDto>(`${this.apiUrl}/products`, formData);
   }
 
-  getAllProducts(search?: string): Observable<ReturnProductDto[]> {
-    const options = search ? { params: { search } } : {};
-    return this.http.get<ReturnProductDto[]>(`${this.apiUrl}/products`, options);
+  getAllProducts(page: number = 1, limit: number = 20, search?: string, showInactive: boolean = false): Observable<PaginatedResponse<ReturnProductDto>> {
+    const params: any = { page, limit };
+    if (search) params.search = search;
+    if (showInactive) params.showInactive = 'true';
+    return this.http.get<PaginatedResponse<ReturnProductDto>>(`${this.apiUrl}/products`, { params });
   }
 
   getLowStockProducts(): Observable<ReturnProductDto[]> {
@@ -41,6 +43,14 @@ export class Products {
 
   deleteProduct(id: string): Observable<ReturnProductDto> {
     return this.http.delete<ReturnProductDto>(`${this.apiUrl}/products/${id}`);
+  }
+
+  reactivateProduct(id: string): Observable<ReturnProductDto> {
+    return this.http.patch<ReturnProductDto>(`${this.apiUrl}/products/${id}/reactivate`, {});
+  }
+
+  permanentDeleteProduct(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/products/${id}/permanent`);
   }
 
   addColor(productId: string, name: string, colorCode?: string, image?: File): Observable<ReturnProductColorDto> {
