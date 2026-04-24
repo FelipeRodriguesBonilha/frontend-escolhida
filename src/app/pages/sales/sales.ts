@@ -306,11 +306,16 @@ export class Sales implements OnInit {
     const barcode = this.searchForm.get('barcode')?.value;
     if (!barcode) return;
 
-    const product = this.products.find(p => p.barcode === barcode);
-    if (product) {
-      this.addToCart(product);
-      this.searchForm.get('barcode')?.setValue('');
-    }
+    this.productService.getProductByBarcode(barcode).subscribe({
+      next: (product) => {
+        this.addToCart(product);
+        this.searchForm.get('barcode')?.setValue('');
+      },
+      error: () => {
+        this.toastService.error(`Produto com código de barras "${barcode}" não encontrado.`);
+        this.searchForm.get('barcode')?.setValue('');
+      }
+    });
   }
 
   addToCart(product: ReturnProductDto): void {
