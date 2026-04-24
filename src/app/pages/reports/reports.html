@@ -15,7 +15,8 @@
                   <mat-label>Data</mat-label>
                   <input matInput type="date" formControlName="date">
                 </mat-form-field>
-                <button type="button" (click)="loadDailyReport()" [disabled]="isLoadingDaily" class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" (click)="loadDailyReport()" [disabled]="isLoadingDaily"
+                  class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   <mat-icon>search</mat-icon>
                   <span>Buscar Relatório</span>
                 </button>
@@ -24,98 +25,99 @@
           </mat-card>
 
           @if (isLoadingDaily) {
-            <div class="flex items-center justify-center py-12">
-              <mat-spinner diameter="50"></mat-spinner>
-            </div>
+          <div class="flex items-center justify-center py-12">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
           } @else if (dailyReport) {
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Total de Vendas</p>
-                      <p class="text-3xl font-bold text-pink-600">{{ dailyReport.totalSales }}</p>
-                    </div>
-                    <div class="bg-pink-100 p-3 rounded-full">
-                      <mat-icon class="text-pink-600">shopping_cart</mat-icon>
-                    </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Total de Vendas</p>
+                    <p class="text-3xl font-bold text-pink-600">{{ dailyReport.totalSales }}</p>
                   </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Receita Total</p>
-                      <p class="text-3xl font-bold text-green-600">{{ dailyReport.totalRevenue | brl }}</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-full">
-                      <mat-icon class="text-green-600">attach_money</mat-icon>
-                    </div>
+                  <div class="bg-pink-100 p-3 rounded-full">
+                    <mat-icon class="text-pink-600">shopping_cart</mat-icon>
                   </div>
-                </mat-card-content>
-              </mat-card>
+                </div>
+              </mat-card-content>
+            </mat-card>
 
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Produtos Vendidos</p>
-                      <p class="text-3xl font-bold text-blue-600">{{ getTotalProductsSold() }}</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                      <mat-icon class="text-blue-600">inventory_2</mat-icon>
-                    </div>
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Receita Total</p>
+                    <p class="text-3xl font-bold text-green-600">{{ dailyReport.totalRevenue | brl }}</p>
                   </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
+                  <div class="bg-green-100 p-3 rounded-full">
+                    <mat-icon class="text-green-600">attach_money</mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <mat-card class="shadow-sm">
-                <mat-card-header class="pb-3">
-                  <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Forma de Pagamento</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  @if (getPaymentMethodsArray(dailyReport.byPaymentMethod).length > 0) {
-                    <div class="space-y-3">
-                      @for (item of getPaymentMethodsArray(dailyReport.byPaymentMethod); track item.method) {
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <span class="font-medium text-gray-700">{{ item.method }}</span>
-                          <span class="text-pink-600 font-semibold">{{ item.amount | brl }}</span>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <p class="text-gray-500 text-center py-8">Nenhuma venda nesta data</p>
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Produtos Vendidos</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ getTotalProductsSold() }}</p>
+                  </div>
+                  <div class="bg-blue-100 p-3 rounded-full">
+                    <mat-icon class="text-blue-600">inventory_2</mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <mat-card class="shadow-sm">
+              <mat-card-header class="pb-3">
+                <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Forma de
+                  Pagamento</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @if (getPaymentMethodsArray(dailyReport.byPaymentMethod).length > 0) {
+                <div class="space-y-3">
+                  @for (item of getPaymentMethodsArray(dailyReport.byPaymentMethod); track item.method) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium text-gray-700">{{ item.method }}</span>
+                    <span class="text-pink-600 font-semibold">{{ item.amount | brl }}</span>
+                  </div>
                   }
-                </mat-card-content>
-              </mat-card>
+                </div>
+                } @else {
+                <p class="text-gray-500 text-center py-8">Nenhuma venda nesta data</p>
+                }
+              </mat-card-content>
+            </mat-card>
 
-              <mat-card class="shadow-sm">
-                <mat-card-header class="pb-3">
-                  <mat-card-title class="text-lg font-semibold text-gray-800">Produtos Mais Vendidos</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  @if (dailyReport.topProducts.length > 0) {
-                    <div class="space-y-3">
-                      @for (product of dailyReport.topProducts; track product.productId) {
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div class="flex-1">
-                            <p class="font-medium text-gray-800">{{ product.name }}</p>
-                            <p class="text-sm text-gray-500">{{ product.quantity }} unidades</p>
-                          </div>
-                          <span class="text-green-600 font-semibold">{{ product.revenue | brl }}</span>
-                        </div>
-                      }
+            <mat-card class="shadow-sm">
+              <mat-card-header class="pb-3">
+                <mat-card-title class="text-lg font-semibold text-gray-800">Top 10 Produtos Mais Vendidos (R$)</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @if (dailyReport.topProducts.length > 0) {
+                <div class="space-y-3">
+                  @for (product of dailyReport.topProducts; track product.productId) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-800">{{ product.name }}</p>
+                      <p class="text-sm text-gray-500">{{ product.quantity }} unidades</p>
                     </div>
-                  } @else {
-                    <p class="text-gray-500 text-center py-8">Nenhum produto vendido</p>
+                    <span class="text-green-600 font-semibold">{{ product.revenue | brl }}</span>
+                  </div>
                   }
-                </mat-card-content>
-              </mat-card>
-            </div>
+                </div>
+                } @else {
+                <p class="text-gray-500 text-center py-8">Nenhum produto vendido</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
           }
         </div>
       </mat-tab>
@@ -129,7 +131,7 @@
                   <mat-label>Ano</mat-label>
                   <mat-select formControlName="year">
                     @for (year of years; track year) {
-                      <mat-option [value]="year">{{ year }}</mat-option>
+                    <mat-option [value]="year">{{ year }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -137,11 +139,12 @@
                   <mat-label>Mês</mat-label>
                   <mat-select formControlName="month">
                     @for (month of months; track month.value) {
-                      <mat-option [value]="month.value">{{ month.name }}</mat-option>
+                    <mat-option [value]="month.value">{{ month.name }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
-                <button type="button" (click)="loadMonthlyReport()" [disabled]="isLoadingMonthly" class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" (click)="loadMonthlyReport()" [disabled]="isLoadingMonthly"
+                  class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                   <mat-icon>search</mat-icon>
                   <span>Buscar Relatório</span>
                 </button>
@@ -150,125 +153,126 @@
           </mat-card>
 
           @if (isLoadingMonthly) {
-            <div class="flex items-center justify-center py-12">
-              <mat-spinner diameter="50"></mat-spinner>
-            </div>
+          <div class="flex items-center justify-center py-12">
+            <mat-spinner diameter="50"></mat-spinner>
+          </div>
           } @else if (monthlyReport) {
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Total de Vendas</p>
-                      <p class="text-3xl font-bold text-pink-600">{{ monthlyReport.totalSales }}</p>
-                    </div>
-                    <div class="bg-pink-100 p-3 rounded-full">
-                      <mat-icon class="text-pink-600">shopping_cart</mat-icon>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Receita Total</p>
-                      <p class="text-3xl font-bold text-green-600">{{ monthlyReport.totalRevenue | brl }}</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-full">
-                      <mat-icon class="text-green-600">attach_money</mat-icon>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Ticket Médio</p>
-                      <p class="text-3xl font-bold text-blue-600">{{ monthlyReport.averageTicket | brl }}</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                      <mat-icon class="text-blue-600">receipt</mat-icon>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Período</p>
-                      <p class="text-xl font-bold text-purple-600">{{ monthlyReport.period }}</p>
-                    </div>
-                    <div class="bg-purple-100 p-3 rounded-full">
-                      <mat-icon class="text-purple-600">calendar_month</mat-icon>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <mat-card class="shadow-sm">
-                <mat-card-header class="pb-3">
-                  <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Forma de Pagamento</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="space-y-3">
-                    @for (item of getPaymentMethodsArray(monthlyReport.byPaymentMethod); track item.method) {
-                      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span class="font-medium text-gray-700">{{ item.method }}</span>
-                        <span class="text-pink-600 font-semibold">{{ item.amount | brl }}</span>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm">
-                <mat-card-header class="pb-3">
-                  <mat-card-title class="text-lg font-semibold text-gray-800">Produtos Mais Vendidos</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="space-y-3">
-                    @for (product of monthlyReport.topProducts.slice(0, 5); track product.productId) {
-                      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div class="flex-1">
-                          <p class="font-medium text-gray-800">{{ product.name }}</p>
-                          <p class="text-sm text-gray-500">{{ product.category }} • {{ product.quantity }} unidades</p>
-                        </div>
-                        <span class="text-green-600 font-semibold">{{ product.revenue | brl }}</span>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
-
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <mat-card class="shadow-sm">
-              <mat-card-header class="pb-3">
-                <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Dia</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="overflow-x-auto">
-                  <div class="space-y-2">
-                    @for (day of getDailyDataArray(); track day.day) {
-                      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span class="font-medium text-gray-700">{{ day.day }}</span>
-                        <div class="flex gap-6">
-                          <span class="text-sm text-gray-600">{{ day.sales }} vendas</span>
-                          <span class="text-green-600 font-semibold">{{ day.revenue | brl }}</span>
-                        </div>
-                      </div>
-                    }
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Total de Vendas</p>
+                    <p class="text-3xl font-bold text-pink-600">{{ monthlyReport.totalSales }}</p>
+                  </div>
+                  <div class="bg-pink-100 p-3 rounded-full">
+                    <mat-icon class="text-pink-600">shopping_cart</mat-icon>
                   </div>
                 </div>
               </mat-card-content>
             </mat-card>
+
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Receita Total</p>
+                    <p class="text-3xl font-bold text-green-600">{{ monthlyReport.totalRevenue | brl }}</p>
+                  </div>
+                  <div class="bg-green-100 p-3 rounded-full">
+                    <mat-icon class="text-green-600">attach_money</mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Ticket Médio</p>
+                    <p class="text-3xl font-bold text-blue-600">{{ monthlyReport.averageTicket | brl }}</p>
+                  </div>
+                  <div class="bg-blue-100 p-3 rounded-full">
+                    <mat-icon class="text-blue-600">receipt</mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="shadow-sm">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600 mb-1">Período</p>
+                    <p class="text-xl font-bold text-purple-600">{{ monthlyReport.period | date:'MM/yyyy':'UTC' }}</p>
+                  </div>
+                  <div class="bg-purple-100 p-3 rounded-full">
+                    <mat-icon class="text-purple-600">calendar_month</mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <mat-card class="shadow-sm">
+              <mat-card-header class="pb-3">
+                <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Forma de
+                  Pagamento</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="space-y-3">
+                  @for (item of getPaymentMethodsArray(monthlyReport.byPaymentMethod); track item.method) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium text-gray-700">{{ item.method }}</span>
+                    <span class="text-pink-600 font-semibold">{{ item.amount | brl }}</span>
+                  </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="shadow-sm">
+              <mat-card-header class="pb-3">
+                <mat-card-title class="text-lg font-semibold text-gray-800">Top 10 Produtos Mais Vendidos (R$)</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="space-y-3">
+                  @for (product of monthlyReport.topProducts; track product.productId) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-800">{{ product.name }}</p>
+                      <p class="text-sm text-gray-500">{{ product.category }} • {{ product.quantity }} unidades</p>
+                    </div>
+                    <span class="text-green-600 font-semibold">{{ product.revenue | brl }}</span>
+                  </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <mat-card class="shadow-sm">
+            <mat-card-header class="pb-3">
+              <mat-card-title class="text-lg font-semibold text-gray-800">Vendas por Dia</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="overflow-x-auto">
+                <div class="space-y-2">
+                  @for (day of getDailyDataArray(); track day.day) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium text-gray-700">{{ day.day | date:'dd/MM/yyyy':'UTC' }}</span>
+                    <div class="flex gap-6">
+                      <span class="text-sm text-gray-600">{{ day.sales }} vendas</span>
+                      <span class="text-green-600 font-semibold">{{ day.revenue | brl }}</span>
+                    </div>
+                  </div>
+                  }
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
           }
         </div>
       </mat-tab>

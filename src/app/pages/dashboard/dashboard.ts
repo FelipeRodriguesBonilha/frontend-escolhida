@@ -100,7 +100,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadTopProducts(): void {
-    this.reportsService.getTopProductsCurrentMonth(15).subscribe({
+    this.reportsService.getTopProductsCurrentMonth(10).subscribe({
       next: (data: TopProductsData) => {
         this.topProductsData = data;
         this.tryRenderCharts();
