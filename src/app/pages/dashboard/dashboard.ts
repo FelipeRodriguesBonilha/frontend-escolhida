@@ -224,8 +224,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
         labels: this.topProductsData.topProducts.map(p => p.name.length > 20 ? p.name.substring(0, 20) + '...' : p.name),
         datasets: [
           {
-            label: 'Quantidade Vendida',
-            data: this.topProductsData.topProducts.map(p => p.quantity),
+            label: 'Receita (R$)',
+            data: this.topProductsData.topProducts.map(p => p.revenue),
             backgroundColor: 'rgba(236, 72, 153, 0.8)',
             borderColor: 'rgb(236, 72, 153)',
             borderWidth: 1
@@ -246,7 +246,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Quantidade'
+              text: 'Receita (R$)'
+            },
+            ticks: {
+              callback: function(value) {
+                return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              }
             }
           }
         }
