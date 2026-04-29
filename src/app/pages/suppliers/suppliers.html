@@ -127,9 +127,9 @@
                 </ng-container>
 
                 <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef class="text-center">Ações</th>
-                  <td mat-cell *matCellDef="let supplier" class="text-center">
-                    <div class="flex items-center justify-center gap-2">
+                  <th mat-header-cell *matHeaderCellDef class="!justify-center font-semibold text-gray-700">Ações</th>
+                  <td mat-cell *matCellDef="let supplier" class="!justify-center">
+                    <div class="flex items-center gap-2">
                       @if (!showInactive) {
                         <button type="button" (click)="editSupplier(supplier)" title="Editar fornecedor"
                                 class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">

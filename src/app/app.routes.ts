@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { Layout } from './layout/layout';
 import { AuthGuard } from './core/guards/auth.guard';
+import { GuestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
   { 
-    path: 'login', 
+    path: 'login',
+    canActivate: [GuestGuard],
     loadComponent: () => import('./pages/login/login').then(m => m.Login) 
   },
   {
@@ -49,6 +51,7 @@ export const routes: Routes = [
         ]
       },
       { path: 'estoque', loadComponent: () => import('./pages/stock/stock').then(m => m.Stock) },
+      { path: 'caixa', loadComponent: () => import('./pages/cash-register/cash-register').then(m => m.CashRegisterComponent) },
       { 
         path: 'pagamentos', 
         children: [
@@ -59,5 +62,5 @@ export const routes: Routes = [
       },
     ]
   },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/dashboard' }
 ];

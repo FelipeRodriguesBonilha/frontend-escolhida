@@ -15,157 +15,131 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-      <div class="flex flex-col sm:flex-row gap-4">
-        <mat-form-field  class="flex-1">
-          <mat-label>Buscar método...</mat-label>
-          <input matInput 
-                 [formControl]="searchQueryControl"
-                 placeholder="Digite o nome ou código...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
-    </div>
+    <mat-card class="shadow-sm">
+      <mat-card-header class="pb-4">
+        <mat-card-title class="text-lg font-semibold text-gray-800">Lista de Métodos de Pagamento</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="mb-6">
+          <mat-form-field class="w-full">
+            <mat-label>Buscar método...</mat-label>
+            <input matInput
+                   [formControl]="searchQueryControl"
+                   placeholder="Digite o nome ou código...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      @if (isLoading) {
-        <div class="flex justify-center items-center py-12">
-          <mat-spinner diameter="40"></mat-spinner>
-          <span class="ml-3 text-gray-600">Carregando métodos...</span>
-        </div>
-      } @else if (filteredPaymentMethods.length === 0) {
-        <div class="text-center py-12">
-          <mat-icon class="text-6xl text-gray-300 mb-4">payments</mat-icon>
-          <h3 class="text-lg font-semibold text-gray-600 mb-2">
-            @if (searchForm.get('searchQuery')?.value) {
-              Nenhum método encontrado
-            } @else {
-              Nenhum método cadastrado
-            }
-          </h3>
-          <p class="text-gray-500 mb-6">
-            @if (searchForm.get('searchQuery')?.value) {
-              Tente outros termos de busca
-            } @else {
-              Cadastre seu primeiro método de pagamento
-            }
-          </p>
-          @if (!searchForm.get('searchQuery')?.value) {
-            <button type="button"
-                    (click)="createPaymentMethod()"
-                    class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2">
-              <mat-icon>add</mat-icon>
-              <span>Cadastrar Primeiro Método</span>
-            </button>
-          }
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Código
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nome
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ordem
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Criado em
-                </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              @for (paymentMethod of filteredPaymentMethods; track paymentMethod.id) {
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0 h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+        @if (isLoading) {
+          <div class="flex justify-center items-center py-12">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-3 text-gray-600">Carregando métodos...</span>
+          </div>
+        } @else {
+          @if (filteredPaymentMethods.length === 0) {
+            <div class="text-center py-12">
+              <mat-icon class="text-6xl text-gray-300 mb-4">payments</mat-icon>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">
+                @if (searchForm.get('searchQuery')?.value) {
+                  Nenhum método encontrado
+                } @else {
+                  Nenhum método cadastrado
+                }
+              </h3>
+              <p class="text-gray-500 mb-6">
+                @if (searchForm.get('searchQuery')?.value) {
+                  Tente outros termos de busca
+                } @else {
+                  Cadastre seu primeiro método de pagamento
+                }
+              </p>
+              @if (!searchForm.get('searchQuery')?.value) {
+                <button type="button"
+                        (click)="createPaymentMethod()"
+                        class="px-4 py-2 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors flex items-center gap-2">
+                  <mat-icon>add</mat-icon>
+                  <span>Cadastrar Primeiro Método</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="filteredPaymentMethods" class="w-full">
+
+                <ng-container matColumnDef="code">
+                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Código</th>
+                  <td mat-cell *matCellDef="let pm">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
                         <mat-icon class="text-yellow-600 text-sm">code</mat-icon>
                       </div>
-                      <div class="ml-3">
-                        <div class="text-sm font-medium text-gray-900 font-mono">
-                          {{ paymentMethod.code }}
-                        </div>
-                      </div>
+                      <p class="font-mono font-medium text-gray-800">{{ pm.code }}</p>
                     </div>
                   </td>
+                </ng-container>
 
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">
-                      {{ paymentMethod.name }}
-                    </div>
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Nome</th>
+                  <td mat-cell *matCellDef="let pm">
+                    <p class="font-medium text-gray-800">{{ pm.name }}</p>
                   </td>
+                </ng-container>
 
-                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                <ng-container matColumnDef="order">
+                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Ordem</th>
+                  <td mat-cell *matCellDef="let pm">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {{ paymentMethod.order || 0 }}
+                      {{ pm.order || 0 }}
                     </span>
                   </td>
+                </ng-container>
 
-                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                <ng-container matColumnDef="active">
+                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Status</th>
+                  <td mat-cell *matCellDef="let pm">
                     <button type="button"
-                            (click)="toggleStatus(paymentMethod)"
+                            (click)="toggleStatus(pm)"
                             [disabled]="isLoading"
                             class="w-8 h-8 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-                      @if (paymentMethod.active) {
+                      @if (pm.active) {
                         <mat-icon class="text-green-500">check_circle</mat-icon>
                       } @else {
                         <mat-icon class="text-red-500">cancel</mat-icon>
                       }
                     </button>
                   </td>
+                </ng-container>
 
-                  <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                    {{ paymentMethod.createdAt | date:'dd/MM/yyyy' }}
+                <ng-container matColumnDef="createdAt">
+                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Criado em</th>
+                  <td mat-cell *matCellDef="let pm">
+                    <p class="text-gray-600">{{ pm.createdAt | date:'dd/MM/yyyy' }}</p>
                   </td>
+                </ng-container>
 
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex justify-end gap-2">
-                      <button type="button"
-                              (click)="editPaymentMethod(paymentMethod.id)"
-                              title="Editar método"
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef class="!justify-center font-semibold text-gray-700">Ações</th>
+                  <td mat-cell *matCellDef="let pm" class="!justify-center">
+                    <div class="flex items-center gap-2">
+                      <button type="button" (click)="editPaymentMethod(pm.id)" title="Editar método"
                               class="w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center">
                         <mat-icon>edit</mat-icon>
                       </button>
-                      <button type="button"
-                              (click)="deletePaymentMethod(paymentMethod)"
-                              title="Excluir método"
+                      <button type="button" (click)="deletePaymentMethod(pm)" title="Excluir método"
                               class="w-8 h-8 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </div>
                   </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+                </ng-container>
 
-        @if (filteredPaymentMethods.length > 0) {
-          <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div class="text-sm text-gray-700">
-                Mostrando 
-                <span class="font-medium">{{ filteredPaymentMethods.length }}</span> 
-                método(s)
-              </div>
-              <div class="text-sm text-gray-500">
-                Ordenado por ordem de exibição
-              </div>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+              </table>
             </div>
-          </div>
+          }
         }
-      }
-    </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>

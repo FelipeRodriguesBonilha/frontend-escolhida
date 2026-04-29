@@ -495,6 +495,12 @@ export class Sales implements OnInit {
       .join(', ');
   }
 
+  clearSalesFilter(): void {
+    this.salesFilterForm.reset();
+    this.currentPage = 1;
+    this.loadSales(1, this.pageSize);
+  }
+
   setTodayFilter(): void {
     const today = new Date();
     const year = today.getFullYear();

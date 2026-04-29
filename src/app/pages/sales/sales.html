@@ -402,6 +402,12 @@
                   <mat-icon>search</mat-icon>
                   <span>Buscar</span>
                 </button>
+                @if (salesFilterForm.get('date')?.value) {
+                  <button type="button" (click)="clearSalesFilter()" class="px-4 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg font-medium flex items-center gap-2">
+                    <mat-icon>close</mat-icon>
+                    <span>Limpar</span>
+                  </button>
+                }
               </form>
             </mat-card-content>
           </mat-card>

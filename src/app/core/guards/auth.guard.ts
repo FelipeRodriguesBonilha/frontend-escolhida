@@ -1,35 +1,22 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth/auth';
 
-export const AuthGuard: CanActivateFn = (route, state) => {
+export const AuthGuard: CanActivateFn = () => {
   const router = inject(Router);
+  const authService = inject(AuthService);
 
-  const token = localStorage.getItem('authToken');
-
-  if (!token) {
+  if (!authService.getToken() || authService.isTokenExpired()) {
+    authService.logout();
     router.navigate(['/login']);
     return false;
   }
 
-  const userStr = localStorage.getItem('user');
-
-  if (!userStr) {
+  if (!authService.isAdmin()) {
+    authService.logout();
     router.navigate(['/login']);
     return false;
   }
 
-  try {
-    const user = JSON.parse(userStr);
-
-    if (user.role !== 'ADMIN') {
-      router.navigate(['/login']);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error parsing user from localStorage:', error);
-    router.navigate(['/login']);
-    return false;
-  }
+  return true;
 };

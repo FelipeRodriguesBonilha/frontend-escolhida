@@ -38,6 +38,7 @@ export class Sidebar {
     { icon: 'business', label: 'Fornecedores', path: '/fornecedores' },
     { icon: 'inventory_2', label: 'Produtos', path: '/produtos' },
     { icon: 'warehouse', label: 'Estoque', path: '/estoque' },
+    { icon: 'local_atm', label: 'Caixa', path: '/caixa' },
     { icon: 'payments', label: 'Pagamentos', path: '/pagamentos' },
     { icon: 'bar_chart', label: 'Relatórios', path: '/relatorios' },
   ];
