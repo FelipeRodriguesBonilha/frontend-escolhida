@@ -9,6 +9,11 @@ export interface CatalogCategory {
   name: string;
 }
 
+export interface CatalogBrand {
+  id: string;
+  name: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -22,15 +27,23 @@ export class CatalogService {
     limit: number = 50,
     search?: string,
     categoryId?: string,
+    brandId?: string,
   ): Observable<PaginatedResponse<ReturnProductDto>> {
     const params: Record<string, string> = { page: String(page), limit: String(limit) };
     if (search) params['search'] = search;
     if (categoryId) params['categoryId'] = categoryId;
+    if (brandId) params['brandId'] = brandId;
     return this.http.get<PaginatedResponse<ReturnProductDto>>(`${this.baseUrl}/products`, { params });
   }
 
   getCategories(): Observable<CatalogCategory[]> {
     return this.http.get<CatalogCategory[]>(`${this.baseUrl}/categories`);
+  }
+
+  getBrands(categoryId?: string): Observable<CatalogBrand[]> {
+    const params: Record<string, string> = {};
+    if (categoryId) params['categoryId'] = categoryId;
+    return this.http.get<CatalogBrand[]>(`${this.baseUrl}/brands`, { params });
   }
 
   getPublicImageUrl(imageUrl: string): string {

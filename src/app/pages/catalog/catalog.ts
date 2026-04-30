@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { ReturnProductDto, ReturnProductColorDto } from '../../core/models';
-import { CatalogCategory, CatalogService } from '../../core/services/catalog/catalog.service';
+import { CatalogBrand, CatalogCategory, CatalogService } from '../../core/services/catalog/catalog.service';
 import { ProductDetailDialog } from './product-detail-dialog/product-detail-dialog';
 
 export interface CartItem {
@@ -38,10 +38,16 @@ export interface CartItem {
 export class Catalog implements OnInit {
   products: ReturnProductDto[] = [];
   categories: CatalogCategory[] = [];
+  brands: CatalogBrand[] = [];
   cart: CartItem[] = [];
 
   searchQuery = '';
   selectedCategoryId = '';
+  selectedBrandId = '';
+  categorySearch = '';
+  brandSearch = '';
+  showCategoryDropdown = false;
+  showBrandDropdown = false;
   isLoading = false;
   showCart = false;
 
@@ -51,10 +57,43 @@ export class Catalog implements OnInit {
 
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  get filteredCategories(): CatalogCategory[] {
+    const q = this.categorySearch.toLowerCase();
+    if (!q) return this.categories;
+    return this.categories.filter(c => c.name.toLowerCase().includes(q));
+  }
+
+  get selectedCategoryName(): string {
+    if (!this.selectedCategoryId) return 'Todas as categorias';
+    return this.categories.find(c => c.id === this.selectedCategoryId)?.name ?? 'Todas as categorias';
+  }
+
+  get filteredBrands(): CatalogBrand[] {
+    const q = this.brandSearch.toLowerCase();
+    if (!q) return this.brands;
+    return this.brands.filter(b => b.name.toLowerCase().includes(q));
+  }
+
+  get selectedBrandName(): string {
+    if (!this.selectedBrandId) return 'Todas as marcas';
+    return this.brands.find(b => b.id === this.selectedBrandId)?.name ?? 'Todas as marcas';
+  }
+
   constructor(
     private catalogService: CatalogService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private elRef: ElementRef
   ) {}
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (!this.elRef.nativeElement.querySelector('.category-dropdown-wrapper')?.contains(event.target)) {
+      this.showCategoryDropdown = false;
+    }
+    if (!this.elRef.nativeElement.querySelector('.brand-dropdown-wrapper')?.contains(event.target)) {
+      this.showBrandDropdown = false;
+    }
+  }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -67,6 +106,12 @@ export class Catalog implements OnInit {
     });
   }
 
+  loadBrands(): void {
+    this.catalogService.getBrands(this.selectedCategoryId || undefined).subscribe({
+      next: (brands) => (this.brands = brands),
+    });
+  }
+
   loadProducts(): void {
     this.isLoading = true;
     this.catalogService
@@ -75,6 +120,7 @@ export class Catalog implements OnInit {
         this.pageSize,
         this.searchQuery || undefined,
         this.selectedCategoryId || undefined,
+        this.selectedBrandId || undefined,
       )
       .subscribe({
         next: (res) => {
@@ -99,8 +145,29 @@ export class Catalog implements OnInit {
 
   selectCategory(id: string): void {
     this.selectedCategoryId = id;
+    this.selectedBrandId = '';
+    this.currentPage = 1;
+    if (id) this.loadBrands();
+    else this.brands = [];
+    this.loadProducts();
+  }
+
+  selectBrand(id: string): void {
+    this.selectedBrandId = id;
     this.currentPage = 1;
     this.loadProducts();
+  }
+
+  clearFilters(): void {
+    this.selectedCategoryId = '';
+    this.selectedBrandId = '';
+    this.brands = [];
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.selectedCategoryId || this.selectedBrandId);
   }
 
   get totalPages(): number {
@@ -108,11 +175,18 @@ export class Catalog implements OnInit {
   }
 
   get pageNumbers(): number[] {
-    const pages: number[] = [];
-    const start = Math.max(1, this.currentPage - 2);
-    const end = Math.min(this.totalPages, this.currentPage + 2);
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
+    const total = this.totalPages;
+    const window = 5;
+    if (total <= window) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    let start = Math.max(1, this.currentPage - Math.floor(window / 2));
+    let end = start + window - 1;
+    if (end > total) {
+      end = total;
+      start = end - window + 1;
+    }
+    return Array.from({ length: window }, (_, i) => start + i);
   }
 
   goToPage(page: number): void {

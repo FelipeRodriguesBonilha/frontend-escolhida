@@ -40,22 +40,124 @@
   </section>
 
   <section class="max-w-[1200px] mx-auto px-5 pt-5 pb-1">
-    <mat-chip-set aria-label="Categorias">
-      <mat-chip-option 
-        [selected]="selectedCategoryId === ''"
-        (click)="selectCategory('')"
-        class="!font-medium">
-        TODOS
-      </mat-chip-option>
-      @for (cat of categories; track cat.id) {
-        <mat-chip-option
-          [selected]="selectedCategoryId === cat.id"
-          (click)="selectCategory(cat.id)"
-          class="!font-medium">
-          {{ cat.name }}
-        </mat-chip-option>
+    <div class="flex flex-wrap gap-3 items-center">
+    <div class="category-dropdown-wrapper relative inline-block min-w-[220px]">
+      <button type="button"
+              (click)="showCategoryDropdown = !showCategoryDropdown; categorySearch = ''"
+              class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-colors shadow-sm cursor-pointer w-full">
+        <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0">category</mat-icon>
+        <span class="flex-1 text-left truncate">{{ selectedCategoryName }}</span>
+        <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0 transition-transform"
+                  [class.rotate-180]="showCategoryDropdown">expand_more</mat-icon>
+      </button>
+
+      @if (showCategoryDropdown) {
+        <div class="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+          <div class="p-2 border-b border-gray-100">
+            <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
+              <mat-icon class="!text-sm !w-4 !h-4 text-gray-400">search</mat-icon>
+              <input type="text"
+                     [(ngModel)]="categorySearch"
+                     placeholder="Buscar categoria..."
+                     class="flex-1 bg-transparent border-0 outline-none text-sm text-gray-700"
+                     (click)="$event.stopPropagation()">
+            </div>
+          </div>
+          <ul class="max-h-52 overflow-y-auto py-1">
+            <li>
+              <button type="button"
+                      (click)="selectCategory(''); showCategoryDropdown = false"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                      [class.bg-pink-50]="selectedCategoryId === ''"
+                      [class.text-pink-600]="selectedCategoryId === ''"
+                      [class.font-semibold]="selectedCategoryId === ''">
+                Todas as categorias
+              </button>
+            </li>
+            @for (cat of filteredCategories; track cat.id) {
+              <li>
+                <button type="button"
+                        (click)="selectCategory(cat.id); showCategoryDropdown = false"
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                        [class.bg-pink-50]="selectedCategoryId === cat.id"
+                        [class.text-pink-600]="selectedCategoryId === cat.id"
+                        [class.font-semibold]="selectedCategoryId === cat.id">
+                  {{ cat.name }}
+                </button>
+              </li>
+            }
+            @if (filteredCategories.length === 0) {
+              <li class="px-4 py-3 text-sm text-gray-400 text-center">Nenhuma categoria encontrada</li>
+            }
+          </ul>
+        </div>
       }
-    </mat-chip-set>
+    </div>
+
+    @if (selectedCategoryId) {
+      <div class="brand-dropdown-wrapper relative inline-block min-w-[200px]">
+        <button type="button"
+                (click)="showBrandDropdown = !showBrandDropdown; brandSearch = ''"
+                class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-colors shadow-sm cursor-pointer w-full">
+          <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0">storefront</mat-icon>
+          <span class="flex-1 text-left truncate">{{ selectedBrandName }}</span>
+          <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0 transition-transform"
+                    [class.rotate-180]="showBrandDropdown">expand_more</mat-icon>
+        </button>
+
+        @if (showBrandDropdown) {
+          <div class="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div class="p-2 border-b border-gray-100">
+              <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
+                <mat-icon class="!text-sm !w-4 !h-4 text-gray-400">search</mat-icon>
+                <input type="text"
+                       [(ngModel)]="brandSearch"
+                       placeholder="Buscar marca..."
+                       class="flex-1 bg-transparent border-0 outline-none text-sm text-gray-700"
+                       (click)="$event.stopPropagation()">
+              </div>
+            </div>
+            <ul class="max-h-52 overflow-y-auto py-1">
+              <li>
+                <button type="button"
+                        (click)="selectBrand(''); showBrandDropdown = false"
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                        [class.bg-pink-50]="selectedBrandId === ''"
+                        [class.text-pink-600]="selectedBrandId === ''"
+                        [class.font-semibold]="selectedBrandId === ''">
+                  Todas as marcas
+                </button>
+              </li>
+              @for (brand of filteredBrands; track brand.id) {
+                <li>
+                  <button type="button"
+                          (click)="selectBrand(brand.id); showBrandDropdown = false"
+                          class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                          [class.bg-pink-50]="selectedBrandId === brand.id"
+                          [class.text-pink-600]="selectedBrandId === brand.id"
+                          [class.font-semibold]="selectedBrandId === brand.id">
+                    {{ brand.name }}
+                  </button>
+                </li>
+              }
+              @if (filteredBrands.length === 0) {
+                <li class="px-4 py-3 text-sm text-gray-400 text-center">Nenhuma marca encontrada</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    }
+
+    @if (hasActiveFilters) {
+      <button type="button"
+              (click)="clearFilters()"
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 border border-red-200 rounded-full transition-colors cursor-pointer">
+        <mat-icon class="!text-base !w-4 !h-4">filter_alt_off</mat-icon>
+        Limpar filtros
+      </button>
+    }
+    </div>
   </section>
 
   <main class="max-w-[1200px] mx-auto px-5 py-5">
