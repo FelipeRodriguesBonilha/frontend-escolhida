@@ -331,6 +331,7 @@ export class ProductsForm implements OnInit {
   removeImage(): void {
     this.selectedImage = null;
     this.imagePreview = null;
+    this.secureImageUrl = null;
   }
 
   onNewColorImageSelected(event: Event): void {
