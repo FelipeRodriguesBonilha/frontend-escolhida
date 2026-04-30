@@ -1,0 +1,26 @@
+// Estilos do dialog (usando Tailwind)
+
+// Scroll suave nas áreas de conteúdo
+:host ::ng-deep {
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(233, 30, 140, 0.3) transparent;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(233, 30, 140, 0.3);
+      border-radius: 3px;
+      
+      &:hover {
+        background-color: rgba(233, 30, 140, 0.5);
+      }
+    }
+  }
+}

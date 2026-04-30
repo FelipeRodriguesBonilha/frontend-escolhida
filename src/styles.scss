@@ -1,4 +1,3 @@
-
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
@@ -6,6 +5,9 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 @use 'tailwindcss';
+
+// Importar fonte Poppins do Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 html {
   @include mat.theme((
@@ -36,11 +38,38 @@ body {
 }
 /* You can add global styles to this file, and also import other style files */
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; }
 
 /* Variáveis de cor personalizadas */
 :root {
   --primary-color: #ec4899; /* Cor rosa primária */
   --primary-color-hover: #db2777; /* Hover mais escuro */
   --primary-color-light: #f9a8d4; /* Versão mais clara */
+}
+
+/* Fix para centralização dos ícones do Material */
+.mat-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+}
+
+.mat-mdc-icon-button,
+.mat-mdc-mini-fab {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  .mat-icon {
+    margin: 0 !important;
+  }
+}
+
+/* Estilo customizado para o dialog de produto */
+.product-detail-dialog {
+  .mat-mdc-dialog-container {
+    border-radius: 24px !important;
+    padding: 0 !important;
+  }
 }

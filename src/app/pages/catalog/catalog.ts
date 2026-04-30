@@ -1,7 +1,17 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { ReturnProductDto, ReturnProductColorDto } from '../../core/models';
 import { CatalogCategory, CatalogService } from '../../core/services/catalog/catalog.service';
+import { ProductDetailDialog } from './product-detail-dialog/product-detail-dialog';
 
 export interface CartItem {
   product: ReturnProductDto;
@@ -11,7 +21,17 @@ export interface CartItem {
 
 @Component({
   selector: 'app-catalog',
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatBadgeModule,
+    MatChipsModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+  ],
   templateUrl: './catalog.html',
   styleUrl: './catalog.scss',
 })
@@ -29,14 +49,12 @@ export class Catalog implements OnInit {
   pageSize = 12;
   total = 0;
 
-  selectedProduct: ReturnProductDto | null = null;
-  modalColor: ReturnProductColorDto | null = null;
-  modalQty = 1;
-  modalImageIndex = 0;
-
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private catalogService: CatalogService) {}
+  constructor(
+    private catalogService: CatalogService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
@@ -108,105 +126,92 @@ export class Catalog implements OnInit {
     return '';
   }
 
-  getColorImageUrl(color: ReturnProductColorDto): string {
-    if (color.imageUrl) return this.catalogService.getPublicImageUrl(color.imageUrl);
-    return '';
-  }
-
-  get modalImages(): string[] {
-    if (!this.selectedProduct) return [];
-    const imgs: string[] = [];
-    if (this.selectedProduct.imageUrl) imgs.push(this.getImageUrl(this.selectedProduct));
-    (this.selectedProduct.colors ?? []).forEach(c => {
-      if (c.imageUrl) imgs.push(this.getColorImageUrl(c));
-    });
-    return imgs;
-  }
-
   openDetail(product: ReturnProductDto): void {
-    this.selectedProduct = product;
-    this.modalColor = product.colors?.length ? product.colors[0] : null;
-    this.modalQty = 1;
-    this.modalImageIndex = 0;
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeDetail(): void {
-    this.selectedProduct = null;
-    document.body.style.overflow = '';
+    this.dialog.open(ProductDetailDialog, {
+      width: '860px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'product-detail-dialog',
+      data: {
+        product,
+        onAddToCart: (quantity: number, color: ReturnProductColorDto | null) => {
+          const key = this.getCartKey(product.id, color?.id ?? null);
+          const existing = this.cart.find(item => 
+            this.getCartKey(item.product.id, item.selectedColor?.id ?? null) === key
+          );
+          if (existing) {
+            existing.quantity += quantity;
+          } else {
+            this.cart.push({
+              product,
+              quantity,
+              selectedColor: color,
+            });
+          }
+          this.showCart = true;
+        },
+      },
+    });
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.selectedProduct) this.closeDetail();
     if (this.showCart) this.showCart = false;
-  }
-
-  selectModalColor(color: ReturnProductColorDto): void {
-    this.modalColor = color;
-    if (color.imageUrl) {
-      const idx = this.modalImages.indexOf(this.getColorImageUrl(color));
-      if (idx >= 0) this.modalImageIndex = idx;
-    }
   }
 
   getCartKey(productId: string, colorId: string | null): string {
     return colorId ? `${productId}-${colorId}` : productId;
   }
 
-  addFromModal(): void {
-    if (!this.selectedProduct) return;
-    const key = this.getCartKey(this.selectedProduct.id, this.modalColor?.id ?? null);
-    const existing = this.cart.find(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) === key);
-    if (existing) {
-      existing.quantity += this.modalQty;
-      existing.selectedColor = this.modalColor;
-    } else {
-      this.cart.push({
-        product: this.selectedProduct,
-        quantity: this.modalQty,
-        selectedColor: this.modalColor,
-      });
-    }
-    this.closeDetail();
-    this.showCart = true;
-  }
-
   getCartQuantity(product: ReturnProductDto): number {
-    const key = this.getCartKey(product.id, null);
-    return this.cart.find(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) === key)?.quantity ?? 0;
+    return this.cart
+      .filter(i => i.product.id === product.id)
+      .reduce((sum, i) => sum + i.quantity, 0);
   }
 
   addToCart(product: ReturnProductDto, event?: Event): void {
     event?.stopPropagation();
     const key = this.getCartKey(product.id, null);
-    const existing = this.cart.find(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) === key);
+    const existing = this.cart.find(i => 
+      i.product.id === product.id && i.selectedColor === null
+    );
     if (existing) {
       existing.quantity++;
     } else {
       this.cart.push({
         product,
         quantity: 1,
-        selectedColor: product.colors?.length ? product.colors[0] : null,
+        selectedColor: null,
       });
     }
   }
 
   removeFromCart(product: ReturnProductDto, event?: Event): void {
     event?.stopPropagation();
-    const key = this.getCartKey(product.id, null);
-    const existing = this.cart.find(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) === key);
+    const existing = this.cart.find(i => i.product.id === product.id);
     if (!existing) return;
     if (existing.quantity > 1) {
       existing.quantity--;
     } else {
-      this.cart = this.cart.filter(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) !== key);
+      this.cart = this.cart.filter(i => i !== existing);
     }
   }
 
   removeItemFromCart(productId: string, colorId?: string): void {
     const key = this.getCartKey(productId, colorId ?? null);
     this.cart = this.cart.filter(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) !== key);
+  }
+
+  incrementCartItem(item: CartItem): void {
+    item.quantity++;
+  }
+
+  decrementCartItem(item: CartItem): void {
+    if (item.quantity > 1) {
+      item.quantity--;
+    } else {
+      this.removeItemFromCart(item.product.id, item.selectedColor?.id);
+    }
   }
 
   updateQuantity(item: CartItem, value: number): void {

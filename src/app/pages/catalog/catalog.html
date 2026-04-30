@@ -1,101 +1,115 @@
-<div class="catalog-page">
-  <header class="catalog-header">
-    <div class="header-inner">
-      <div class="brand">
-        <span class="brand-icon">🌸</span>
-        <span class="brand-name">A Escolhida</span>
+<div class="min-h-screen bg-gray-50 text-gray-800 pb-20" style="font-family: 'Poppins', sans-serif;">
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm">
+    <div class="max-w-[1200px] mx-auto px-5 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/assets/images/logo.jpeg" alt="A Escolhida Makeup" class="h-16 w-auto object-contain" />
       </div>
-      <button class="cart-btn" (click)="showCart = !showCart">
-        <span class="cart-icon">🛒</span>
-        @if (cartItemCount > 0) {
-          <span class="cart-badge">{{ cartItemCount }}</span>
-        }
-        <span class="cart-label">Meu pedido</span>
+      <button mat-raised-button 
+              class="!bg-[#fce4f3] !text-[#e91e8c] !rounded-full !px-5 !py-2.5 !font-semibold !normal-case"
+              (click)="showCart = !showCart"
+              [matBadge]="cartItemCount"
+              [matBadgeHidden]="cartItemCount === 0"
+              matBadgeColor="warn"
+              matBadgeSize="small">
+        <span class="text-lg mr-2">🛒</span>
+        <span>Meu pedido</span>
       </button>
     </div>
   </header>
 
-  <section class="search-section">
-    <h1 class="hero-title">Nosso Catálogo</h1>
-    <p class="hero-sub">Escolha seus produtos favoritos e chame a gente no WhatsApp!</p>
-    <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  <section class="bg-gradient-to-br from-[#e91e8c] to-[#c2186f] py-10 px-5 text-center text-white">
+    <h1 class="text-4xl font-extrabold mb-2 tracking-tight">Nosso Catálogo</h1>
+    <p class="mb-6 opacity-90 text-sm">Escolha seus produtos favoritos e chame a gente no WhatsApp!</p>
+    <div class="flex items-center max-w-[500px] mx-auto bg-white rounded-full px-5 py-2.5 gap-2.5 shadow-lg">
+      <mat-icon class="!text-gray-600">search</mat-icon>
       <input
         type="text"
         placeholder="Buscar produto..."
         [(ngModel)]="searchQuery"
         (ngModelChange)="onSearchChange()"
-        class="search-input"
+        class="flex-1 border-0 outline-none text-base text-gray-800 bg-transparent"
       />
       @if (searchQuery) {
-        <button class="clear-search" (click)="searchQuery = ''; currentPage = 1; loadProducts()">✕</button>
+        <button mat-icon-button (click)="searchQuery = ''; currentPage = 1; loadProducts()">
+          <mat-icon>close</mat-icon>
+        </button>
       }
     </div>
   </section>
 
-  <section class="category-section">
-    <div class="category-chips">
-      <button class="chip" [class.active]="selectedCategoryId === ''" (click)="selectCategory('')">Todos</button>
+  <section class="max-w-[1200px] mx-auto px-5 pt-5 pb-1">
+    <mat-chip-set aria-label="Categorias">
+      <mat-chip-option 
+        [selected]="selectedCategoryId === ''"
+        (click)="selectCategory('')"
+        class="!font-medium">
+        TODOS
+      </mat-chip-option>
       @for (cat of categories; track cat.id) {
-        <button
-          class="chip"
-          [class.active]="selectedCategoryId === cat.id"
+        <mat-chip-option
+          [selected]="selectedCategoryId === cat.id"
           (click)="selectCategory(cat.id)"
-        >{{ cat.name }}</button>
+          class="!font-medium">
+          {{ cat.name }}
+        </mat-chip-option>
       }
-    </div>
+    </mat-chip-set>
   </section>
 
-  <main class="product-grid-section">
+  <main class="max-w-[1200px] mx-auto px-5 py-5">
     @if (isLoading) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Carregando produtos...</p>
+      <div class="flex flex-col items-center justify-center py-16 text-gray-600 gap-4">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="text-base">Carregando produtos...</p>
       </div>
     } @else if (products.length === 0) {
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon-svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/></svg>
-        <p>Nenhum produto encontrado.</p>
+      <div class="flex flex-col items-center justify-center py-16 text-gray-600 gap-4">
+        <mat-icon class="!w-16 !h-16 !text-6xl !text-gray-200">shopping_bag</mat-icon>
+        <p class="text-base">Nenhum produto encontrado.</p>
       </div>
     } @else {
-      <p class="result-count">{{ total }} {{ total === 1 ? 'produto encontrado' : 'produtos encontrados' }}</p>
+      <p class="text-sm text-gray-600 mb-4">{{ total }} {{ total === 1 ? 'produto encontrado' : 'produtos encontrados' }}</p>
 
-      <div class="product-grid">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
         @for (product of products; track product.id) {
-          <div class="product-card" (click)="openDetail(product)">
-            <div class="card-image-wrapper">
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer" (click)="openDetail(product)">
+            <div class="relative h-56 overflow-hidden bg-gray-100">
               @if (getImageUrl(product)) {
                 <img
                   [src]="getImageUrl(product)"
                   [alt]="product.name"
-                  class="card-image"
+                  class="w-full h-full object-cover transition-transform hover:scale-105"
                   loading="lazy"
                 />
               } @else {
-                <div class="card-image-placeholder">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                  <span>Sem foto</span>
+                <div class="h-full flex flex-col items-center justify-center gap-2 text-gray-200">
+                  <mat-icon class="!w-12 !h-12 !text-5xl">image</mat-icon>
+                  <span class="text-xs text-gray-600 font-medium tracking-wider">Sem foto</span>
                 </div>
               }
               @if (product.category) {
-                <div class="card-category-badge">{{ product.category.name }}</div>
+                <div class="absolute top-2.5 left-2.5 bg-[rgba(233,30,140,0.85)] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                  {{ product.category.name }}
+                </div>
               }
               @if (getCartQuantity(product) > 0) {
-                <div class="card-in-cart">{{ getCartQuantity(product) }} no pedido</div>
+                <div class="absolute bottom-2.5 right-2.5 bg-[rgba(233,30,140,0.92)] text-white text-xs font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                  {{ getCartQuantity(product) }} no pedido
+                </div>
               }
             </div>
 
-            <div class="card-body">
-              <h3 class="card-title">{{ product.name }}</h3>
+            <mat-card-content class="!p-4 flex flex-col gap-1.5">
+              <h3 class="text-sm font-bold text-gray-800 leading-tight m-0">{{ product.name }}</h3>
               @if (product.description) {
-                <p class="card-desc">{{ product.description }}</p>
+                <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
               }
 
               @if (product.colors && product.colors.length > 0) {
-                <div class="color-swatches">
+                <div class="flex gap-1.5 flex-wrap mt-1">
                   @for (color of product.colors; track color.id) {
                     <span
-                      class="swatch"
+                      class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block"
                       [style.background]="color.colorCode || '#ccc'"
                       [title]="color.name"
                     ></span>
@@ -103,39 +117,87 @@
                 </div>
               }
 
-              <div class="card-footer">
-                <span class="card-price">{{ formatCurrency(product.price) }}</span>
-                @if (getCartQuantity(product) === 0) {
-                  <div class="cart-controls">
-                    <button class="btn-add" (click)="addToCart(product)">+ Adicionar</button>
-                  </div>
+              <div class="flex items-center justify-between mt-2.5">
+                <span class="text-lg text-[#e91e8c]">{{ formatCurrency(product.price) }}</span>
+                @if (product.colors && product.colors.length > 0) {
+                  @if (getCartQuantity(product) === 0) {
+                    <button mat-stroked-button 
+                            color="primary" 
+                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                            (click)="openDetail(product); $event.stopPropagation()">
+                      <mat-icon class="!text-base !mr-1">palette</mat-icon>
+                      Cores
+                    </button>
+                  } @else {
+                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                      <button mat-mini-fab 
+                              color="primary"
+                              class="!w-8 !h-8 !shadow-none"
+                              (click)="removeFromCart(product)">
+                        <mat-icon class="!text-lg">remove</mat-icon>
+                      </button>
+                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                      <button mat-mini-fab 
+                              color="primary"
+                              class="!w-8 !h-8 !shadow-none"
+                              (click)="addToCart(product)">
+                        <mat-icon class="!text-lg">add</mat-icon>
+                      </button>
+                    </div>
+                  }
                 } @else {
-                  <div class="cart-stepper">
-                    <button class="stepper-btn" (click)="removeFromCart(product)">−</button>
-                    <span class="stepper-qty">{{ getCartQuantity(product) }}</span>
-                    <button class="stepper-btn" (click)="addToCart(product)">+</button>
-                  </div>
+                  @if (getCartQuantity(product) === 0) {
+                    <button mat-raised-button 
+                            color="primary" 
+                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                            (click)="addToCart(product); $event.stopPropagation()">
+                      + Adicionar
+                    </button>
+                  } @else {
+                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                      <button mat-mini-fab 
+                              color="primary"
+                              class="!w-8 !h-8 !shadow-none"
+                              (click)="removeFromCart(product)">
+                        <mat-icon class="!text-lg">remove</mat-icon>
+                      </button>
+                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                      <button mat-mini-fab 
+                              color="primary"
+                              class="!w-8 !h-8 !shadow-none"
+                              (click)="addToCart(product)">
+                        <mat-icon class="!text-lg">add</mat-icon>
+                      </button>
+                    </div>
+                  }
                 }
               </div>
-            </div>
-
-          </div>
+            </mat-card-content>
+          </mat-card>
         }
       </div>
 
       @if (totalPages > 1) {
-        <div class="pagination">
-          <button class="page-btn nav" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        <div class="flex items-center justify-center gap-1.5 mt-9 flex-wrap">
+          <button mat-stroked-button 
+                  class="!min-w-[38px] !h-[38px] !rounded-lg !px-4 !text-sm !normal-case"
+                  [disabled]="currentPage === 1" 
+                  (click)="goToPage(currentPage - 1)">
             ‹ Anterior
           </button>
           @for (p of pageNumbers; track p) {
-            <button
-              class="page-btn"
-              [class.active]="p === currentPage"
-              (click)="goToPage(p)"
-            >{{ p }}</button>
+            <button mat-raised-button
+                    [color]="p === currentPage ? 'primary' : ''"
+                    [class.mat-stroked-button]="p !== currentPage"
+                    class="!min-w-[38px] !h-[38px] !rounded-lg !px-3 !text-sm !font-medium"
+                    (click)="goToPage(p)">
+              {{ p }}
+            </button>
           }
-          <button class="page-btn nav" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <button mat-stroked-button 
+                  class="!min-w-[38px] !h-[38px] !rounded-lg !px-4 !text-sm !normal-case"
+                  [disabled]="currentPage === totalPages" 
+                  (click)="goToPage(currentPage + 1)">
             Próxima ›
           </button>
         </div>
@@ -143,156 +205,92 @@
     }
   </main>
 
-  @if (selectedProduct) {
-    <div class="modal-overlay" (click)="closeDetail()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <button class="modal-close" (click)="closeDetail()">✕</button>
-        <div class="modal-layout">
-          <div class="modal-gallery">
-            <div class="modal-main-image">
-              @if (modalImages.length > 0) {
-                <img
-                  [src]="modalImages[modalImageIndex]"
-                  [alt]="selectedProduct.name"
-                  class="modal-img"
-                />
-              } @else {
-                <div class="modal-no-image">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-                  <span>Sem foto</span>
-                </div>
-              }
-            </div>
-            @if (modalImages.length > 1) {
-              <div class="modal-thumbs">
-                @for (img of modalImages; track $index; let i = $index) {
-                  <img
-                    [src]="img"
-                    [class.active]="i === modalImageIndex"
-                    (click)="modalImageIndex = i"
-                    class="modal-thumb"
-                  />
-                }
-              </div>
-            }
-          </div>
-
-          <div class="modal-info">
-            <div class="modal-badges">
-              @if (selectedProduct.category) {
-                <span class="modal-badge category">{{ selectedProduct.category.name }}</span>
-              }
-              @if (selectedProduct.brand) {
-                <span class="modal-badge brand">{{ selectedProduct.brand.name }}</span>
-              }
-            </div>
-
-            <h2 class="modal-title">{{ selectedProduct.name }}</h2>
-            <p class="modal-price">{{ formatCurrency(selectedProduct.price) }}</p>
-
-            @if (selectedProduct.description) {
-              <p class="modal-desc">{{ selectedProduct.description }}</p>
-            }
-
-            @if (selectedProduct.colors && selectedProduct.colors.length > 0) {
-              <div class="modal-colors">
-                <p class="modal-label">Cor: <strong>{{ modalColor?.name || '—' }}</strong></p>
-                <div class="modal-color-list">
-                  @for (color of selectedProduct.colors; track color.id) {
-                    <button
-                      class="modal-color-btn"
-                      [class.selected]="modalColor?.id === color.id"
-                      (click)="selectModalColor(color)"
-                      [title]="color.name"
-                    >
-                      <span class="color-dot" [style.background]="color.colorCode || '#ccc'"></span>
-                      <span class="color-name">{{ color.name }}</span>
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-
-            <div class="modal-actions">
-              <div class="modal-qty">
-                <button class="stepper-btn lg" (click)="modalQty > 1 ? modalQty = modalQty - 1 : null">−</button>
-                <span class="stepper-qty lg">{{ modalQty }}</span>
-                <button class="stepper-btn lg" (click)="modalQty = modalQty + 1">+</button>
-              </div>
-              <button class="btn-add-modal" (click)="addFromModal()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
-                Adicionar ao pedido
-              </button>
-            </div>
-
-            <p class="modal-hint">Clique em "Adicionar ao pedido" e depois envie pelo WhatsApp 💬</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
-
   @if (showCart) {
-    <div class="cart-overlay" (click)="showCart = false"></div>
+    <div class="fixed inset-0 bg-black/40 z-[200]" (click)="showCart = false"></div>
   }
-  <aside class="cart-panel" [class.open]="showCart">
-    <div class="cart-panel-header">
-      <h2>Meu Pedido</h2>
-      <button class="clear-cart-btn" (click)="cart = []; showCart = false" title="Limpar carrinho">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+
+  <aside class="fixed top-0 h-screen bg-white z-[201] flex flex-col shadow-xl transition-all duration-300 w-[400px] max-w-full"
+         [class.right-0]="showCart"
+         [class.-right-[420px]]="!showCart">
+    <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-200 gap-2">
+      <h2 class="text-xl font-bold m-0 text-gray-800">Meu Pedido</h2>
+      <button mat-icon-button 
+              class="!bg-gray-100 hover:!bg-red-50 hover:!text-red-600"
+              (click)="cart = []; showCart = false" 
+              title="Limpar carrinho">
+        <mat-icon>delete</mat-icon>
       </button>
-      <button class="close-btn" (click)="showCart = false">✕</button>
+      <button mat-icon-button 
+              class="!bg-gray-100 hover:!bg-gray-200"
+              (click)="showCart = false">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
 
     @if (cart.length === 0) {
-      <div class="cart-empty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="cart-empty-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
+      <div class="flex-1 flex flex-col items-center justify-center gap-3 text-gray-600 text-sm text-center px-5">
+        <mat-icon class="!w-14 !h-14 !text-5xl !text-gray-200">shopping_cart</mat-icon>
         <p>Seu pedido está vazio.<br>Toque em um produto para adicionar!</p>
       </div>
     } @else {
-      <div class="cart-items">
-        @for (item of cart; track item.product.id) {
-          <div class="cart-item">
-            <div class="cart-item-img">
+      <div class="flex-1 overflow-y-auto py-3">
+        @for (item of cart; track $index) {
+          <div class="grid grid-cols-[56px_1fr_auto_auto] items-center gap-2.5 px-5 py-3 border-b border-gray-100">
+            <div class="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-2xl">
               @if (getImageUrl(item.product)) {
-                <img [src]="getImageUrl(item.product)" [alt]="item.product.name" />
+                <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="w-full h-full object-cover" />
               } @else {
-                <span class="no-img-text">Sem foto</span>
+                <span class="text-[10px] text-gray-600 font-medium">Sem foto</span>
               }
             </div>
-            <div class="cart-item-info">
-              <p class="cart-item-name">{{ item.product.name }}</p>
+            <div>
+              <p class="text-xs font-semibold m-0 mb-0.5 text-gray-800">{{ item.product.name }}</p>
               @if (item.selectedColor) {
-                <p class="cart-item-color">{{ item.selectedColor.name }}</p>
+                <p class="text-[11px] text-[#e91e8c] font-medium m-0">{{ item.selectedColor.name }}</p>
               }
-              <p class="cart-item-price">{{ formatCurrency(item.product.price) }} un.</p>
+              <p class="text-xs text-gray-600 m-0">{{ formatCurrency(item.product.price) }} un.</p>
             </div>
-            <div class="cart-item-controls">
-              <button class="stepper-btn" (click)="removeFromCart(item.product)">−</button>
+            <div class="flex items-center gap-1.5">
+              <button mat-mini-fab 
+                      color="primary"
+                      class="!w-8 !h-8 !shadow-none"
+                      (click)="decrementCartItem(item)">
+                <mat-icon class="!text-lg">remove</mat-icon>
+              </button>
               <input
                 type="number"
                 [value]="item.quantity"
                 min="1"
-                class="qty-input"
+                class="w-10 h-8 text-center border-[1.5px] border-gray-200 rounded-lg text-sm font-semibold text-gray-800 outline-none bg-white focus:border-[#e91e8c]"
                 (change)="updateQuantity(item, +$any($event.target).value)"
               />
-              <button class="stepper-btn" (click)="addToCart(item.product)">+</button>
-              <button class="remove-btn" (click)="removeItemFromCart(item.product.id)" title="Remover">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              <button mat-mini-fab 
+                      color="primary"
+                      class="!w-8 !h-8 !shadow-none"
+                      (click)="incrementCartItem(item)">
+                <mat-icon class="!text-lg">add</mat-icon>
+              </button>
+              <button mat-icon-button 
+                      class="!ml-1"
+                      (click)="removeItemFromCart(item.product.id, item.selectedColor?.id)" 
+                      title="Remover">
+                <mat-icon>delete</mat-icon>
               </button>
             </div>
-            <p class="cart-item-subtotal">{{ formatCurrency(item.product.price * item.quantity) }}</p>
+            <p class="text-xs text-[#e91e8c] text-right m-0">{{ formatCurrency(item.product.price * item.quantity) }}</p>
           </div>
         }
       </div>
 
-      <div class="cart-footer">
-        <div class="cart-total-row">
+      <div class="px-5 py-5 border-t border-gray-200 bg-white">
+        <div class="flex justify-between text-lg mb-4 text-gray-800">
           <span>Total</span>
-          <strong>{{ formatCurrency(cartTotal) }}</strong>
+          <span class="text-[#e91e8c] text-xl">{{ formatCurrency(cartTotal) }}</span>
         </div>
-        <button class="whatsapp-btn" (click)="openWhatsApp()">
-          <svg viewBox="0 0 24 24" fill="currentColor" class="wa-icon"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <button mat-raised-button 
+                class="!w-full !bg-[#25d366] hover:!bg-[#128c7e] !text-white !rounded-full !px-5 !py-3.5 !text-base !font-bold !normal-case !flex !items-center !justify-center !gap-2.5"
+                (click)="openWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-[22px] h-[22px] inline-block align-middle flex-shrink-0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           Chamar no WhatsApp
         </button>
       </div>
@@ -300,10 +298,11 @@
   </aside>
 
   @if (cartItemCount > 0 && !showCart) {
-    <div class="sticky-cart-bar" (click)="showCart = true">
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[500px] bg-[#e91e8c] text-white rounded-full px-6 py-3.5 flex items-center justify-between shadow-lg cursor-pointer z-[150] text-sm font-semibold transition-transform hover:-translate-x-1/2 hover:-translate-y-0.5"
+         (click)="showCart = true">
       <span>🛒 {{ cartItemCount }} {{ cartItemCount === 1 ? 'item' : 'itens' }}</span>
       <strong>{{ formatCurrency(cartTotal) }}</strong>
-      <span class="view-order">Ver pedido →</span>
+      <span class="opacity-85">Ver pedido →</span>
     </div>
   }
 </div>
