@@ -46,6 +46,7 @@ export class ProductsForm implements OnInit {
   selectedImage: File | null = null;
   imagePreview: string | null = null;
   secureImageUrl: string | null = null;
+  imageRemoved = false;
 
   categories: ReturnCategoryDto[] = [];
   brands: ReturnBrandDto[] = [];
@@ -62,6 +63,7 @@ export class ProductsForm implements OnInit {
   isAddingColor = false;
 
   editingColorId: string | null = null;
+  editColorImageRemoved = false;
   editColorName = '';
   editColorCode = '';
   editColorFile: File | null = null;
@@ -240,7 +242,8 @@ export class ProductsForm implements OnInit {
       supplierId: this.productForm.value.supplierId || undefined,
       initialStock: this.productForm.value.initialStock || undefined,
       minQuantity: this.productForm.value.minQuantity || undefined,
-      active: this.productForm.value.active
+      active: this.productForm.value.active,
+      removeImage: this.imageRemoved && !this.selectedImage ? true : undefined
     };
 
     this.productService.updateProduct(this.productId, productData, this.selectedImage || undefined).subscribe({
@@ -332,6 +335,7 @@ export class ProductsForm implements OnInit {
     this.selectedImage = null;
     this.imagePreview = null;
     this.secureImageUrl = null;
+    this.imageRemoved = true;
   }
 
   onNewColorImageSelected(event: Event): void {
@@ -390,12 +394,14 @@ export class ProductsForm implements OnInit {
     this.editColorCode = color.colorCode ?? '';
     this.editColorFile = null;
     this.editColorPreview = this.colorSecureUrls.get(color.id) || null;
+    this.editColorImageRemoved = false;
   }
 
   cancelEditColor(): void {
     this.editingColorId = null;
     this.editColorFile = null;
     this.editColorPreview = null;
+    this.editColorImageRemoved = false;
   }
 
   onEditColorImageSelected(event: Event): void {
@@ -426,7 +432,8 @@ export class ProductsForm implements OnInit {
       colorId,
       this.editColorName.trim(),
       this.editColorCode.trim() || undefined,
-      this.editColorFile || undefined
+      this.editColorFile || undefined,
+      this.editColorImageRemoved && !this.editColorFile ? true : undefined
     ).subscribe({
       next: (updated) => {
         this.colors = this.colors.map(c => c.id === colorId ? updated : c);
@@ -434,6 +441,8 @@ export class ProductsForm implements OnInit {
           this.uploadService.getSecureImageUrl(updated.imageUrl).subscribe(url => {
             this.colorSecureUrls.set(updated.id, url);
           });
+        } else {
+          this.colorSecureUrls.delete(updated.id);
         }
         this.cancelEditColor();
         this.isSavingColor = false;

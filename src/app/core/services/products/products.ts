@@ -61,11 +61,12 @@ export class Products {
     return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors`, formData);
   }
 
-  updateColor(productId: string, colorId: string, name: string, colorCode?: string, image?: File): Observable<ReturnProductColorDto> {
+  updateColor(productId: string, colorId: string, name: string, colorCode?: string, image?: File, removeImage?: boolean): Observable<ReturnProductColorDto> {
     const formData = new FormData();
     formData.append('name', name);
     if (colorCode) formData.append('colorCode', colorCode);
     if (image) formData.append('image', image);
+    else if (removeImage) formData.append('removeImage', 'true');
     return this.http.patch<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/${colorId}`, formData);
   }
 
