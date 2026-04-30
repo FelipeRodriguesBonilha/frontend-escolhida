@@ -5,14 +5,15 @@
         <img src="/assets/images/logo.jpeg" alt="A Escolhida Makeup" class="h-16 w-auto object-contain" />
       </div>
       <button mat-raised-button 
-              class="!bg-[#fce4f3] !text-[#e91e8c] !rounded-full !px-5 !py-2.5 !font-semibold !normal-case"
+              class="!bg-[#fce4f3] !text-[#e91e8c] !rounded-full !px-3 !py-1.5 sm:!px-5 sm:!py-2.5 !font-semibold !normal-case !text-sm sm:!text-base !min-w-0"
               (click)="showCart = !showCart"
               [matBadge]="cartItemCount"
               [matBadgeHidden]="cartItemCount === 0"
               matBadgeColor="warn"
               matBadgeSize="small">
-        <span class="text-lg mr-2">🛒</span>
-        <span>Meu pedido</span>
+        <span class="text-base sm:text-lg mr-1 sm:mr-2">🛒</span>
+        <span class="hidden sm:inline">Meu pedido</span>
+        <span class="inline sm:hidden">Pedido</span>
       </button>
     </div>
   </header>
@@ -30,8 +31,9 @@
         class="flex-1 border-0 outline-none text-base text-gray-800 bg-transparent"
       />
       @if (searchQuery) {
-        <button mat-icon-button (click)="searchQuery = ''; currentPage = 1; loadProducts()">
-          <mat-icon>close</mat-icon>
+        <button (click)="searchQuery = ''; currentPage = 1; loadProducts()"
+          class="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 border-0 cursor-pointer flex-shrink-0">
+          <mat-icon class="!text-base !w-4 !h-4 !leading-none">close</mat-icon>
         </button>
       }
     </div>
@@ -178,27 +180,27 @@
       </div>
 
       @if (totalPages > 1) {
-        <div class="flex items-center justify-center gap-1.5 mt-9 flex-wrap">
-          <button mat-stroked-button 
-                  class="!min-w-[38px] !h-[38px] !rounded-lg !px-4 !text-sm !normal-case"
-                  [disabled]="currentPage === 1" 
+        <div class="flex items-center justify-center gap-1 mt-9 flex-wrap">
+          <button mat-icon-button
+                  class="!w-9 !h-9"
+                  [disabled]="currentPage === 1"
                   (click)="goToPage(currentPage - 1)">
-            ‹ Anterior
+            <mat-icon>chevron_left</mat-icon>
           </button>
           @for (p of pageNumbers; track p) {
-            <button mat-raised-button
-                    [color]="p === currentPage ? 'primary' : ''"
-                    [class.mat-stroked-button]="p !== currentPage"
-                    class="!min-w-[38px] !h-[38px] !rounded-lg !px-3 !text-sm !font-medium"
+            <button
+                    [class]="p === currentPage
+                      ? 'w-9 h-9 rounded-lg bg-[#e91e8c] text-white text-sm font-bold border-0 cursor-pointer'
+                      : 'w-9 h-9 rounded-lg bg-white text-gray-800 text-sm font-medium border border-gray-200 cursor-pointer hover:border-[#e91e8c] hover:text-[#e91e8c]'"
                     (click)="goToPage(p)">
               {{ p }}
             </button>
           }
-          <button mat-stroked-button 
-                  class="!min-w-[38px] !h-[38px] !rounded-lg !px-4 !text-sm !normal-case"
-                  [disabled]="currentPage === totalPages" 
+          <button mat-icon-button
+                  class="!w-9 !h-9"
+                  [disabled]="currentPage === totalPages"
                   (click)="goToPage(currentPage + 1)">
-            Próxima ›
+            <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       }

@@ -508,6 +508,7 @@ export class Sales implements OnInit {
     const day = String(today.getDate()).padStart(2, '0');
     const todayStr = `${year}-${month}-${day}`;
     this.salesFilterForm.patchValue({ date: todayStr });
+    this.loadSales();
   }
 
   getProductImageUrl(product: ReturnProductDto): string {
