@@ -7,6 +7,7 @@ import {
   CashRegisterDto,
   CloseCashRegisterDto,
   CreateCashBleedDto,
+  CreateCashEntryDto,
   OpenCashRegisterDto,
   PaginatedCashRegistersResponse,
 } from '../../models/cash-register/cash-register.interface';
@@ -29,6 +30,14 @@ export class CashRegisterService {
 
   bleed(id: string, dto: CreateCashBleedDto): Observable<CashBleedDto> {
     return this.http.post<CashBleedDto>(`${this.apiUrl}/${id}/bleed`, dto);
+  }
+
+  addEntry(id: string, dto: CreateCashEntryDto): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/entry`, dto);
+  }
+
+  linkSaleToCurrentCashRegister(saleId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/link-sale/${saleId}`, {});
   }
 
   getCurrent(): Observable<CashRegisterDto | null> {

@@ -14,7 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { NgxCurrencyDirective } from 'ngx-currency';
-import { CashRegisterDto } from '../../core/models/cash-register/cash-register.interface';
+import { CashRegisterDto, CreateCashEntryDto } from '../../core/models/cash-register/cash-register.interface';
 import { CashRegisterDetailsDialog } from './cash-register-details-dialog/cash-register-details-dialog';
 import { CashRegisterService } from '../../core/services/cash-register/cash-register';
 import { ToastService } from '../../core/services/toast/toast.service';
@@ -57,10 +57,14 @@ export class CashRegisterComponent implements OnInit {
   openForm: FormGroup;
   closeForm: FormGroup;
   bleedForm: FormGroup;
+  entryForm: FormGroup;
   historyFilterForm: FormGroup;
 
-  historyColumns: string[] = ['openedAt', 'closedAt', 'initialAmount', 'finalAmount', 'difference', 'status', 'actions'];
+  historyColumns: string[] = ['openedAt', 'closedAt', 'initialAmount', 'finalAmount', 'status', 'actions'];
   bleedColumns: string[] = ['createdAt', 'reason', 'amount'];
+  entryColumns: string[] = ['createdAt', 'description', 'amount'];
+  showEntryForm: boolean = false;
+  entries: CreateCashEntryDto[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -83,13 +87,17 @@ export class CashRegisterComponent implements OnInit {
     });
 
     this.closeForm = this.fb.group({
-      finalAmount: [0, [Validators.required, Validators.min(0)]],
       closingNotes: [''],
     });
 
     this.bleedForm = this.fb.group({
       amount: [null, [Validators.required, Validators.min(0.01)]],
       reason: ['', Validators.required],
+    });
+
+    this.entryForm = this.fb.group({
+      amount: [null, [Validators.required, Validators.min(0.01)]],
+      description: ['', Validators.required],
     });
   }
 
@@ -119,10 +127,16 @@ export class CashRegisterComponent implements OnInit {
   openCashRegister(): void {
     if (this.openForm.invalid) return;
     this.isLoading = true;
-    this.cashRegisterService.open(this.openForm.value).subscribe({
+    const openData = {
+      ...this.openForm.value,
+      entries: this.entries.length > 0 ? this.entries : undefined
+    };
+    this.cashRegisterService.open(openData).subscribe({
       next: (cr) => {
         this.currentCashRegister = cr;
         this.openForm.reset({ initialAmount: 0, notes: '' });
+        this.entries = [];
+        this.showEntryForm = false;
         this.toastService.success('Caixa aberto com sucesso!');
         this.loadHistory();
         this.isLoading = false;
@@ -135,12 +149,12 @@ export class CashRegisterComponent implements OnInit {
   }
 
   closeCashRegister(): void {
-    if (!this.currentCashRegister || this.closeForm.invalid) return;
+    if (!this.currentCashRegister) return;
     this.isLoading = true;
     this.cashRegisterService.close(this.currentCashRegister.id, this.closeForm.value).subscribe({
       next: (cr) => {
-        this.currentCashRegister = cr;
-        this.closeForm.reset({ finalAmount: 0, closingNotes: '' });
+        this.currentCashRegister = null;
+        this.closeForm.reset({ closingNotes: '' });
         this.toastService.success('Caixa fechado com sucesso!');
         this.loadHistory();
         this.isLoading = false;
@@ -167,6 +181,39 @@ export class CashRegisterComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  addEntry(): void {
+    if (!this.currentCashRegister || this.entryForm.invalid) return;
+    this.isLoading = true;
+    this.cashRegisterService.addEntry(this.currentCashRegister.id, this.entryForm.value).subscribe({
+      next: () => {
+        this.entryForm.reset({ amount: null, description: '' });
+        this.toastService.success('Entrada registrada com sucesso!');
+        this.loadCurrent();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.toastService.error(err?.error?.message || 'Erro ao registrar entrada.');
+        this.isLoading = false;
+      },
+    });
+  }
+
+  addEntryToOpenList(): void {
+    if (this.entryForm.invalid) return;
+    const entry = this.entryForm.value;
+    this.entries.push(entry);
+    this.entryForm.reset({ amount: null, description: '' });
+    this.toastService.success('Entrada adicionada à lista!');
+  }
+
+  removeEntryFromList(index: number): void {
+    this.entries.splice(index, 1);
+  }
+
+  toggleEntryForm(): void {
+    this.showEntryForm = !this.showEntryForm;
   }
 
   onPageChange(event: any): void {
@@ -206,10 +253,5 @@ export class CashRegisterComponent implements OnInit {
       maxHeight: '90vh',
       data: { cashRegister },
     });
-  }
-
-  get differenceClass(): string {
-    if (!this.currentCashRegister?.difference) return '';
-    return this.currentCashRegister.difference > 0 ? 'text-green-600' : this.currentCashRegister.difference < 0 ? 'text-red-600' : '';
   }
 }

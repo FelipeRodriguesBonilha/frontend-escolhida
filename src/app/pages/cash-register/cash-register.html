@@ -21,7 +21,7 @@
       <mat-tab label="Caixa Atual">
         <div class="pt-6 space-y-6">
           @if (currentCashRegister) {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               <mat-card class="shadow-sm hover:shadow-md transition-shadow">
                 <mat-card-content class="p-6">
                   <div class="flex items-center justify-between">
@@ -40,8 +40,36 @@
                 <mat-card-content class="p-6">
                   <div class="flex items-center justify-between">
                     <div>
+                      <p class="text-sm text-gray-600 mb-1">Vendas em Dinheiro</p>
+                      <p class="text-2xl font-bold text-green-600">{{ currentCashRegister.totalCashSales || 0 | brl }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                      <mat-icon class="text-green-600">payments</mat-icon>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+                <mat-card-content class="p-6">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 mb-1">Total Entradas</p>
+                      <p class="text-2xl font-bold text-blue-600">{{ currentCashRegister.totalEntries || 0 | brl }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                      <mat-icon class="text-blue-600">add_circle_outline</mat-icon>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="shadow-sm hover:shadow-md transition-shadow">
+                <mat-card-content class="p-6">
+                  <div class="flex items-center justify-between">
+                    <div>
                       <p class="text-sm text-gray-600 mb-1">Total Sangrias</p>
-                      <p class="text-2xl font-bold text-red-600">{{ currentCashRegister.totalBleeds | brl }}</p>
+                      <p class="text-2xl font-bold text-red-600">{{ currentCashRegister.totalBleeds || 0 | brl }}</p>
                     </div>
                     <div class="bg-red-100 p-3 rounded-full">
                       <mat-icon class="text-red-600">remove_circle_outline</mat-icon>
@@ -54,25 +82,11 @@
                 <mat-card-content class="p-6">
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="text-sm text-gray-600 mb-1">Aberto em</p>
-                      <p class="text-base font-bold text-gray-800">{{ currentCashRegister.openedAt | date:'dd/MM HH:mm' }}</p>
+                      <p class="text-sm text-gray-600 mb-1">Vendas</p>
+                      <p class="text-2xl font-bold text-purple-600">{{ currentCashRegister.sales.length || 0 }}</p>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded-full">
-                      <mat-icon class="text-blue-600">schedule</mat-icon>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="shadow-sm hover:shadow-md transition-shadow">
-                <mat-card-content class="p-6">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm text-gray-600 mb-1">Sangrias</p>
-                      <p class="text-2xl font-bold text-orange-600">{{ currentCashRegister.bleeds.length }}</p>
-                    </div>
-                    <div class="bg-orange-100 p-3 rounded-full">
-                      <mat-icon class="text-orange-600">list</mat-icon>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                      <mat-icon class="text-purple-600">shopping_cart</mat-icon>
                     </div>
                   </div>
                 </mat-card-content>
@@ -95,6 +109,62 @@
                         [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
                       <mat-icon matSuffix>attach_money</mat-icon>
                     </mat-form-field>
+
+                    @if (entries.length > 0) {
+                      <div class="space-y-2">
+                        <p class="text-sm font-medium text-gray-700">Entradas de Dinheiro Adicionadas:</p>
+                        @for (entry of entries; track entry; let i = $index) {
+                          <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex-1">
+                              <p class="text-sm font-medium text-gray-800">{{ entry.description }}</p>
+                              <p class="text-sm text-blue-600">{{ entry.amount | brl }}</p>
+                            </div>
+                            <button type="button" (click)="removeEntryFromList(i)"
+                              class="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    <div class="flex items-center gap-2">
+                      <button type="button" (click)="toggleEntryForm()"
+                        class="px-4 py-2 bg-pink-100 text-pink-700 rounded-lg font-medium hover:bg-pink-200 transition-colors flex items-center gap-2">
+                        <mat-icon>add_circle_outline</mat-icon>
+                        <span>Adicionar Entrada</span>
+                      </button>
+                    </div>
+
+                    @if (showEntryForm) {
+                      <div class="p-4 bg-gray-50 rounded-lg space-y-3">
+                        <form [formGroup]="entryForm" class="space-y-3">
+                          <mat-form-field class="w-full">
+                            <mat-label>Valor da Entrada</mat-label>
+                            <input matInput currencyMask formControlName="amount"
+                              [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
+                            <mat-icon matSuffix>add_circle_outline</mat-icon>
+                          </mat-form-field>
+                          <mat-form-field class="w-full">
+                            <mat-label>Descrição</mat-label>
+                            <input matInput formControlName="description"
+                              placeholder="Ex: Recebimento de cliente" />
+                          </mat-form-field>
+                          <div class="flex gap-2">
+                            <button type="button" (click)="addEntryToOpenList()"
+                              [disabled]="entryForm.invalid"
+                              class="flex-1 h-10 bg-gradient-to-r from-pink-600 to-pink-800 text-white rounded-lg font-medium hover:from-pink-700 hover:to-pink-900 transition-colors">
+                              Adicionar à Lista
+                            </button>
+                            <button type="button" (click)="toggleEntryForm()"
+                              class="px-4 h-10 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                              Cancelar
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    }
+
                     <mat-form-field class="w-full">
                       <mat-label>Observações (opcional)</mat-label>
                       <textarea matInput formControlName="notes" rows="2"></textarea>
@@ -120,19 +190,24 @@
                   <mat-card-title class="text-lg font-semibold text-gray-800">Fechar Caixa</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
+                  <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2">Valor final será calculado automaticamente:</p>
+                    <div class="text-sm space-y-1">
+                      <p>• Valor Inicial: <span class="font-semibold">{{ currentCashRegister.initialAmount | brl }}</span></p>
+                      <p>• Vendas em Dinheiro: <span class="font-semibold text-green-600">{{ currentCashRegister.totalCashSales || 0 | brl }}</span></p>
+                      <p>• Entradas: <span class="font-semibold text-blue-600">{{ currentCashRegister.totalEntries || 0 | brl }}</span></p>
+                      <p>• Sangrias: <span class="font-semibold text-red-600">-{{ currentCashRegister.totalBleeds || 0 | brl }}</span></p>
+                      <hr class="my-2">
+                      <p class="font-semibold text-green-600">Valor Final: {{ (currentCashRegister.initialAmount + (currentCashRegister.totalEntries || 0) + (currentCashRegister.totalCashSales || 0) - (currentCashRegister.totalBleeds || 0)) | brl }}</p>
+                    </div>
+                  </div>
                   <form [formGroup]="closeForm" (ngSubmit)="closeCashRegister()" class="space-y-4">
-                    <mat-form-field class="w-full">
-                      <mat-label>Valor em Caixa (contagem física)</mat-label>
-                      <input matInput currencyMask formControlName="finalAmount"
-                        [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
-                      <mat-icon matSuffix>account_balance_wallet</mat-icon>
-                    </mat-form-field>
                     <mat-form-field class="w-full">
                       <mat-label>Observações de fechamento (opcional)</mat-label>
                       <textarea matInput formControlName="closingNotes" rows="2"></textarea>
                     </mat-form-field>
                     <button type="submit"
-                      [disabled]="closeForm.invalid || isLoading"
+                      [disabled]="isLoading"
                       class="w-full h-12 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                       @if (isLoading) {
                         <mat-spinner diameter="20"></mat-spinner>
@@ -147,38 +222,104 @@
             }
 
             @if (currentCashRegister && isCashOpen) {
-              <mat-card class="shadow-sm">
-                <mat-card-header class="pb-3">
-                  <mat-card-title class="text-lg font-semibold text-gray-800">Registrar Sangria</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <form [formGroup]="bleedForm" (ngSubmit)="addBleed()" class="space-y-4">
-                    <mat-form-field class="w-full">
-                      <mat-label>Valor da Sangria</mat-label>
-                      <input matInput currencyMask formControlName="amount"
-                        [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
-                      <mat-icon matSuffix>money_off</mat-icon>
-                    </mat-form-field>
-                    <mat-form-field class="w-full">
-                      <mat-label>Motivo</mat-label>
-                      <input matInput formControlName="reason" placeholder="Ex: Pagamento de fornecedor" />
-                    </mat-form-field>
-                    <button type="submit"
-                      [disabled]="bleedForm.invalid || isLoading"
-                      class="w-full h-12 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                      @if (isLoading) {
-                        <mat-spinner diameter="20"></mat-spinner>
-                      } @else {
-                        <mat-icon>remove_circle_outline</mat-icon>
-                      }
-                      Registrar Sangria
-                    </button>
-                  </form>
-                </mat-card-content>
-              </mat-card>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <mat-card class="shadow-sm">
+                  <mat-card-header class="pb-3">
+                    <mat-card-title class="text-lg font-semibold text-gray-800">Registrar Entrada</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <form [formGroup]="entryForm" (ngSubmit)="addEntry()" class="space-y-4">
+                      <mat-form-field class="w-full">
+                        <mat-label>Valor da Entrada</mat-label>
+                        <input matInput currencyMask formControlName="amount"
+                          [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
+                        <mat-icon matSuffix>add_circle_outline</mat-icon>
+                      </mat-form-field>
+                      <mat-form-field class="w-full">
+                        <mat-label>Descrição</mat-label>
+                        <input matInput formControlName="description" placeholder="Ex: Recebimento de cliente" />
+                      </mat-form-field>
+                      <button type="submit"
+                        [disabled]="entryForm.invalid || isLoading"
+                        class="w-full h-12 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                        @if (isLoading) {
+                          <mat-spinner diameter="20"></mat-spinner>
+                        } @else {
+                          <mat-icon>add_circle_outline</mat-icon>
+                        }
+                        Registrar Entrada
+                      </button>
+                    </form>
+                  </mat-card-content>
+                </mat-card>
+
+                <mat-card class="shadow-sm">
+                  <mat-card-header class="pb-3">
+                    <mat-card-title class="text-lg font-semibold text-gray-800">Registrar Sangria</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <form [formGroup]="bleedForm" (ngSubmit)="addBleed()" class="space-y-4">
+                      <mat-form-field class="w-full">
+                        <mat-label>Valor da Sangria</mat-label>
+                        <input matInput currencyMask formControlName="amount"
+                          [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }" />
+                        <mat-icon matSuffix>money_off</mat-icon>
+                      </mat-form-field>
+                      <mat-form-field class="w-full">
+                        <mat-label>Motivo</mat-label>
+                        <input matInput formControlName="reason" placeholder="Ex: Pagamento de fornecedor" />
+                      </mat-form-field>
+                      <button type="submit"
+                        [disabled]="bleedForm.invalid || isLoading"
+                        class="w-full h-12 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                        @if (isLoading) {
+                          <mat-spinner diameter="20"></mat-spinner>
+                        } @else {
+                          <mat-icon>remove_circle_outline</mat-icon>
+                        }
+                        Registrar Sangria
+                      </button>
+                    </form>
+                  </mat-card-content>
+                </mat-card>
+              </div>
             }
 
           </div>
+
+          @if (currentCashRegister && currentCashRegister.entries.length > 0) {
+            <mat-card class="shadow-sm">
+              <mat-card-header class="pb-3">
+                <mat-card-title class="text-lg font-semibold text-gray-800">Entradas deste Caixa</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="overflow-x-auto">
+                  <table mat-table [dataSource]="currentCashRegister.entries" class="w-full">
+                    <ng-container matColumnDef="createdAt">
+                      <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Data/Hora</th>
+                      <td mat-cell *matCellDef="let entry">
+                        <span class="text-sm text-gray-600">{{ entry.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="description">
+                      <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Descrição</th>
+                      <td mat-cell *matCellDef="let entry">
+                        <span class="text-sm text-gray-800">{{ entry.description }}</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="amount">
+                      <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Valor</th>
+                      <td mat-cell *matCellDef="let entry">
+                        <span class="font-semibold text-blue-600">+ {{ entry.amount | brl }}</span>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="entryColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: entryColumns;" class="hover:bg-gray-50"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
 
           @if (currentCashRegister && currentCashRegister.bleeds.length > 0) {
             <mat-card class="shadow-sm">
@@ -283,18 +424,7 @@
                       <span class="text-sm text-gray-800">{{ cr.finalAmount != null ? (cr.finalAmount | brl) : '—' }}</span>
                     </td>
                   </ng-container>
-                  <ng-container matColumnDef="difference">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Diferença</th>
-                    <td mat-cell *matCellDef="let cr">
-                      <span class="font-semibold"
-                        [class.text-green-600]="cr.difference > 0"
-                        [class.text-red-600]="cr.difference < 0"
-                        [class.text-gray-600]="cr.difference === 0">
-                        {{ cr.difference != null ? (cr.difference | brl) : '—' }}
-                      </span>
-                    </td>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
+                                    <ng-container matColumnDef="status">
                     <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Status</th>
                     <td mat-cell *matCellDef="let cr">
                       <mat-chip

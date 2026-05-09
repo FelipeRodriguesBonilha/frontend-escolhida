@@ -3,7 +3,6 @@
 
 <mat-dialog-content class="space-y-6">
 
-  <!-- Informações gerais -->
   <div class="bg-gray-50 rounded-lg p-4">
     <h3 class="font-semibold text-gray-800 mb-3">Informações Gerais</h3>
     <div class="grid grid-cols-2 gap-4 text-sm">
@@ -25,30 +24,25 @@
       }
       @if (cr.finalAmount != null) {
         <div>
-          <span class="text-gray-600">Valor Final (contagem)</span>
+          <span class="text-gray-600">Valor Final</span>
           <p class="font-semibold text-gray-800 mt-0.5">{{ cr.finalAmount | brl }}</p>
         </div>
       }
-      @if (cr.expectedAmount != null) {
-        <div>
-          <span class="text-gray-600">Valor Esperado</span>
-          <p class="font-semibold text-gray-800 mt-0.5">{{ cr.expectedAmount | brl }}</p>
-        </div>
-      }
-      @if (cr.difference != null) {
-        <div>
-          <span class="text-gray-600">Diferença</span>
-          <p class="font-semibold mt-0.5"
-            [class.text-green-600]="cr.difference > 0"
-            [class.text-red-600]="cr.difference < 0"
-            [class.text-gray-800]="cr.difference === 0">
-            {{ cr.difference | brl }}
-          </p>
-        </div>
-      }
+      <div>
+        <span class="text-gray-600">Vendas em Dinheiro</span>
+        <p class="font-semibold text-green-600 mt-0.5">{{ cr.totalCashSales || 0 | brl }}</p>
+      </div>
+      <div>
+        <span class="text-gray-600">Total Entradas</span>
+        <p class="font-semibold text-blue-600 mt-0.5">{{ cr.totalEntries || 0 | brl }}</p>
+      </div>
       <div>
         <span class="text-gray-600">Total de Sangrias</span>
-        <p class="font-semibold text-red-600 mt-0.5">{{ cr.totalBleeds | brl }}</p>
+        <p class="font-semibold text-red-600 mt-0.5">{{ cr.totalBleeds || 0 | brl }}</p>
+      </div>
+      <div>
+        <span class="text-gray-600">Total de Vendas</span>
+        <p class="font-semibold text-purple-600 mt-0.5">{{ cr.sales.length || 0 }}</p>
       </div>
     </div>
 
@@ -68,7 +62,42 @@
     }
   </div>
 
-  <!-- Sangrias -->
+  @if (cr.entries && cr.entries.length > 0) {
+    <div>
+      <h3 class="font-semibold text-gray-800 mb-3">
+        Entradas de Dinheiro
+        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          {{ cr.entries.length }}
+        </span>
+      </h3>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data/Hora</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            @for (entry of cr.entries; track entry.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm text-gray-600">{{ entry.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-800">{{ entry.description }}</td>
+                <td class="px-4 py-3 text-right font-semibold text-blue-600">+ {{ entry.amount | brl }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-6 text-gray-400">
+      <mat-icon class="text-4xl mb-2">add_circle_outline</mat-icon>
+      <p class="text-sm">Nenhuma entrada registrada neste caixa.</p>
+    </div>
+  }
+
   @if (cr.bleeds && cr.bleeds.length > 0) {
     <div>
       <h3 class="font-semibold text-gray-800 mb-3">
@@ -105,36 +134,40 @@
     </div>
   }
 
-  <!-- Resumo financeiro -->
-  @if (cr.status === 'CLOSED') {
-    <div class="bg-pink-50 rounded-lg p-4 border border-pink-200">
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between">
-          <span class="text-gray-600">Valor Inicial</span>
-          <span class="font-medium">{{ cr.initialAmount | brl }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-600">Total Sangrias</span>
-          <span class="font-medium text-red-600">- {{ cr.totalBleeds | brl }}</span>
-        </div>
-        @if (cr.expectedAmount != null) {
-          <div class="flex justify-between">
-            <span class="text-gray-600">Valor Esperado</span>
-            <span class="font-medium">{{ cr.expectedAmount | brl }}</span>
-          </div>
-        }
-        <mat-divider class="my-1"></mat-divider>
-        <div class="flex justify-between items-center pt-1">
-          <span class="text-base font-semibold text-gray-800">Diferença</span>
-          <span class="text-xl font-bold"
-            [class.text-green-600]="(cr.difference ?? 0) >= 0"
-            [class.text-red-600]="(cr.difference ?? 0) < 0">
-            {{ cr.difference | brl }}
+  <div class="bg-pink-50 rounded-lg p-4 border border-pink-200">
+    <h3 class="font-semibold text-gray-800 mb-3">Resumo Financeiro</h3>
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between">
+        <span class="text-gray-600">Valor Inicial</span>
+        <span class="font-medium">{{ cr.initialAmount | brl }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Vendas em Dinheiro</span>
+        <span class="font-medium text-green-600">+ {{ cr.totalCashSales || 0 | brl }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Total Entradas</span>
+        <span class="font-medium text-blue-600">+ {{ cr.totalEntries || 0 | brl }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Total Sangrias</span>
+        <span class="font-medium text-red-600">- {{ cr.totalBleeds || 0 | brl }}</span>
+      </div>
+      <mat-divider class="my-1"></mat-divider>
+      <div class="flex justify-between items-center pt-1">
+        <span class="text-base font-semibold text-gray-800">Valor Final</span>
+        @if (cr.finalAmount != null) {
+          <span class="text-xl font-bold text-green-600">
+            {{ cr.finalAmount | brl }}
           </span>
-        </div>
+        } @else {
+          <span class="text-xl font-bold text-gray-400">
+            Em aberto
+          </span>
+        }
       </div>
     </div>
-  }
+  </div>
 
 </mat-dialog-content>
 
