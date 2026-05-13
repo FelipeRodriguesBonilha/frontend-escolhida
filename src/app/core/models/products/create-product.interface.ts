@@ -9,4 +9,5 @@ export interface CreateProductDto {
   supplierId?: string;
   initialStock?: number;
   minQuantity?: number;
+  showInCatalog?: boolean;
 }

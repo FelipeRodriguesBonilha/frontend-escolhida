@@ -92,7 +92,8 @@ export class ProductsForm implements OnInit {
       supplierId: [''],
       initialStock: [0, [Validators.min(0)]],
       minQuantity: [0, [Validators.min(0)]],
-      active: [true]
+      active: [true],
+      showInCatalog: [false]
     });
   }
 
@@ -147,7 +148,8 @@ export class ProductsForm implements OnInit {
             categoryId: product.categoryId,
             brandId: product.brandId,
             supplierId: product.supplierId,
-            active: product.active
+            active: product.active,
+            showInCatalog: product.showInCatalog
           });
           
           if (product.imageUrl) {
@@ -211,7 +213,8 @@ export class ProductsForm implements OnInit {
       brandId: this.productForm.value.brandId!,
       supplierId: this.productForm.value.supplierId || undefined,
       initialStock: this.productForm.value.initialStock || undefined,
-      minQuantity: this.productForm.value.minQuantity || undefined
+      minQuantity: this.productForm.value.minQuantity || undefined,
+      showInCatalog: this.productForm.value.showInCatalog ?? false
     };
 
     this.productService.createProduct(productData, this.selectedImage || undefined).subscribe({
@@ -243,6 +246,7 @@ export class ProductsForm implements OnInit {
       initialStock: this.productForm.value.initialStock || undefined,
       minQuantity: this.productForm.value.minQuantity || undefined,
       active: this.productForm.value.active,
+      showInCatalog: this.productForm.value.showInCatalog ?? false,
       removeImage: this.imageRemoved && !this.selectedImage ? true : undefined
     };
 

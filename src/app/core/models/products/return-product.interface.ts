@@ -17,6 +17,7 @@ export interface ReturnProductDto {
   supplierId?: string;
   imageUrl: string | null;
   active: boolean;
+  showInCatalog: boolean;
   createdAt: Date;
   updatedAt: Date;
   category?: ReturnCategoryDto;

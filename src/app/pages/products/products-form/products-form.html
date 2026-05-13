@@ -381,6 +381,12 @@
                 </div>
               </div>
             }
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <mat-checkbox formControlName="showInCatalog" color="primary">
+                <span class="text-gray-700 font-medium">Mostrar no Catálogo</span>
+              </mat-checkbox>
+              <p class="text-sm text-gray-500">Produto ficará visível no catálogo público</p>
+            </div>
             @if (isEditing) {
               <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                 <mat-checkbox formControlName="active" color="primary">
