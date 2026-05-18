@@ -30,12 +30,12 @@
         (ngModelChange)="onSearchChange()"
         class="flex-1 border-0 outline-none text-base text-gray-800 bg-transparent"
       />
-      @if (searchQuery) {
-        <button (click)="searchQuery = ''; currentPage = 1; loadProducts()"
-          class="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 border-0 cursor-pointer flex-shrink-0">
-          <mat-icon class="!text-base !w-4 !h-4 !leading-none">close</mat-icon>
-        </button>
-      }
+      <button (click)="searchQuery = ''; currentPage = 1; loadProducts()"
+        [class.invisible]="!searchQuery"
+        [class.pointer-events-none]="!searchQuery"
+        class="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 border-0 cursor-pointer flex-shrink-0">
+        <mat-icon class="!text-base !w-4 !h-4 !leading-none">close</mat-icon>
+      </button>
     </div>
   </section>
 

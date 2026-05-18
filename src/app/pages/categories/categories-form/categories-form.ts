@@ -43,7 +43,8 @@ export class CategoriesForm implements OnInit {
   ) {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      active: [true]
+      active: [true],
+      showInCatalog: [false]
     });
   }
 
@@ -66,7 +67,8 @@ export class CategoriesForm implements OnInit {
           this.category = category;
           this.categoryForm.patchValue({
             name: category.name,
-            active: category.active
+            active: category.active,
+            showInCatalog: category.showInCatalog
           });
         } else {
           console.error('Category not found');
@@ -99,7 +101,8 @@ export class CategoriesForm implements OnInit {
 
   private createCategory(): void {
     const categoryData: CreateCategoryDto = {
-      name: this.categoryForm.value.name!
+      name: this.categoryForm.value.name!,
+      showInCatalog: this.categoryForm.value.showInCatalog ?? false
     };
 
     this.categoryService.createCategory(categoryData).subscribe({
@@ -121,7 +124,8 @@ export class CategoriesForm implements OnInit {
 
     const categoryData: UpdateCategoryDto = {
       name: this.categoryForm.value.name!,
-      active: this.categoryForm.value.active
+      active: this.categoryForm.value.active,
+      showInCatalog: this.categoryForm.value.showInCatalog
     };
 
     this.categoryService.updateCategory(this.categoryId, categoryData).subscribe({

@@ -43,7 +43,8 @@ export class BrandsForm implements OnInit {
   ) {
     this.brandForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      active: [true]
+      active: [true],
+      showInCatalog: [false]
     });
   }
 
@@ -66,7 +67,8 @@ export class BrandsForm implements OnInit {
           this.brand = brand;
           this.brandForm.patchValue({
             name: brand.name,
-            active: brand.active
+            active: brand.active,
+            showInCatalog: brand.showInCatalog
           });
         } else {
           console.error('Brand not found');
@@ -98,7 +100,8 @@ export class BrandsForm implements OnInit {
 
   private createBrand(): void {
     const brandData: CreateBrandDto = {
-      name: this.brandForm.value.name!
+      name: this.brandForm.value.name!,
+      showInCatalog: this.brandForm.value.showInCatalog ?? false
     };
 
     this.brandService.createBrand(brandData).subscribe({
@@ -120,7 +123,8 @@ export class BrandsForm implements OnInit {
 
     const brandData: UpdateBrandDto = {
       name: this.brandForm.value.name!,
-      active: this.brandForm.value.active
+      active: this.brandForm.value.active,
+      showInCatalog: this.brandForm.value.showInCatalog
     };
 
     this.brandService.updateBrand(this.brandId, brandData).subscribe({

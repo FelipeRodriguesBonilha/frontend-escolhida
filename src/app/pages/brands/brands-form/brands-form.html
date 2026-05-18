@@ -39,14 +39,22 @@
                 <mat-error>{{ getErrorMessage('name') }}</mat-error>
               }
             </mat-form-field>
-            @if (isEditing) {
+            <div class="space-y-3">
               <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <mat-checkbox formControlName="active" color="primary">
-                  <span class="text-gray-700 font-medium">Marca Ativa</span>
+                <mat-checkbox formControlName="showInCatalog" color="primary">
+                  <span class="text-gray-700 font-medium">Exibir no Catálogo</span>
                 </mat-checkbox>
-                <p class="text-sm text-gray-500">Marcas inativas não aparecem nas listagens</p>
+                <p class="text-sm text-gray-500">Marca visível para clientes no catálogo online</p>
               </div>
-            }
+              @if (isEditing) {
+                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                  <mat-checkbox formControlName="active" color="primary">
+                    <span class="text-gray-700 font-medium">Marca Ativa</span>
+                  </mat-checkbox>
+                  <p class="text-sm text-gray-500">Marcas inativas não aparecem nas listagens</p>
+                </div>
+              }
+            </div>
             @if (isEditing && brand) {
               <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 class="text-sm font-semibold text-blue-800 mb-2">Informações da Marca</h3>
