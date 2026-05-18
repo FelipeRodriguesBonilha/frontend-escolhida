@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateProductDto, PaginatedResponse, ReturnProductColorDto, ReturnProductDto, UpdateProductDto } from '../../models';
+import { CreateProductDto, PaginatedResponse, ReturnProductColorDto, ReturnProductDto, ReturnProductImageDto, UpdateProductDto } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +12,9 @@ export class Products {
 
   constructor(private http: HttpClient) { }
 
-  createProduct(productData: CreateProductDto, image?: File): Observable<ReturnProductDto> {
-    const formData = this.buildFormData(productData, image);
+  createProduct(productData: CreateProductDto, images?: File[]): Observable<ReturnProductDto> {
+    const formData = this.buildFormData(productData);
+    (images ?? []).forEach(img => formData.append('images', img));
     return this.http.post<ReturnProductDto>(`${this.apiUrl}/products`, formData);
   }
 
@@ -36,8 +37,10 @@ export class Products {
     return this.http.get<ReturnProductDto>(`${this.apiUrl}/products/${id}`);
   }
 
-  updateProduct(id: string, productData: UpdateProductDto, image?: File): Observable<ReturnProductDto> {
-    const formData = this.buildFormData(productData, image);
+  updateProduct(id: string, productData: UpdateProductDto, images?: File[], removeImageIds?: string[]): Observable<ReturnProductDto> {
+    const formData = this.buildFormData(productData);
+    (images ?? []).forEach(img => formData.append('images', img));
+    (removeImageIds ?? []).forEach(id => formData.append('removeImageIds', id));
     return this.http.patch<ReturnProductDto>(`${this.apiUrl}/products/${id}`, formData);
   }
 
@@ -74,20 +77,18 @@ export class Products {
     return this.http.delete<void>(`${this.apiUrl}/products/${productId}/colors/${colorId}`);
   }
 
-  private buildFormData(data: CreateProductDto | UpdateProductDto, image?: File): FormData {
+  setMainImage(productId: string, imageId: string): Observable<ReturnProductImageDto[]> {
+    return this.http.patch<ReturnProductImageDto[]>(`${this.apiUrl}/products/${productId}/images/${imageId}/set-main`, {});
+  }
+
+  private buildFormData(data: CreateProductDto | UpdateProductDto): FormData {
     const formData = new FormData();
-    
     Object.keys(data).forEach(key => {
       const value = (data as any)[key];
-      if (value !== null && value !== undefined) {
+      if (value !== null && value !== undefined && !Array.isArray(value)) {
         formData.append(key, value.toString());
       }
     });
-    
-    if (image) {
-      formData.append('image', image);
-    }
-    
     return formData;
   }
 }

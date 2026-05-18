@@ -11,6 +11,7 @@ export * from './products/create-product.interface';
 export * from './products/update-product.interface';
 export * from './products/return-product.interface';
 export * from './products/return-product-color.interface';
+export * from './products/return-product-image.interface';
 
 export * from './categories/create-category.interface';
 export * from './categories/update-category.interface';

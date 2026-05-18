@@ -65,39 +65,83 @@
               </mat-form-field>
             </div>
             <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Imagem do Produto</h3>
-              <div class="flex flex-col md:flex-row gap-4 items-start">
-                @if (getProductImageUrl()) {
-                  <div class="relative">
-                    <img [src]="getProductImageUrl()" 
-                         alt="Preview do produto"
-                         class="w-48 h-48 object-cover rounded-lg border-2 border-gray-200">
-                    <button type="button"
-                            (click)="removeImage()"
-                            class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white hover:bg-red-600 rounded-full flex items-center justify-center transition-colors">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </div>
-                }
-                <div class="flex-1">
-                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-500 transition-colors">
-                    <input type="file"
-                           #fileInput
-                           (change)="onImageSelected($event)"
-                           accept="image/*"
-                           class="hidden">
-                    <button type="button"
-                            (click)="fileInput.click()"
+              <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Imagens do Produto</h3>
+              <div class="space-y-3">
+                  @if (images.length > 0 || newFilePreviews.length > 0) {
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      @for (image of images; track image.id) {
+                        <div class="relative group"
+                             [class.opacity-40]="isMarkedForRemoval(image.id)">
+                          <img [src]="getGalleryImageUrl(image)"
+                               alt="Imagem do produto"
+                               class="w-full aspect-square object-cover rounded-lg border-2"
+                               [class.border-pink-500]="image.order === 0 && !isMarkedForRemoval(image.id)"
+                               [class.border-red-400]="isMarkedForRemoval(image.id)"
+                               [class.border-gray-200]="image.order !== 0 && !isMarkedForRemoval(image.id)">
+                          @if (image.order === 0 && !isMarkedForRemoval(image.id)) {
+                            <span class="absolute top-1.5 left-1.5 bg-pink-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">Principal</span>
+                          }
+                          @if (isMarkedForRemoval(image.id)) {
+                            <span class="absolute top-1.5 left-1.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">Remover</span>
+                          }
+                          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                            @if (!isMarkedForRemoval(image.id) && image.order !== 0) {
+                              <button type="button"
+                                      (click)="setMainImage(image.id)"
+                                      title="Definir como principal"
+                                      class="w-8 h-8 bg-white text-pink-600 hover:bg-pink-50 rounded-full flex items-center justify-center">
+                                <mat-icon class="!text-base">star</mat-icon>
+                              </button>
+                            }
+                            <button type="button"
+                                    (click)="toggleRemoveExistingImage(image.id)"
+                                    [title]="isMarkedForRemoval(image.id) ? 'Desfazer remoção' : 'Remover imagem'"
+                                    [class]="isMarkedForRemoval(image.id)
+                                      ? 'w-8 h-8 bg-white text-gray-600 hover:bg-gray-50 rounded-full flex items-center justify-center'
+                                      : 'w-8 h-8 bg-white text-red-600 hover:bg-red-50 rounded-full flex items-center justify-center'">
+                              <mat-icon class="!text-base">{{ isMarkedForRemoval(image.id) ? 'undo' : 'delete' }}</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                      @for (preview of newFilePreviews; track $index) {
+                        <div class="relative group">
+                          <img [src]="preview"
+                               alt="Nova imagem"
+                               class="w-full aspect-square object-cover rounded-lg border-2 border-dashed border-pink-400">
+                          <span class="absolute top-1.5 left-1.5 bg-pink-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">Nova</span>
+                          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <button type="button"
+                                    (click)="removeNewImage($index)"
+                                    title="Cancelar"
+                                    class="w-8 h-8 bg-white text-red-600 hover:bg-red-50 rounded-full flex items-center justify-center">
+                              <mat-icon class="!text-base">close</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="text-sm text-gray-400 bg-gray-50 rounded-lg p-3">Nenhuma imagem cadastrada.</p>
+                  }
+                  <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-pink-500 transition-colors">
+                    <input type="file" #galleryFileInput (change)="onGalleryImagesSelected($event)" accept="image/*" multiple class="hidden">
+                    <button type="button" (click)="galleryFileInput.click()"
                             class="px-4 py-2 border-2 border-pink-500 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors flex items-center gap-2">
-                      <mat-icon>cloud_upload</mat-icon>
-                      {{ getProductImageUrl() ? 'Alterar Imagem' : 'Selecionar Imagem' }}
+                      <mat-icon>add_photo_alternate</mat-icon>
+                      Adicionar Imagens
                     </button>
-                    <p class="text-xs text-gray-500 mt-2">
-                      PNG, JPG, GIF até 5MB
-                    </p>
+                    <p class="text-xs text-gray-500 mt-2">PNG, JPG, GIF até 5MB &bull; Seleção múltipla permitida</p>
                   </div>
+                  @if (imagesToRemove.length > 0 || newFiles.length > 0) {
+                    <p class="text-xs text-amber-600 bg-amber-50 rounded-lg p-2">
+                      {{ newFiles.length > 0 ? newFiles.length + ' nova(s) imagem(ns) a adicionar' : '' }}
+                      {{ newFiles.length > 0 && imagesToRemove.length > 0 ? ' &bull; ' : '' }}
+                      {{ imagesToRemove.length > 0 ? imagesToRemove.length + ' imagem(ns) a remover' : '' }}
+                      &mdash; serão aplicadas ao salvar.
+                    </p>
+                  }
                 </div>
-              </div>
             </div>
             <div class="space-y-4">
               <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">Cores do Produto</h3>

@@ -29,6 +29,7 @@ export class ProductDetailDialog {
   selectedColor: ReturnProductColorDto | null = null;
   quantity = 1;
   imageIndex = 0;
+  images: string[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<ProductDetailDialog>,
@@ -36,6 +37,21 @@ export class ProductDetailDialog {
     private catalogService: CatalogService
   ) {
     this.selectedColor = null;
+    this.images = this.buildImages();
+  }
+
+  private buildImages(): string[] {
+    const imgs: string[] = [];
+    const productImages = this.data.product.images ?? [];
+    if (productImages.length > 0) {
+      productImages.forEach(img => imgs.push(this.getImageUrl(img.url)));
+    } else if (this.data.product.imageUrl) {
+      imgs.push(this.getImageUrl(this.data.product.imageUrl));
+    }
+    (this.data.product.colors ?? []).forEach(c => {
+      if (c.imageUrl) imgs.push(this.getImageUrl(c.imageUrl));
+    });
+    return imgs;
   }
 
   get canAddToCart(): boolean {
@@ -43,19 +59,6 @@ export class ProductDetailDialog {
       return this.selectedColor !== null;
     }
     return true;
-  }
-
-  get images(): string[] {
-    const imgs: string[] = [];
-    if (this.data.product.imageUrl) {
-      imgs.push(this.getImageUrl(this.data.product.imageUrl));
-    }
-    (this.data.product.colors ?? []).forEach(c => {
-      if (c.imageUrl) {
-        imgs.push(this.getImageUrl(c.imageUrl));
-      }
-    });
-    return imgs;
   }
 
   getImageUrl(imageUrl: string): string {

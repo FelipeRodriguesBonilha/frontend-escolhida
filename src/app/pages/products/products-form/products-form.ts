@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast/toast.service';
-import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductColorDto, ReturnProductDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
+import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductColorDto, ReturnProductDto, ReturnProductImageDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
 import { Brands as BrandService } from '../../../core/services/brands/brands';
 import { Categories as CategoryService } from '../../../core/services/categories/categories';
 import { Products as ProductService } from '../../../core/services/products/products';
@@ -51,6 +51,12 @@ export class ProductsForm implements OnInit {
   categories: ReturnCategoryDto[] = [];
   brands: ReturnBrandDto[] = [];
   suppliers: ReturnSupplierDto[] = [];
+
+  images: ReturnProductImageDto[] = [];
+  imageSecureUrls = new Map<string, string>();
+  imagesToRemove: string[] = [];
+  newFiles: File[] = [];
+  newFilePreviews: string[] = [];
 
   colors: ReturnProductColorDto[] = [];
   colorImagePreviews = new Map<string, string>();
@@ -158,6 +164,13 @@ export class ProductsForm implements OnInit {
             });
           }
 
+          this.images = product.images ?? [];
+          this.images.forEach(image => {
+            this.uploadService.getSecureImageUrl(image.url).subscribe(url => {
+              this.imageSecureUrls.set(image.id, url);
+            });
+          });
+
           this.colors = product.colors ?? [];
           this.colors.forEach(color => {
             if (color.imageUrl) {
@@ -217,7 +230,7 @@ export class ProductsForm implements OnInit {
       showInCatalog: this.productForm.value.showInCatalog ?? false
     };
 
-    this.productService.createProduct(productData, this.selectedImage || undefined).subscribe({
+    this.productService.createProduct(productData, this.newFiles.length > 0 ? this.newFiles : undefined).subscribe({
       next: () => {
         this.toastService.success('Produto cadastrado com sucesso!');
         this.router.navigate(['/produtos']);
@@ -247,10 +260,14 @@ export class ProductsForm implements OnInit {
       minQuantity: this.productForm.value.minQuantity || undefined,
       active: this.productForm.value.active,
       showInCatalog: this.productForm.value.showInCatalog ?? false,
-      removeImage: this.imageRemoved && !this.selectedImage ? true : undefined
     };
 
-    this.productService.updateProduct(this.productId, productData, this.selectedImage || undefined).subscribe({
+    this.productService.updateProduct(
+      this.productId,
+      productData,
+      this.newFiles.length > 0 ? this.newFiles : undefined,
+      this.imagesToRemove.length > 0 ? this.imagesToRemove : undefined
+    ).subscribe({
       next: () => {
         this.toastService.success('Produto atualizado com sucesso!');
         this.router.navigate(['/produtos']);
@@ -477,6 +494,70 @@ export class ProductsForm implements OnInit {
 
   getColorImageUrl(color: ReturnProductColorDto): string {
     return this.colorSecureUrls.get(color.id) || '';
+  }
+
+  getGalleryImageUrl(image: ReturnProductImageDto): string {
+    return this.imageSecureUrls.get(image.id) || '';
+  }
+
+  isMarkedForRemoval(imageId: string): boolean {
+    return this.imagesToRemove.includes(imageId);
+  }
+
+  toggleRemoveExistingImage(imageId: string): void {
+    if (this.imagesToRemove.includes(imageId)) {
+      this.imagesToRemove = this.imagesToRemove.filter(id => id !== imageId);
+    } else {
+      this.imagesToRemove = [...this.imagesToRemove, imageId];
+    }
+  }
+
+  onGalleryImagesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    const files = Array.from(input.files);
+    input.value = '';
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        this.toastService.warning(`${file.name}: apenas arquivos de imagem`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastService.warning(`${file.name}: máximo 5MB`);
+        continue;
+      }
+      this.newFiles = [...this.newFiles, file];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.newFilePreviews = [...this.newFilePreviews, e.target?.result as string];
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeNewImage(index: number): void {
+    this.newFiles = this.newFiles.filter((_, i) => i !== index);
+    this.newFilePreviews = this.newFilePreviews.filter((_, i) => i !== index);
+  }
+
+  setMainImage(imageId: string): void {
+    if (!this.productId) return;
+    this.productService.setMainImage(this.productId, imageId).subscribe({
+      next: (updatedImages) => {
+        this.images = updatedImages;
+        this.imageSecureUrls.clear();
+        this.images.forEach(image => {
+          this.uploadService.getSecureImageUrl(image.url).subscribe(url => {
+            this.imageSecureUrls.set(image.id, url);
+          });
+        });
+        this.toastService.success('Imagem principal definida!');
+      },
+      error: (error) => {
+        this.toastService.error(error?.error?.message || 'Erro ao definir imagem principal');
+      }
+    });
   }
 
   getProductImageUrl(): string {
