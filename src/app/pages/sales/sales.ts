@@ -3,12 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
@@ -26,8 +26,10 @@ import { NgxCurrencyDirective } from 'ngx-currency';
 import { BrlCurrencyPipe } from '../../shared/pipes/brl-currency.pipe';
 import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
+import { CartDialog } from './cart-dialog/cart-dialog';
+import type { CartDialogState } from './cart-dialog/cart-dialog';
 
-interface CartItem {
+export interface CartItem {
   product: ReturnProductDto;
   quantity: number;
   subtotal: number;
@@ -249,7 +251,7 @@ export class Sales implements OnInit {
     });
   }
 
-  onPageChange(event: any): void {
+  onPageChange(event: PageEvent): void {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadSales(this.currentPage, this.pageSize);
@@ -378,6 +380,32 @@ export class Sales implements OnInit {
     this.calculateTotals();
   }
 
+  openCartDialog(): void {
+    this.dialog.open(CartDialog, {
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      data: {
+        ...this.getCartDialogState(),
+        displayedColumns: this.displayedColumns,
+        getProductImageUrl: (product: ReturnProductDto) => this.getProductImageUrl(product),
+        updateQuantity: (index: number, quantity: number) => {
+          this.updateQuantity(index, quantity);
+          return this.getCartDialogState();
+        },
+        removeFromCart: (index: number) => {
+          this.removeFromCart(index);
+          return this.getCartDialogState();
+        },
+        clearCart: () => {
+          this.clearCart();
+          return this.getCartDialogState();
+        }
+      }
+    });
+  }
+
   simulateSale(): void {
     if (this.cartItems.length === 0) return;
 
@@ -421,7 +449,7 @@ export class Sales implements OnInit {
     });
   }
 
-  private executeCompleteSale(dialogRef?: any): void {
+  private executeCompleteSale(dialogRef?: MatDialogRef<SimulationDialog>): void {
     this.isLoading = true;
 
     const saleData: CreateSaleDto = {
@@ -521,5 +549,14 @@ export class Sales implements OnInit {
         this.productImageUrls.set(product.id, url);
       });
     }
+  }
+
+  private getCartDialogState(): CartDialogState {
+    return {
+      cartItems: this.cartItems,
+      subtotal: this.subtotal,
+      discount: this.discount,
+      total: this.total
+    };
   }
 }

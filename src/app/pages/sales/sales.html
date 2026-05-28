@@ -264,7 +264,15 @@
             <mat-card class="lg:col-span-2 shadow-sm">
               <mat-card-header class="pb-3">
                 <mat-card-title class="text-lg font-semibold text-gray-800 flex items-center justify-between">
-                  <span>Carrinho de Compras</span>
+                  <div class="flex items-center gap-2">
+                    <span>Carrinho de Compras</span>
+                    <button type="button"
+                            (click)="openCartDialog()"
+                            class="w-8 h-8 text-pink-600 hover:bg-pink-50 rounded-lg transition-colors flex items-center justify-center"
+                            title="Visualizar carrinho em tela cheia">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </div>
                   @if (cartItems.length > 0) {
                     <span class="bg-pink-100 text-pink-800 text-sm font-medium px-2 py-1 rounded-full">
                       {{ cartItems.length }} itens
