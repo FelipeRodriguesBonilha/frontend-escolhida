@@ -29,12 +29,14 @@ export class CatalogService {
     categoryId?: string,
     brandId?: string,
     inPromotion?: boolean,
+    isNew?: boolean,
   ): Observable<PaginatedResponse<ReturnProductDto>> {
     const params: Record<string, string> = { page: String(page), limit: String(limit) };
     if (search) params['search'] = search;
     if (categoryId) params['categoryId'] = categoryId;
     if (brandId) params['brandId'] = brandId;
     if (inPromotion) params['inPromotion'] = 'true';
+    if (isNew) params['isNew'] = 'true';
     return this.http.get<PaginatedResponse<ReturnProductDto>>(`${this.baseUrl}/products`, { params });
   }
 

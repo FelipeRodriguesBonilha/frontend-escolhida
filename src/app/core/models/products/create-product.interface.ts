@@ -12,4 +12,5 @@ export interface CreateProductDto {
   showInCatalog?: boolean;
   inPromotion?: boolean;
   promotionPrice?: number;
+  isNew?: boolean;
 }

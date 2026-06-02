@@ -101,7 +101,8 @@ export class ProductsForm implements OnInit {
       active: [true],
       showInCatalog: [false],
       inPromotion: [false],
-      promotionPrice: [null]
+      promotionPrice: [null],
+      isNew: [false]
     });
   }
 
@@ -159,7 +160,8 @@ export class ProductsForm implements OnInit {
             active: product.active,
             showInCatalog: product.showInCatalog,
             inPromotion: product.inPromotion ?? false,
-            promotionPrice: product.promotionPrice ? Number(product.promotionPrice) : null
+            promotionPrice: product.promotionPrice ? Number(product.promotionPrice) : null,
+            isNew: product.isNew ?? false
           });
           
           if (product.imageUrl) {
@@ -233,7 +235,8 @@ export class ProductsForm implements OnInit {
       minQuantity: this.productForm.value.minQuantity || undefined,
       showInCatalog: this.productForm.value.showInCatalog ?? false,
       inPromotion: this.productForm.value.inPromotion ?? false,
-      promotionPrice: this.productForm.value.inPromotion ? this.productForm.value.promotionPrice || undefined : undefined
+      promotionPrice: this.productForm.value.inPromotion ? this.productForm.value.promotionPrice || undefined : undefined,
+      isNew: this.productForm.value.isNew ?? false
     };
 
     this.productService.createProduct(productData, this.newFiles.length > 0 ? this.newFiles : undefined).subscribe({
@@ -267,7 +270,8 @@ export class ProductsForm implements OnInit {
       active: this.productForm.value.active,
       showInCatalog: this.productForm.value.showInCatalog ?? false,
       inPromotion: this.productForm.value.inPromotion ?? false,
-      promotionPrice: this.productForm.value.inPromotion ? this.productForm.value.promotionPrice || undefined : undefined
+      promotionPrice: this.productForm.value.inPromotion ? this.productForm.value.promotionPrice || undefined : undefined,
+      isNew: this.productForm.value.isNew ?? false
     };
 
     this.productService.updateProduct(

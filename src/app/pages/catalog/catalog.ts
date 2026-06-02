@@ -49,10 +49,13 @@ export class Catalog implements OnInit {
   showCategoryDropdown = false;
   showBrandDropdown = false;
   filterPromotion = false;
+  filterNew = false;
   isLoading = false;
   showCart = false;
   promotionProducts: ReturnProductDto[] = [];
   isLoadingPromotion = false;
+  newProducts: ReturnProductDto[] = [];
+  isLoadingNew = false;
 
   currentPage = 1;
   pageSize = 12;
@@ -101,6 +104,7 @@ export class Catalog implements OnInit {
   ngOnInit(): void {
     this.loadCategories();
     this.loadPromotionProducts();
+    this.loadNewProducts();
     this.loadProducts();
   }
 
@@ -126,13 +130,13 @@ export class Catalog implements OnInit {
         this.selectedCategoryId || undefined,
         this.selectedBrandId || undefined,
         this.filterPromotion || undefined,
+        this.filterNew || undefined,
       )
       .subscribe({
         next: (res) => {
           this.products = res.data;
           this.total = res.total;
           this.isLoading = false;
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         error: () => {
           this.isLoading = false;
@@ -149,6 +153,19 @@ export class Catalog implements OnInit {
       },
       error: () => {
         this.isLoadingPromotion = false;
+      },
+    });
+  }
+
+  loadNewProducts(): void {
+    this.isLoadingNew = true;
+    this.catalogService.getProducts(1, 500, undefined, undefined, undefined, undefined, true).subscribe({
+      next: (res) => {
+        this.newProducts = res.data;
+        this.isLoadingNew = false;
+      },
+      error: () => {
+        this.isLoadingNew = false;
       },
     });
   }
@@ -180,6 +197,7 @@ export class Catalog implements OnInit {
     this.selectedCategoryId = '';
     this.selectedBrandId = '';
     this.filterPromotion = false;
+    this.filterNew = false;
     this.brands = [];
     this.currentPage = 1;
     this.loadProducts();
@@ -187,12 +205,20 @@ export class Catalog implements OnInit {
 
   togglePromotionFilter(): void {
     this.filterPromotion = !this.filterPromotion;
+    this.filterNew = false;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  toggleNewFilter(): void {
+    this.filterNew = !this.filterNew;
+    this.filterPromotion = false;
     this.currentPage = 1;
     this.loadProducts();
   }
 
   get hasActiveFilters(): boolean {
-    return !!(this.selectedCategoryId || this.selectedBrandId || this.filterPromotion);
+    return !!(this.selectedCategoryId || this.selectedBrandId || this.filterPromotion || this.filterNew);
   }
 
   get totalPages(): number {

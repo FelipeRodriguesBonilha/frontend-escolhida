@@ -16,6 +16,7 @@ export interface ReturnProductDto {
   inPromotion: boolean;
   promotionPrice: number | null;
   effectivePrice: number;
+  isNew: boolean;
   categoryId: string;
   brandId: string;
   supplierId?: string;
