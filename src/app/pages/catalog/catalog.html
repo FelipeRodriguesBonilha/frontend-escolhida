@@ -149,6 +149,20 @@
       </div>
     }
 
+    <button type="button"
+            (click)="togglePromotionFilter()"
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer border"
+            [class.bg-[#e91e8c]]="filterPromotion"
+            [class.text-white]="filterPromotion"
+            [class.border-[#e91e8c]]="filterPromotion"
+            [class.bg-white]="!filterPromotion"
+            [class.text-[#e91e8c]]="!filterPromotion"
+            [class.border-[#fce4f3]]="!filterPromotion"
+            [class.hover:bg-[#fce4f3]]="!filterPromotion">
+      <mat-icon class="!text-base !w-4 !h-4">local_offer</mat-icon>
+      Promoções
+    </button>
+
     @if (hasActiveFilters) {
       <button type="button"
               (click)="clearFilters()"
@@ -160,7 +174,126 @@
     </div>
   </section>
 
+  @if (promotionProducts.length > 0 && !filterPromotion && !searchQuery && !selectedCategoryId && !selectedBrandId) {
+    <section class="max-w-[1200px] mx-auto px-5 pt-6 pb-2">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
+          <mat-icon class="!text-lg">local_offer</mat-icon>
+          <span class="font-bold text-sm">PROMOÇÕES</span>
+        </div>
+        <div class="flex-1 h-px bg-gradient-to-r from-[#fce4f3] to-transparent"></div>
+      </div>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
+        @for (product of promotionProducts; track product.id) {
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer !border-2 !border-[#fce4f3] relative overflow-hidden" (click)="openDetail(product)">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-[#e91e8c] z-10"></div>
+            <div class="relative h-56 overflow-hidden bg-gray-100">
+              @if (getImageUrl(product)) {
+                <img
+                  [src]="getImageUrl(product)"
+                  [alt]="product.name"
+                  class="w-full h-full object-cover transition-transform hover:scale-105"
+                  loading="lazy"
+                />
+              } @else {
+                <div class="h-full flex flex-col items-center justify-center gap-2 text-gray-200">
+                  <mat-icon class="!w-12 !h-12 !text-5xl">image</mat-icon>
+                  <span class="text-xs text-gray-600 font-medium tracking-wider">Sem foto</span>
+                </div>
+              }
+              <div class="absolute top-2.5 right-2.5 bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                -{{ (((product.price - product.effectivePrice) / product.price) * 100).toFixed(0) }}%
+              </div>
+              @if (product.category) {
+                <div class="absolute top-2.5 left-2.5 bg-[rgba(233,30,140,0.85)] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                  {{ product.category.name }}
+                </div>
+              }
+              @if (getCartQuantity(product) > 0) {
+                <div class="absolute bottom-2.5 right-2.5 bg-[rgba(233,30,140,0.92)] text-white text-xs font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                  {{ getCartQuantity(product) }} no pedido
+                </div>
+              }
+            </div>
+            <mat-card-content class="!p-4 flex flex-col gap-1.5">
+              <h3 class="text-sm font-bold text-gray-800 leading-tight m-0">{{ product.name }}</h3>
+              @if (product.description) {
+                <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
+              }
+              @if (product.colors && product.colors.length > 0) {
+                <div class="flex gap-1.5 flex-wrap mt-1">
+                  @for (color of product.colors; track color.id) {
+                    <span
+                      class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block"
+                      [style.background]="color.colorCode || '#ccc'"
+                      [title]="color.name"
+                    ></span>
+                  }
+                </div>
+              }
+              <div class="flex items-center justify-between mt-2.5">
+                <div class="flex flex-col">
+                  <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
+                  <span class="text-lg text-[#e91e8c] font-bold">{{ formatCurrency(product.effectivePrice) }}</span>
+                </div>
+                @if (product.colors && product.colors.length > 0) {
+                  @if (getCartQuantity(product) === 0) {
+                    <button mat-stroked-button
+                            color="primary"
+                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                            (click)="openDetail(product); $event.stopPropagation()">
+                      <mat-icon class="!text-base !mr-1">palette</mat-icon>
+                      Cores
+                    </button>
+                  } @else {
+                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
+                        <mat-icon class="!text-lg">remove</mat-icon>
+                      </button>
+                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
+                        <mat-icon class="!text-lg">add</mat-icon>
+                      </button>
+                    </div>
+                  }
+                } @else {
+                  @if (getCartQuantity(product) === 0) {
+                    <button mat-raised-button
+                            color="primary"
+                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                            (click)="addToCart(product); $event.stopPropagation()">
+                      + Adicionar
+                    </button>
+                  } @else {
+                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
+                        <mat-icon class="!text-lg">remove</mat-icon>
+                      </button>
+                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
+                        <mat-icon class="!text-lg">add</mat-icon>
+                      </button>
+                    </div>
+                  }
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </section>
+  }
+
   <main class="max-w-[1200px] mx-auto px-5 py-5">
+    @if (!filterPromotion && !searchQuery && !selectedCategoryId && !selectedBrandId && promotionProducts.length > 0) {
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
+          <mat-icon class="!text-lg">inventory_2</mat-icon>
+          <span class="font-bold text-sm">TODOS OS PRODUTOS</span>
+        </div>
+        <div class="flex-1 h-px bg-gradient-to-r from-[#fce4f3] to-transparent"></div>
+      </div>
+    }
     @if (isLoading) {
       <div class="flex flex-col items-center justify-center py-16 text-gray-600 gap-4">
         <mat-spinner diameter="40"></mat-spinner>
@@ -176,7 +309,13 @@
 
       <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
         @for (product of products; track product.id) {
-          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer" (click)="openDetail(product)">
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+                    [class.!border-2]="product.inPromotion"
+                    [class.!border-[#fce4f3]]="product.inPromotion"
+                    (click)="openDetail(product)">
+            @if (product.inPromotion) {
+              <div class="absolute top-0 left-0 right-0 h-1 bg-[#e91e8c] z-10"></div>
+            }
             <div class="relative h-56 overflow-hidden bg-gray-100">
               @if (getImageUrl(product)) {
                 <img
@@ -189,6 +328,11 @@
                 <div class="h-full flex flex-col items-center justify-center gap-2 text-gray-200">
                   <mat-icon class="!w-12 !h-12 !text-5xl">image</mat-icon>
                   <span class="text-xs text-gray-600 font-medium tracking-wider">Sem foto</span>
+                </div>
+              }
+              @if (product.inPromotion && product.promotionPrice) {
+                <div class="absolute top-2.5 right-2.5 bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                  -{{ (((product.price - product.effectivePrice) / product.price) * 100).toFixed(0) }}%
                 </div>
               }
               @if (product.category) {
@@ -222,7 +366,14 @@
               }
 
               <div class="flex items-center justify-between mt-2.5">
-                <span class="text-lg text-[#e91e8c]">{{ formatCurrency(product.price) }}</span>
+                <div class="flex flex-col">
+                  @if (product.inPromotion && product.promotionPrice) {
+                    <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
+                    <span class="text-lg text-[#e91e8c] font-bold">{{ formatCurrency(product.effectivePrice) }}</span>
+                  } @else {
+                    <span class="text-lg text-[#e91e8c]">{{ formatCurrency(product.price) }}</span>
+                  }
+                </div>
                 @if (product.colors && product.colors.length > 0) {
                   @if (getCartQuantity(product) === 0) {
                     <button mat-stroked-button 
@@ -337,51 +488,62 @@
         <p>Seu pedido está vazio.<br>Toque em um produto para adicionar!</p>
       </div>
     } @else {
-      <div class="flex-1 overflow-y-auto py-3">
+      <div class="flex-1 overflow-y-auto">
         @for (item of cart; track $index) {
-          <div class="grid grid-cols-[56px_1fr_auto_auto] items-center gap-2.5 px-5 py-3 border-b border-gray-100">
-            <div class="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-2xl">
-              @if (getImageUrl(item.product)) {
-                <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="w-full h-full object-cover" />
-              } @else {
-                <span class="text-[10px] text-gray-600 font-medium">Sem foto</span>
-              }
-            </div>
-            <div>
-              <p class="text-xs font-semibold m-0 mb-0.5 text-gray-800">{{ item.product.name }}</p>
-              @if (item.selectedColor) {
-                <p class="text-[11px] text-[#e91e8c] font-medium m-0">{{ item.selectedColor.name }}</p>
-              }
-              <p class="text-xs text-gray-600 m-0">{{ formatCurrency(item.product.price) }} un.</p>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button mat-mini-fab 
-                      color="primary"
-                      class="!w-8 !h-8 !shadow-none"
-                      (click)="decrementCartItem(item)">
-                <mat-icon class="!text-lg">remove</mat-icon>
-              </button>
-              <input
-                type="number"
-                [value]="item.quantity"
-                min="1"
-                class="w-10 h-8 text-center border-[1.5px] border-gray-200 rounded-lg text-sm font-semibold text-gray-800 outline-none bg-white focus:border-[#e91e8c]"
-                (change)="updateQuantity(item, +$any($event.target).value)"
-              />
-              <button mat-mini-fab 
-                      color="primary"
-                      class="!w-8 !h-8 !shadow-none"
-                      (click)="incrementCartItem(item)">
-                <mat-icon class="!text-lg">add</mat-icon>
-              </button>
-              <button mat-icon-button 
-                      class="!ml-1"
-                      (click)="removeItemFromCart(item.product.id, item.selectedColor?.id)" 
+          <div class="flex flex-col gap-2 px-4 py-3 border-b border-gray-100">
+            <div class="flex items-start gap-3">
+              <div class="w-14 h-14 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                @if (getImageUrl(item.product)) {
+                  <img [src]="getImageUrl(item.product)" [alt]="item.product.name" class="w-full h-full object-cover" />
+                } @else {
+                  <mat-icon class="!text-gray-300 !text-3xl">image</mat-icon>
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold m-0 text-gray-800 leading-tight line-clamp-2">{{ item.product.name }}</p>
+                @if (item.selectedColor) {
+                  <p class="text-xs text-[#e91e8c] font-medium m-0 mt-0.5">{{ item.selectedColor.name }}</p>
+                }
+                @if (item.product.inPromotion && item.product.promotionPrice) {
+                  <p class="m-0 mt-0.5">
+                    <span class="text-xs line-through text-gray-400 mr-1">{{ formatCurrency(item.product.price) }}</span>
+                    <span class="text-xs text-[#e91e8c] font-semibold">{{ formatCurrency(item.product.effectivePrice) }} un.</span>
+                  </p>
+                } @else {
+                  <p class="text-xs text-gray-500 m-0 mt-0.5">{{ formatCurrency(item.product.price) }} un.</p>
+                }
+              </div>
+              <button mat-icon-button
+                      class="!w-8 !h-8 !flex-shrink-0 !text-gray-400 hover:!text-red-500"
+                      (click)="removeItemFromCart(item.product.id, item.selectedColor?.id)"
                       title="Remover">
-                <mat-icon>delete</mat-icon>
+                <mat-icon class="!text-lg">close</mat-icon>
               </button>
             </div>
-            <p class="text-xs text-[#e91e8c] text-right m-0">{{ formatCurrency(item.product.price * item.quantity) }}</p>
+            <div class="flex items-center justify-between pl-[68px]">
+              <div class="flex items-center gap-1 bg-gray-100 rounded-full px-1 py-0.5">
+                <button mat-mini-fab
+                        color="primary"
+                        class="!w-7 !h-7 !shadow-none !min-h-0"
+                        (click)="decrementCartItem(item)">
+                  <mat-icon class="!text-base">remove</mat-icon>
+                </button>
+                <input
+                  type="number"
+                  [value]="item.quantity"
+                  min="1"
+                  class="w-9 h-7 text-center border-0 bg-transparent text-sm font-bold text-gray-800 outline-none"
+                  (change)="updateQuantity(item, +$any($event.target).value)"
+                />
+                <button mat-mini-fab
+                        color="primary"
+                        class="!w-7 !h-7 !shadow-none !min-h-0"
+                        (click)="incrementCartItem(item)">
+                  <mat-icon class="!text-base">add</mat-icon>
+                </button>
+              </div>
+              <p class="text-sm font-bold text-[#e91e8c] m-0">{{ formatCurrency(item.product.effectivePrice * item.quantity) }}</p>
+            </div>
           </div>
         }
       </div>

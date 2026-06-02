@@ -48,8 +48,11 @@ export class Catalog implements OnInit {
   brandSearch = '';
   showCategoryDropdown = false;
   showBrandDropdown = false;
+  filterPromotion = false;
   isLoading = false;
   showCart = false;
+  promotionProducts: ReturnProductDto[] = [];
+  isLoadingPromotion = false;
 
   currentPage = 1;
   pageSize = 12;
@@ -97,6 +100,7 @@ export class Catalog implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadPromotionProducts();
     this.loadProducts();
   }
 
@@ -121,6 +125,7 @@ export class Catalog implements OnInit {
         this.searchQuery || undefined,
         this.selectedCategoryId || undefined,
         this.selectedBrandId || undefined,
+        this.filterPromotion || undefined,
       )
       .subscribe({
         next: (res) => {
@@ -133,6 +138,19 @@ export class Catalog implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+
+  loadPromotionProducts(): void {
+    this.isLoadingPromotion = true;
+    this.catalogService.getProducts(1, 500, undefined, undefined, undefined, true).subscribe({
+      next: (res) => {
+        this.promotionProducts = res.data;
+        this.isLoadingPromotion = false;
+      },
+      error: () => {
+        this.isLoadingPromotion = false;
+      },
+    });
   }
 
   onSearchChange(): void {
@@ -161,13 +179,20 @@ export class Catalog implements OnInit {
   clearFilters(): void {
     this.selectedCategoryId = '';
     this.selectedBrandId = '';
+    this.filterPromotion = false;
     this.brands = [];
     this.currentPage = 1;
     this.loadProducts();
   }
 
+  togglePromotionFilter(): void {
+    this.filterPromotion = !this.filterPromotion;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
   get hasActiveFilters(): boolean {
-    return !!(this.selectedCategoryId || this.selectedBrandId);
+    return !!(this.selectedCategoryId || this.selectedBrandId || this.filterPromotion);
   }
 
   get totalPages(): number {
@@ -297,7 +322,7 @@ export class Catalog implements OnInit {
   }
 
   get cartTotal(): number {
-    return this.cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    return this.cart.reduce((sum, item) => sum + item.product.effectivePrice * item.quantity, 0);
   }
 
   get cartItemCount(): number {
@@ -313,7 +338,7 @@ export class Catalog implements OnInit {
 
     const lines = this.cart.map(item => {
       const color = item.selectedColor ? ` (${item.selectedColor.name})` : '';
-      return `• ${item.quantity}x ${item.product.name}${color} - ${this.formatCurrency(item.product.price * item.quantity)}`;
+      return `• ${item.quantity}x ${item.product.name}${color} - ${this.formatCurrency(item.product.effectivePrice * item.quantity)}`;
     });
 
     const total = this.formatCurrency(this.cartTotal);

@@ -53,7 +53,17 @@
       </div>
 
       <h2 class="text-2xl max-md:text-xl font-extrabold text-gray-800 m-0 leading-tight break-words">{{ data.product.name }}</h2>
-      <p class="text-3xl max-md:text-2xl text-[#e91e8c] m-0 font-bold">{{ formatCurrency(data.product.price) }}</p>
+      @if (data.product.inPromotion && data.product.promotionPrice) {
+        <div class="flex items-center gap-3 flex-wrap">
+          <p class="text-3xl max-md:text-2xl text-[#e91e8c] m-0 font-bold">{{ formatCurrency(data.product.effectivePrice) }}</p>
+          <p class="text-lg text-gray-400 line-through m-0">{{ formatCurrency(data.product.price) }}</p>
+          <span class="bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            -{{ (((data.product.price - data.product.promotionPrice) / data.product.price) * 100).toFixed(0) }}%
+          </span>
+        </div>
+      } @else {
+        <p class="text-3xl max-md:text-2xl text-[#e91e8c] m-0 font-bold">{{ formatCurrency(data.product.price) }}</p>
+      }
 
       @if (data.product.description) {
         <p class="text-sm text-gray-600 leading-relaxed m-0">{{ data.product.description }}</p>

@@ -13,6 +13,9 @@ export interface ReturnProductDto {
   description: string | null;
   price: number;
   costPrice: number;
+  inPromotion: boolean;
+  promotionPrice: number | null;
+  effectivePrice: number;
   categoryId: string;
   brandId: string;
   supplierId?: string;

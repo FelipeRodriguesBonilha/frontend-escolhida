@@ -325,12 +325,12 @@ export class Sales implements OnInit {
 
     if (existingItem) {
       existingItem.quantity += 1;
-      existingItem.subtotal = existingItem.quantity * existingItem.product.price;
+      existingItem.subtotal = existingItem.quantity * existingItem.product.effectivePrice;
     } else {
       this.cartItems.push({
         product,
         quantity: 1,
-        subtotal: product.price
+        subtotal: product.effectivePrice
       });
     }
 
@@ -354,7 +354,7 @@ export class Sales implements OnInit {
 
     const item = this.cartItems[index];
     item.quantity = quantity;
-    item.subtotal = item.quantity * item.product.price;
+    item.subtotal = item.quantity * item.product.effectivePrice;
     this.cartItems = [...this.cartItems];
     this.calculateTotals();
     this.resetSimulation();

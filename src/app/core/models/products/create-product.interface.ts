@@ -10,4 +10,6 @@ export interface CreateProductDto {
   initialStock?: number;
   minQuantity?: number;
   showInCatalog?: boolean;
+  inPromotion?: boolean;
+  promotionPrice?: number;
 }
