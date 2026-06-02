@@ -188,7 +188,7 @@
     </div>
   </section>
 
-  @if (newProducts.length > 0 && !filterNew && !filterPromotion && !searchQuery && !selectedCategoryId && !selectedBrandId) {
+  @if (newProducts.length > 0 && isHomeView) {
     <section class="max-w-[1200px] mx-auto px-5 pt-6 pb-2">
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
@@ -277,7 +277,7 @@
     </section>
   }
 
-  @if (promotionProducts.length > 0 && !filterPromotion && !searchQuery && !selectedCategoryId && !selectedBrandId) {
+  @if (promotionProducts.length > 0 && isHomeView) {
     <section class="max-w-[1200px] mx-auto px-5 pt-6 pb-2">
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
@@ -388,7 +388,7 @@
   }
 
   <main class="max-w-[1200px] mx-auto px-5 py-5">
-    @if (!filterPromotion && !searchQuery && !selectedCategoryId && !selectedBrandId && promotionProducts.length > 0) {
+    @if (isHomeView && (promotionProducts.length > 0 || newProducts.length > 0)) {
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
           <mat-icon class="!text-lg">inventory_2</mat-icon>
@@ -433,15 +433,18 @@
                   <span class="text-xs text-gray-600 font-medium tracking-wider">Sem foto</span>
                 </div>
               }
-              @if (product.inPromotion && product.promotionPrice) {
-                <div class="absolute top-2.5 right-2.5 bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
-                  -{{ (((product.price - product.effectivePrice) / product.price) * 100).toFixed(0) }}%
-                </div>
-              } @else if (product.isNew) {
-                <div class="absolute top-2.5 right-2.5 bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
-                  NOVO
-                </div>
-              }
+              <div class="absolute top-2.5 right-2.5 flex flex-col gap-1 items-end">
+                @if (product.inPromotion && product.promotionPrice) {
+                  <div class="bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                    -{{ (((product.price - product.effectivePrice) / product.price) * 100).toFixed(0) }}%
+                  </div>
+                }
+                @if (product.isNew) {
+                  <div class="bg-[#e91e8c] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                    NOVO
+                  </div>
+                }
+              </div>
               @if (product.category) {
                 <div class="absolute top-2.5 left-2.5 bg-[rgba(233,30,140,0.85)] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
                   {{ product.category.name }}

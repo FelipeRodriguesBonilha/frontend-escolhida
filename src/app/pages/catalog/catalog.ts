@@ -205,20 +205,22 @@ export class Catalog implements OnInit {
 
   togglePromotionFilter(): void {
     this.filterPromotion = !this.filterPromotion;
-    this.filterNew = false;
     this.currentPage = 1;
     this.loadProducts();
   }
 
   toggleNewFilter(): void {
     this.filterNew = !this.filterNew;
-    this.filterPromotion = false;
     this.currentPage = 1;
     this.loadProducts();
   }
 
   get hasActiveFilters(): boolean {
     return !!(this.selectedCategoryId || this.selectedBrandId || this.filterPromotion || this.filterNew);
+  }
+
+  get isHomeView(): boolean {
+    return !this.filterPromotion && !this.filterNew && !this.searchQuery && !this.selectedCategoryId && !this.selectedBrandId;
   }
 
   get totalPages(): number {
