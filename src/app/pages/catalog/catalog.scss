@@ -1,1 +1,15 @@
-// Estilos customizados para o catálogo (usando Tailwind CSS)
+:host {
+  .grid {
+    mat-card {
+      display: flex !important;
+      flex-direction: column !important;
+      height: 100%;
+    }
+
+    mat-card .mat-mdc-card-content {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+  }
+}

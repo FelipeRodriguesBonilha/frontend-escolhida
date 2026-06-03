@@ -199,7 +199,7 @@
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 sm:gap-5">
         @for (product of newProducts; track product.id) {
-          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer !border-2 !border-[#fce4f3] relative overflow-hidden" (click)="openDetail(product)">
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer !border-2 !border-[#fce4f3] relative overflow-hidden !flex !flex-col" (click)="openDetail(product)">
             <div class="absolute top-0 left-0 right-0 h-1 bg-[#e91e8c] z-10"></div>
             <div class="relative h-40 sm:h-56 overflow-hidden bg-gray-100">
               @if (getImageUrl(product)) {
@@ -224,7 +224,7 @@
                 </div>
               }
             </div>
-            <mat-card-content class="!p-4 flex flex-col gap-1.5">
+            <mat-card-content class="!p-4 flex flex-col gap-1.5 !flex-1">
               <h3 class="text-sm font-bold text-gray-800 leading-tight m-0">{{ product.name }}</h3>
               @if (product.description) {
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
@@ -236,7 +236,7 @@
                   }
                 </div>
               }
-              <div class="flex items-center justify-between mt-2.5">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   @if (product.inPromotion && product.promotionPrice) {
                     <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
@@ -252,7 +252,7 @@
                       Cores
                     </button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
                       <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
@@ -262,7 +262,7 @@
                   @if (getCartQuantity(product) === 0) {
                     <button mat-raised-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="addToCart(product); $event.stopPropagation()">+ Adicionar</button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
                       <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
@@ -288,7 +288,7 @@
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 sm:gap-5">
         @for (product of promotionProducts; track product.id) {
-          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer !border-2 !border-[#fce4f3] relative overflow-hidden" (click)="openDetail(product)">
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer !border-2 !border-[#fce4f3] relative overflow-hidden !flex !flex-col" (click)="openDetail(product)">
             <div class="absolute top-0 left-0 right-0 h-1 bg-[#e91e8c] z-10"></div>
             <div class="relative h-40 sm:h-56 overflow-hidden bg-gray-100">
               @if (getImageUrl(product)) {
@@ -318,7 +318,7 @@
                 </div>
               }
             </div>
-            <mat-card-content class="!p-4 flex flex-col gap-1.5">
+            <mat-card-content class="!p-4 flex flex-col gap-1.5 !flex-1">
               <h3 class="text-sm font-bold text-gray-800 leading-tight m-0">{{ product.name }}</h3>
               @if (product.description) {
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
@@ -334,7 +334,7 @@
                   }
                 </div>
               }
-              <div class="flex items-center justify-between mt-2.5">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
                   <span class="text-lg text-[#e91e8c] font-bold">{{ formatCurrency(product.effectivePrice) }}</span>
@@ -349,7 +349,7 @@
                       Cores
                     </button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
                         <mat-icon class="!text-lg">remove</mat-icon>
                       </button>
@@ -368,7 +368,7 @@
                       + Adicionar
                     </button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
                         <mat-icon class="!text-lg">remove</mat-icon>
                       </button>
@@ -412,7 +412,7 @@
 
       <div class="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3 sm:gap-5">
         @for (product of products; track product.id) {
-          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
+          <mat-card class="!rounded-2xl !shadow-lg hover:!shadow-xl hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden !flex !flex-col"
                     [class.!border-2]="product.inPromotion || product.isNew"
                     [class.!border-[#fce4f3]]="product.inPromotion || product.isNew"
                     (click)="openDetail(product)">
@@ -457,7 +457,7 @@
               }
             </div>
 
-            <mat-card-content class="!p-4 flex flex-col gap-1.5">
+            <mat-card-content class="!p-4 flex flex-col gap-1.5 !flex-1">
               <h3 class="text-sm font-bold text-gray-800 leading-tight m-0">{{ product.name }}</h3>
               @if (product.description) {
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
@@ -475,7 +475,7 @@
                 </div>
               }
 
-              <div class="flex items-center justify-between mt-2.5">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   @if (product.inPromotion && product.promotionPrice) {
                     <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
@@ -494,7 +494,7 @@
                       Cores
                     </button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab 
                               color="primary"
                               class="!w-8 !h-8 !shadow-none"
@@ -519,7 +519,7 @@
                       + Adicionar
                     </button>
                   } @else {
-                    <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
                       <button mat-mini-fab 
                               color="primary"
                               class="!w-8 !h-8 !shadow-none"
