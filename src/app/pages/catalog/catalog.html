@@ -236,6 +236,12 @@
                   }
                 </div>
               }
+              @if (isLowStock(product)) {
+                <div class="flex items-center gap-1 mt-1">
+                  <mat-icon class="!text-sm !w-4 !h-4 text-amber-500">warning</mat-icon>
+                  <span class="text-xs text-amber-600 font-semibold">Poucas unidades</span>
+                </div>
+              }
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   @if (product.inPromotion && product.promotionPrice) {
@@ -245,28 +251,32 @@
                     <span class="text-lg text-[#e91e8c] font-bold">{{ formatCurrency(product.price) }}</span>
                   }
                 </div>
-                @if (product.colors && product.colors.length > 0) {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-stroked-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="openDetail(product); $event.stopPropagation()">
-                      <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                      Cores
-                    </button>
-                  } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
-                    </div>
-                  }
+                @if (isOutOfStock(product)) {
+                  <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-raised-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="addToCart(product); $event.stopPropagation()">+ Adicionar</button>
+                  @if (product.colors && product.colors.length > 0) {
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-stroked-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="openDetail(product); $event.stopPropagation()">
+                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
+                        Cores
+                      </button>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
+                      </div>
+                    }
                   } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
-                    </div>
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-raised-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="addToCart(product); $event.stopPropagation()">+ Adicionar</button>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)"><mat-icon class="!text-lg">remove</mat-icon></button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)"><mat-icon class="!text-lg">add</mat-icon></button>
+                      </div>
+                    }
                   }
                 }
               </div>
@@ -334,49 +344,59 @@
                   }
                 </div>
               }
+              @if (isLowStock(product)) {
+                <div class="flex items-center gap-1 mt-1">
+                  <mat-icon class="!text-sm !w-4 !h-4 text-amber-500">warning</mat-icon>
+                  <span class="text-xs text-amber-600 font-semibold">Poucas unidades</span>
+                </div>
+              }
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   <span class="text-xs text-gray-400 line-through">{{ formatCurrency(product.price) }}</span>
                   <span class="text-lg text-[#e91e8c] font-bold">{{ formatCurrency(product.effectivePrice) }}</span>
                 </div>
-                @if (product.colors && product.colors.length > 0) {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-stroked-button
-                            color="primary"
-                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
-                            (click)="openDetail(product); $event.stopPropagation()">
-                      <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                      Cores
-                    </button>
-                  } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
-                        <mat-icon class="!text-lg">remove</mat-icon>
-                      </button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
-                        <mat-icon class="!text-lg">add</mat-icon>
-                      </button>
-                    </div>
-                  }
+                @if (isOutOfStock(product)) {
+                  <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-raised-button
-                            color="primary"
-                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
-                            (click)="addToCart(product); $event.stopPropagation()">
-                      + Adicionar
-                    </button>
+                  @if (product.colors && product.colors.length > 0) {
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-stroked-button
+                              color="primary"
+                              class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                              (click)="openDetail(product); $event.stopPropagation()">
+                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
+                        Cores
+                      </button>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
+                          <mat-icon class="!text-lg">remove</mat-icon>
+                        </button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
+                          <mat-icon class="!text-lg">add</mat-icon>
+                        </button>
+                      </div>
+                    }
                   } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
-                        <mat-icon class="!text-lg">remove</mat-icon>
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-raised-button
+                              color="primary"
+                              class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                              (click)="addToCart(product); $event.stopPropagation()">
+                        + Adicionar
                       </button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
-                        <mat-icon class="!text-lg">add</mat-icon>
-                      </button>
-                    </div>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="removeFromCart(product)">
+                          <mat-icon class="!text-lg">remove</mat-icon>
+                        </button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab color="primary" class="!w-8 !h-8 !shadow-none" (click)="addToCart(product)">
+                          <mat-icon class="!text-lg">add</mat-icon>
+                        </button>
+                      </div>
+                    }
                   }
                 }
               </div>
@@ -475,6 +495,13 @@
                 </div>
               }
 
+              @if (isLowStock(product)) {
+                <div class="flex items-center gap-1 mt-1">
+                  <mat-icon class="!text-sm !w-4 !h-4 text-amber-500">warning</mat-icon>
+                  <span class="text-xs text-amber-600 font-semibold">Poucas unidades</span>
+                </div>
+              }
+
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-auto pt-2.5 gap-2">
                 <div class="flex flex-col">
                   @if (product.inPromotion && product.promotionPrice) {
@@ -484,56 +511,60 @@
                     <span class="text-lg text-[#e91e8c]">{{ formatCurrency(product.price) }}</span>
                   }
                 </div>
-                @if (product.colors && product.colors.length > 0) {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-stroked-button 
-                            color="primary" 
-                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
-                            (click)="openDetail(product); $event.stopPropagation()">
-                      <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                      Cores
-                    </button>
-                  } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab 
-                              color="primary"
-                              class="!w-8 !h-8 !shadow-none"
-                              (click)="removeFromCart(product)">
-                        <mat-icon class="!text-lg">remove</mat-icon>
-                      </button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab 
-                              color="primary"
-                              class="!w-8 !h-8 !shadow-none"
-                              (click)="addToCart(product)">
-                        <mat-icon class="!text-lg">add</mat-icon>
-                      </button>
-                    </div>
-                  }
+                @if (isOutOfStock(product)) {
+                  <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (getCartQuantity(product) === 0) {
-                    <button mat-raised-button 
-                            color="primary" 
-                            class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
-                            (click)="addToCart(product); $event.stopPropagation()">
-                      + Adicionar
-                    </button>
+                  @if (product.colors && product.colors.length > 0) {
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-stroked-button 
+                              color="primary" 
+                              class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                              (click)="openDetail(product); $event.stopPropagation()">
+                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
+                        Cores
+                      </button>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab 
+                                color="primary"
+                                class="!w-8 !h-8 !shadow-none"
+                                (click)="removeFromCart(product)">
+                          <mat-icon class="!text-lg">remove</mat-icon>
+                        </button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab 
+                                color="primary"
+                                class="!w-8 !h-8 !shadow-none"
+                                (click)="addToCart(product)">
+                          <mat-icon class="!text-lg">add</mat-icon>
+                        </button>
+                      </div>
+                    }
                   } @else {
-                    <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
-                      <button mat-mini-fab 
-                              color="primary"
-                              class="!w-8 !h-8 !shadow-none"
-                              (click)="removeFromCart(product)">
-                        <mat-icon class="!text-lg">remove</mat-icon>
+                    @if (getCartQuantity(product) === 0) {
+                      <button mat-raised-button 
+                              color="primary" 
+                              class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
+                              (click)="addToCart(product); $event.stopPropagation()">
+                        + Adicionar
                       </button>
-                      <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
-                      <button mat-mini-fab 
-                              color="primary"
-                              class="!w-8 !h-8 !shadow-none"
-                              (click)="addToCart(product)">
-                        <mat-icon class="!text-lg">add</mat-icon>
-                      </button>
-                    </div>
+                    } @else {
+                      <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
+                        <button mat-mini-fab 
+                                color="primary"
+                                class="!w-8 !h-8 !shadow-none"
+                                (click)="removeFromCart(product)">
+                          <mat-icon class="!text-lg">remove</mat-icon>
+                        </button>
+                        <span class="text-base font-bold min-w-5 text-center">{{ getCartQuantity(product) }}</span>
+                        <button mat-mini-fab 
+                                color="primary"
+                                class="!w-8 !h-8 !shadow-none"
+                                (click)="addToCart(product)">
+                          <mat-icon class="!text-lg">add</mat-icon>
+                        </button>
+                      </div>
+                    }
                   }
                 }
               </div>

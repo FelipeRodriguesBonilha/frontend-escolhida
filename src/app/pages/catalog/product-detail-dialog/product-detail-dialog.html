@@ -69,6 +69,21 @@
         <p class="text-sm text-gray-600 leading-relaxed m-0">{{ data.product.description }}</p>
       }
 
+      @if (isOutOfStock) {
+        <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <mat-icon class="!text-red-500">remove_shopping_cart</mat-icon>
+          <div>
+            <p class="text-sm font-bold text-red-600 m-0">Estoque insuficiente</p>
+            <p class="text-xs text-red-400 m-0">Este produto está indisponível no momento</p>
+          </div>
+        </div>
+      } @else if (isLowStock) {
+        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <mat-icon class="!text-amber-500 !text-lg">warning</mat-icon>
+          <span class="text-sm text-amber-700 font-semibold">Poucas unidades disponíveis</span>
+        </div>
+      }
+
       @if (data.product.colors && data.product.colors.length > 0) {
         <div>
           <p class="text-sm mb-2.5 m-0 font-medium" [class.text-gray-700]="selectedColor" [class.text-red-600]="!selectedColor">
@@ -93,36 +108,38 @@
         </div>
       }
 
-      <div class="flex gap-3 max-md:flex-col items-center mt-2 max-md:mt-1">
-        <div class="flex items-center gap-2.5 max-md:w-full max-md:justify-center">
-          <button mat-mini-fab 
+      @if (!isOutOfStock) {
+        <div class="flex gap-3 max-md:flex-col items-center mt-2 max-md:mt-1">
+          <div class="flex items-center gap-2.5 max-md:w-full max-md:justify-center">
+            <button mat-mini-fab 
+                    color="primary"
+                    class="!w-11 !h-11 max-md:!w-10 max-md:!h-10 !shadow-md"
+                    (click)="decrementQuantity()">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="text-2xl max-md:text-xl font-bold min-w-12 max-md:min-w-10 text-center">{{ quantity }}</span>
+            <button mat-mini-fab 
+                    color="primary"
+                    class="!w-11 !h-11 max-md:!w-10 max-md:!h-10 !shadow-md"
+                    (click)="incrementQuantity()">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <button mat-raised-button 
                   color="primary"
-                  class="!w-11 !h-11 max-md:!w-10 max-md:!h-10 !shadow-md"
-                  (click)="decrementQuantity()">
-            <mat-icon>remove</mat-icon>
-          </button>
-          <span class="text-2xl max-md:text-xl font-bold min-w-12 max-md:min-w-10 text-center">{{ quantity }}</span>
-          <button mat-mini-fab 
-                  color="primary"
-                  class="!w-11 !h-11 max-md:!w-10 max-md:!h-10 !shadow-md"
-                  (click)="incrementQuantity()">
-            <mat-icon>add</mat-icon>
+                  [disabled]="!canAddToCart"
+                  class="!flex-1 max-md:!w-full !rounded-full !px-6 !py-4 !text-base max-md:!text-sm !font-bold !normal-case !shadow-lg"
+                  (click)="addToCart()">
+            <mat-icon class="!mr-2">shopping_cart</mat-icon>
+            Adicionar ao pedido
           </button>
         </div>
-        <button mat-raised-button 
-                color="primary"
-                [disabled]="!canAddToCart"
-                class="!flex-1 max-md:!w-full !rounded-full !px-6 !py-4 !text-base max-md:!text-sm !font-bold !normal-case !shadow-lg"
-                (click)="addToCart()">
-          <mat-icon class="!mr-2">shopping_cart</mat-icon>
-          Adicionar ao pedido
-        </button>
-      </div>
 
-      @if (!canAddToCart) {
-        <p class="text-sm text-red-600 text-center m-0 font-semibold">⚠️ Selecione uma cor para continuar</p>
-      } @else {
-        <p class="text-sm text-gray-600 text-center m-0">Clique em "Adicionar ao pedido" e envie pelo WhatsApp 💬</p>
+        @if (!canAddToCart) {
+          <p class="text-sm text-red-600 text-center m-0 font-semibold">Selecione uma cor para continuar</p>
+        } @else {
+          <p class="text-sm text-gray-600 text-center m-0">Clique em "Adicionar ao pedido" e envie pelo WhatsApp</p>
+        }
       }
     </div>
   </div>

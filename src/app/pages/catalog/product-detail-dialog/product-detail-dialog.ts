@@ -55,10 +55,21 @@ export class ProductDetailDialog {
   }
 
   get canAddToCart(): boolean {
+    if (this.isOutOfStock) return false;
     if (this.data.product.colors && this.data.product.colors.length > 0) {
       return this.selectedColor !== null;
     }
     return true;
+  }
+
+  get isOutOfStock(): boolean {
+    return (this.data.product.stock?.quantity ?? 0) <= 0;
+  }
+
+  get isLowStock(): boolean {
+    const stock = this.data.product.stock;
+    if (!stock) return false;
+    return stock.quantity > 0 && stock.quantity <= stock.minQuantity;
   }
 
   getImageUrl(imageUrl: string): string {

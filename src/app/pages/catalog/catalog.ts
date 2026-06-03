@@ -357,6 +357,15 @@ export class Catalog implements OnInit {
     return this.cart.reduce((sum, item) => sum + item.quantity, 0);
   }
 
+  isOutOfStock(product: ReturnProductDto): boolean {
+    return (product.stock?.quantity ?? 0) <= 0;
+  }
+
+  isLowStock(product: ReturnProductDto): boolean {
+    if (!product.stock) return false;
+    return product.stock.quantity > 0 && product.stock.quantity <= product.stock.minQuantity;
+  }
+
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   }
