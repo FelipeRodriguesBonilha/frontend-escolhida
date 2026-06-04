@@ -63,8 +63,11 @@ export class Reports implements OnInit {
     private toastService: ToastService
   ) {
     const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
     this.dailyForm = this.fb.group({
-      date: [today.toISOString().split('T')[0], Validators.required]
+      date: [`${year}-${month}-${day}`, Validators.required]
     });
 
     this.monthlyForm = this.fb.group({
