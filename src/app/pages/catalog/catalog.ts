@@ -137,6 +137,7 @@ export class Catalog implements OnInit {
           this.products = res.data;
           this.total = res.total;
           this.isLoading = false;
+          this.scrollToSection();
         },
         error: () => {
           this.isLoading = false;
@@ -246,16 +247,17 @@ export class Catalog implements OnInit {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.loadProducts();
-    setTimeout(() => {
-      if (page === 1) {
-        window.scrollTo({ behavior: 'smooth', top: 0 });
-      } else {
-        const element = this.elRef.nativeElement.querySelector('#all-products-section');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+  }
+
+  scrollToSection(): void {
+    if (this.currentPage === 1) {
+      window.scrollTo({ behavior: 'smooth', top: 0 });
+    } else {
+      const element = this.elRef.nativeElement.querySelector('#all-products-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }, 100);
+    }
   }
 
   getImageUrl(product: ReturnProductDto): string {
