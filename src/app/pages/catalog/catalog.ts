@@ -247,9 +247,13 @@ export class Catalog implements OnInit {
     this.currentPage = page;
     this.loadProducts();
     setTimeout(() => {
-      const element = this.elRef.nativeElement.querySelector('#all-products-section');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (page === 1) {
+        window.scrollTo({ behavior: 'smooth', top: 0 });
+      } else {
+        const element = this.elRef.nativeElement.querySelector('#all-products-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     }, 100);
   }
