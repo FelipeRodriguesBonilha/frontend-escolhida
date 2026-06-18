@@ -250,14 +250,16 @@ export class Catalog implements OnInit {
   }
 
   scrollToSection(): void {
-    if (this.currentPage === 1) {
-      window.scrollTo({ behavior: 'smooth', top: 0 });
-    } else {
-      const element = this.elRef.nativeElement.querySelector('#all-products-section');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    requestAnimationFrame(() => {
+      if (this.currentPage === 1) {
+        window.scrollTo({ behavior: 'smooth', top: 0 });
+      } else {
+        const element = this.elRef.nativeElement.querySelector('#all-products-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
-    }
+    });
   }
 
   getImageUrl(product: ReturnProductDto): string {
