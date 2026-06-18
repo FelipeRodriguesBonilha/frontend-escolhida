@@ -246,6 +246,12 @@ export class Catalog implements OnInit {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.loadProducts();
+    setTimeout(() => {
+      const element = this.elRef.nativeElement.querySelector('#all-products-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
   getImageUrl(product: ReturnProductDto): string {

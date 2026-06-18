@@ -188,7 +188,7 @@
     </div>
   </section>
 
-  @if (newProducts.length > 0 && isHomeView) {
+  @if (newProducts.length > 0 && isHomeView && currentPage === 1) {
     <section class="max-w-[1200px] mx-auto px-5 pt-6 pb-2">
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
@@ -287,7 +287,7 @@
     </section>
   }
 
-  @if (promotionProducts.length > 0 && isHomeView) {
+  @if (promotionProducts.length > 0 && isHomeView && currentPage === 1) {
     <section class="max-w-[1200px] mx-auto px-5 pt-6 pb-2">
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
@@ -407,7 +407,7 @@
     </section>
   }
 
-  <main class="max-w-[1200px] mx-auto px-5 py-5">
+  <main id="all-products-section" class="max-w-[1200px] mx-auto px-5 py-5">
     @if (isHomeView && (promotionProducts.length > 0 || newProducts.length > 0)) {
       <div class="flex items-center gap-3 mb-4">
         <div class="flex items-center gap-2 bg-[#e91e8c] text-white px-4 py-2 rounded-full">
