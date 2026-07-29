@@ -320,13 +320,27 @@
 
                       <ng-container matColumnDef="price">
                         <th mat-header-cell *matHeaderCellDef class="text-right">Preço</th>
-                        <td mat-cell *matCellDef="let item" class="text-right text-base font-medium">
-                          @if (item.product.inPromotion && item.product.promotionPrice) {
-                            <span class="line-through text-gray-400 text-xs block">{{ item.product.price | brl }}</span>
-                            <span class="text-orange-600">{{ item.product.effectivePrice | brl }}</span>
-                          } @else {
-                            {{ item.product.price | brl }}
-                          }
+                        <td mat-cell *matCellDef="let item; let i = index" class="text-right text-base font-medium">
+                          <div class="flex items-center justify-end gap-1">
+                            <div>
+                              @if (item.unitPrice !== undefined) {
+                                <span class="line-through text-gray-400 text-xs block">{{ item.product.effectivePrice | brl }}</span>
+                                <span class="text-pink-700">{{ item.unitPrice | brl }}</span>
+                              } @else if (item.product.inPromotion && item.product.promotionPrice) {
+                                <span class="line-through text-gray-400 text-xs block">{{ item.product.price | brl }}</span>
+                                <span class="text-orange-600">{{ item.product.effectivePrice | brl }}</span>
+                              } @else {
+                                {{ item.product.price | brl }}
+                              }
+                            </div>
+                            <button type="button"
+                                    (click)="editUnitPrice(i)"
+                                    title="Editar valor somente para esta venda"
+                                    aria-label="Editar valor somente para esta venda"
+                                    class="w-8 h-8 text-pink-700 hover:bg-pink-50 rounded-lg transition-colors flex items-center justify-center">
+                              <mat-icon class="text-base">edit</mat-icon>
+                            </button>
+                          </div>
                         </td>
                       </ng-container>
 

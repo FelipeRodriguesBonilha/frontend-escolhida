@@ -1,6 +1,7 @@
 export interface SimulateSaleItemDto {
   productId: string;
   quantity: number;
+  unitPrice?: number;
 }
 
 export interface SimulatePaymentDto {

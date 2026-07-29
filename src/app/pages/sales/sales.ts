@@ -28,10 +28,12 @@ import { SaleDetailsDialog } from './sale-details-dialog/sale-details-dialog';
 import { SimulationDialog } from './simulation-dialog/simulation-dialog';
 import { CartDialog } from './cart-dialog/cart-dialog';
 import type { CartDialogState } from './cart-dialog/cart-dialog';
+import { EditPriceDialog } from './edit-price-dialog/edit-price-dialog';
 
 export interface CartItem {
   product: ReturnProductDto;
   quantity: number;
+  unitPrice?: number;
   subtotal: number;
 }
 
@@ -325,7 +327,7 @@ export class Sales implements OnInit {
 
     if (existingItem) {
       existingItem.quantity += 1;
-      existingItem.subtotal = existingItem.quantity * existingItem.product.effectivePrice;
+      existingItem.subtotal = this.calculateItemSubtotal(existingItem);
     } else {
       this.cartItems.push({
         product,
@@ -354,10 +356,41 @@ export class Sales implements OnInit {
 
     const item = this.cartItems[index];
     item.quantity = quantity;
-    item.subtotal = item.quantity * item.product.effectivePrice;
+    item.subtotal = this.calculateItemSubtotal(item);
     this.cartItems = [...this.cartItems];
     this.calculateTotals();
     this.resetSimulation();
+  }
+
+  editUnitPrice(index: number): void {
+    const item = this.cartItems[index];
+    const dialogRef = this.dialog.open(EditPriceDialog, {
+      width: '480px',
+      data: {
+        productName: item.product.name,
+        currentPrice: this.getUnitPrice(item),
+        productPrice: item.product.effectivePrice,
+        hasCustomPrice: item.unitPrice !== undefined,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((unitPrice: number | null | undefined) => {
+      if (unitPrice === undefined) return;
+      this.updateUnitPrice(index, unitPrice);
+    });
+  }
+
+  updateUnitPrice(index: number, unitPrice: number | null): void {
+    const item = this.cartItems[index];
+    item.unitPrice = unitPrice === null ? undefined : unitPrice;
+    item.subtotal = this.calculateItemSubtotal(item);
+    this.cartItems = [...this.cartItems];
+    this.calculateTotals();
+    this.resetSimulation();
+  }
+
+  getUnitPrice(item: CartItem): number {
+    return item.unitPrice ?? item.product.effectivePrice;
   }
 
   get discountAmountInReais(): number {
@@ -398,6 +431,10 @@ export class Sales implements OnInit {
           this.removeFromCart(index);
           return this.getCartDialogState();
         },
+        updateUnitPrice: (index: number, unitPrice: number | null) => {
+          this.updateUnitPrice(index, unitPrice);
+          return this.getCartDialogState();
+        },
         clearCart: () => {
           this.clearCart();
           return this.getCartDialogState();
@@ -414,7 +451,8 @@ export class Sales implements OnInit {
     const simulateData: SimulateSaleDto = {
       items: this.cartItems.map(item => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
       })),
       payments: this.paymentControls.map(group => ({
         paymentMethodId: group.get('paymentMethodId')?.value,
@@ -455,7 +493,8 @@ export class Sales implements OnInit {
     const saleData: CreateSaleDto = {
       items: this.cartItems.map(item => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
       })),
       payments: this.paymentControls.map(group => ({
         paymentMethodId: group.get('paymentMethodId')?.value,
@@ -558,5 +597,9 @@ export class Sales implements OnInit {
       discount: this.discount,
       total: this.total
     };
+  }
+
+  private calculateItemSubtotal(item: CartItem): number {
+    return Math.round(this.getUnitPrice(item) * item.quantity * 100) / 100;
   }
 }
