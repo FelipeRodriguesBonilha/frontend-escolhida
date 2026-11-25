@@ -8,7 +8,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ConfirmationDialog } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductColorDto, ReturnProductDto, ReturnProductImageDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
 import { Brands as BrandService } from '../../../core/services/brands/brands';
@@ -31,6 +33,7 @@ import { NgxCurrencyDirective } from 'ngx-currency';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
+    MatDialogModule,
     NgxCurrencyDirective
   ],
   templateUrl: './products-form.html',
@@ -87,7 +90,8 @@ export class ProductsForm implements OnInit {
     private uploadService: UploadService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private dialog: MatDialog
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -394,6 +398,16 @@ export class ProductsForm implements OnInit {
 
   addColor(): void {
     if (!this.productId || !this.newColorName.trim()) return;
+    const barcode = this.newColorBarcode.trim();
+    if (barcode) {
+      this.checkNewColorBarcodeConflict(barcode);
+      return;
+    }
+    this.submitAddColor();
+  }
+
+  private submitAddColor(): void {
+    if (!this.productId) return;
     this.isAddingColor = true;
     this.productService.addColor(
       this.productId,
@@ -402,26 +416,80 @@ export class ProductsForm implements OnInit {
       this.newColorBarcode.trim() || undefined,
       this.newColorFile || undefined
     ).subscribe({
-      next: (color) => {
-        this.colors = [...this.colors, color];
-        if (color.imageUrl) {
-          this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
-            this.colorSecureUrls.set(color.id, url);
-          });
-        }
-        this.newColorName = '';
-        this.newColorCode = '';
-        this.newColorBarcode = '';
-        this.newColorFile = null;
-        this.newColorPreview = null;
-        this.isAddingColor = false;
-        this.toastService.success('Cor adicionada!');
-      },
+      next: (color) => this.onColorAdded(color, 'Cor adicionada!'),
       error: (error) => {
         const msg = error?.error?.message || 'Erro ao adicionar cor';
         this.toastService.error(msg);
         this.isAddingColor = false;
       }
+    });
+  }
+
+  private onColorAdded(color: ReturnProductColorDto, message: string): void {
+    this.colors = [...this.colors, color];
+    if (color.imageUrl) {
+      this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
+        this.colorSecureUrls.set(color.id, url);
+      });
+    }
+    this.newColorName = '';
+    this.newColorCode = '';
+    this.newColorBarcode = '';
+    this.newColorFile = null;
+    this.newColorPreview = null;
+    this.isAddingColor = false;
+    this.toastService.success(message);
+  }
+
+  private checkNewColorBarcodeConflict(barcode: string): void {
+    this.isAddingColor = true;
+    this.productService.getProductByBarcode(barcode).subscribe({
+      next: (product) => {
+        if (product.barcode === barcode) {
+          if (product.id === this.productId) {
+            this.toastService.error('Este código de barras já pertence a este produto');
+            this.isAddingColor = false;
+            return;
+          }
+          this.confirmConvertProduct(product, barcode);
+          return;
+        }
+        this.toastService.error('Este código já é uma variação de outro produto');
+        this.isAddingColor = false;
+      },
+      error: () => this.submitAddColor()
+    });
+  }
+
+  private confirmConvertProduct(product: ReturnProductDto, barcode: string): void {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      width: '480px',
+      data: {
+        title: 'Código já cadastrado',
+        message: `O código ${barcode} pertence ao produto "${product.name}". Transformar esse produto em variação deste produto? O produto "${product.name}" será desativado.`,
+        confirmText: 'Transformar em variação',
+        cancelText: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) {
+        this.isAddingColor = false;
+        return;
+      }
+      if (!this.productId) return;
+      this.productService.convertColorFromProduct(this.productId, {
+        barcode,
+        name: this.newColorName.trim() || product.name,
+        colorCode: this.newColorCode.trim() || undefined
+      }).subscribe({
+        next: (color) => this.onColorAdded(color, 'Produto convertido em variação!'),
+        error: (error) => {
+          const msg = error?.error?.message || 'Erro ao converter produto em variação';
+          this.toastService.error(msg);
+          this.isAddingColor = false;
+        }
+      });
     });
   }
 
@@ -463,6 +531,17 @@ export class ProductsForm implements OnInit {
 
   saveColorEdit(): void {
     if (!this.productId || !this.editingColorId || !this.editColorName.trim()) return;
+    const color = this.colors.find(c => c.id === this.editingColorId);
+    const barcode = this.editColorBarcode.trim();
+    if (barcode && barcode !== color?.barcode) {
+      this.checkEditColorBarcodeConflict(barcode);
+      return;
+    }
+    this.submitUpdateColor();
+  }
+
+  private submitUpdateColor(): void {
+    if (!this.productId || !this.editingColorId) return;
     this.isSavingColor = true;
     const colorId = this.editingColorId;
     this.productService.updateColor(
@@ -492,6 +571,74 @@ export class ProductsForm implements OnInit {
         this.toastService.error(msg);
         this.isSavingColor = false;
       }
+    });
+  }
+
+  private checkEditColorBarcodeConflict(barcode: string): void {
+    this.isSavingColor = true;
+    this.productService.getProductByBarcode(barcode).subscribe({
+      next: (product) => {
+        if (product.barcode === barcode) {
+          if (product.id === this.productId) {
+            this.toastService.error('Este código de barras já pertence a este produto');
+            this.isSavingColor = false;
+            return;
+          }
+          this.confirmConvertProductForEdit(product, barcode);
+          return;
+        }
+        this.toastService.error('Este código já é uma variação de outro produto');
+        this.isSavingColor = false;
+      },
+      error: () => this.submitUpdateColor()
+    });
+  }
+
+  private confirmConvertProductForEdit(product: ReturnProductDto, barcode: string): void {
+    const colorId = this.editingColorId;
+    if (!colorId || !this.productId) {
+      this.isSavingColor = false;
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      width: '480px',
+      data: {
+        title: 'Código já cadastrado',
+        message: `O código ${barcode} pertence ao produto "${product.name}". Transformar esse produto em variação deste produto? O produto "${product.name}" será desativado.`,
+        confirmText: 'Transformar em variação',
+        cancelText: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed || !this.productId) {
+        this.isSavingColor = false;
+        return;
+      }
+      this.productService.convertColorFromProduct(this.productId, {
+        barcode,
+        colorId,
+        name: this.editColorName.trim() || undefined,
+        colorCode: this.editColorCode.trim() || undefined
+      }).subscribe({
+        next: (updated) => {
+          this.colors = this.colors.map(c => c.id === colorId ? updated : c);
+          if (updated.imageUrl) {
+            this.uploadService.getSecureImageUrl(updated.imageUrl).subscribe(url => {
+              this.colorSecureUrls.set(updated.id, url);
+            });
+          }
+          this.cancelEditColor();
+          this.isSavingColor = false;
+          this.toastService.success('Produto convertido em variação!');
+        },
+        error: (error) => {
+          const msg = error?.error?.message || 'Erro ao converter produto em variação';
+          this.toastService.error(msg);
+          this.isSavingColor = false;
+        }
+      });
     });
   }
 
