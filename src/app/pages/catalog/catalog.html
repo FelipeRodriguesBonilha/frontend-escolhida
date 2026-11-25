@@ -257,7 +257,6 @@
                   @if (product.variations && product.variations.length > 0) {
                     @if (getCartQuantity(product) === 0) {
                       <button mat-stroked-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="openDetail(product); $event.stopPropagation()">
-                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
                         Variações
                       </button>
                     } @else {
@@ -364,7 +363,6 @@
                               color="primary"
                               class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
                               (click)="openDetail(product); $event.stopPropagation()">
-                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
                         Variações
                       </button>
                     } @else {
@@ -520,7 +518,6 @@
                               color="primary" 
                               class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
                               (click)="openDetail(product); $event.stopPropagation()">
-                        <mat-icon class="!text-base !mr-1">palette</mat-icon>
                         Variações
                       </button>
                     } @else {
