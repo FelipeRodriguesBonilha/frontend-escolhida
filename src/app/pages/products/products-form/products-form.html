@@ -52,6 +52,13 @@
                     <mat-error>{{ getErrorMessage('barcode') }}</mat-error>
                   }
                 </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Data de Validade</mat-label>
+                  <input matInput
+                         type="date"
+                         formControlName="expirationDate">
+                  <mat-icon matSuffix>event</mat-icon>
+                </mat-form-field>
               </div>
               <mat-form-field class="w-full">
                 <mat-label>Descrição</mat-label>

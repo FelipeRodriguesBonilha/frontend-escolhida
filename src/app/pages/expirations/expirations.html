@@ -1,0 +1,139 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">Validades</h1>
+          <p class="text-gray-600">Produtos vencidos ou próximos do vencimento (90 dias)</p>
+        </div>
+        @if (!isLoading) {
+          <div class="flex items-center gap-8">
+            <div class="text-right">
+              <p class="text-sm text-gray-600">A vencer</p>
+              <p class="text-3xl font-bold text-orange-600">{{ expiring.length }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-600">Vencidos</p>
+              <p class="text-3xl font-bold text-red-600">{{ expired.length }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="flex items-center justify-center py-12">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else {
+      <mat-card class="shadow-sm">
+        <mat-card-content class="p-4">
+          <div class="mb-4 space-y-3">
+            <form [formGroup]="searchForm" class="flex gap-3">
+              <mat-form-field class="flex-1">
+                <mat-label>Buscar produto...</mat-label>
+                <input matInput formControlName="searchQuery" placeholder="Nome, código, categoria, marca...">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              <div class="flex gap-2">
+                <button type="button" (click)="setFilter('expiring')"
+                        [class]="filter === 'expiring' ? 'px-4 py-2 bg-orange-100 border-2 border-orange-500 text-orange-700 rounded-lg font-medium flex items-center gap-2' : 'px-4 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg font-medium flex items-center gap-2'">
+                  <mat-icon>schedule</mat-icon>
+                  <span>A vencer</span>
+                </button>
+                <button type="button" (click)="setFilter('expired')"
+                        [class]="filter === 'expired' ? 'px-4 py-2 bg-red-100 border-2 border-red-500 text-red-700 rounded-lg font-medium flex items-center gap-2' : 'px-4 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg font-medium flex items-center gap-2'">
+                  <mat-icon>event_busy</mat-icon>
+                  <span>Vencidos</span>
+                </button>
+                <button type="button" (click)="setFilter('all')"
+                        [class]="filter === 'all' ? 'px-4 py-2 bg-pink-100 border-2 border-pink-500 text-pink-700 rounded-lg font-medium flex items-center gap-2' : 'px-4 py-2 border-2 border-gray-400 text-gray-600 hover:bg-gray-50 rounded-lg font-medium flex items-center gap-2'">
+                  <mat-icon>list</mat-icon>
+                  <span>Todos</span>
+                </button>
+              </div>
+            </form>
+          </div>
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="products" class="w-full">
+              <ng-container matColumnDef="product">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Produto</th>
+                <td mat-cell *matCellDef="let product">
+                  <div class="py-2">
+                    <p class="font-medium text-gray-800">{{ product.name }}</p>
+                    <p class="text-sm text-gray-500">{{ product.barcode || '-' }}</p>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Categoria</th>
+                <td mat-cell *matCellDef="let product">
+                  <span class="text-gray-600">{{ product.category?.name || '-' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="stock">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Estoque</th>
+                <td mat-cell *matCellDef="let product">
+                  <span class="text-lg font-semibold"
+                        [class.text-red-600]="(product.stock?.quantity ?? 0) === 0"
+                        [class.text-gray-800]="(product.stock?.quantity ?? 0) > 0">
+                    {{ product.stock?.quantity ?? 0 }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="expirationDate">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Validade</th>
+                <td mat-cell *matCellDef="let product">
+                  <span class="font-medium"
+                        [class.text-red-600]="isExpired(product)"
+                        [class.text-orange-600]="!isExpired(product)">
+                    {{ product.expirationDate | date:'dd/MM/yyyy' }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="days">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Prazo</th>
+                <td mat-cell *matCellDef="let product">
+                  <span class="text-sm"
+                        [class.text-red-600]="isExpired(product)"
+                        [class.text-orange-600]="!isExpired(product)">
+                    {{ daysLabel(product) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-700">Status</th>
+                <td mat-cell *matCellDef="let product">
+                  <mat-chip
+                    [class.bg-red-100]="isExpired(product)"
+                    [class.text-red-700]="isExpired(product)"
+                    [class.bg-orange-100]="!isExpired(product)"
+                    [class.text-orange-700]="!isExpired(product)">
+                    {{ statusLabel(product) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+            </table>
+          </div>
+
+          @if (products.length === 0) {
+            <div class="text-center py-12">
+              <mat-icon class="text-gray-400 text-6xl mb-4">event_available</mat-icon>
+              <p class="text-gray-500 text-lg">
+                {{ filter === 'expired' ? 'Nenhum produto vencido' : filter === 'expiring' ? 'Nenhum produto próximo do vencimento' : 'Nenhum produto com validade' }}
+              </p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

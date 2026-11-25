@@ -29,6 +29,10 @@ export class Products {
     return this.http.get<ReturnProductDto[]>(`${this.apiUrl}/products/low-stock`);
   }
 
+  getExpirations(days: number = 90): Observable<{ expired: ReturnProductDto[]; expiring: ReturnProductDto[] }> {
+    return this.http.get<{ expired: ReturnProductDto[]; expiring: ReturnProductDto[] }>(`${this.apiUrl}/products/expirations`, { params: { days } });
+  }
+
   getProductByBarcode(barcode: string): Observable<ReturnProductDto> {
     return this.http.get<ReturnProductDto>(`${this.apiUrl}/products/barcode/${barcode}`);
   }

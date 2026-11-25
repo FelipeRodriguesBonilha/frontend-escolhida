@@ -21,6 +21,7 @@ export interface ReturnProductDto {
   brandId: string;
   supplierId?: string;
   imageUrl: string | null;
+  expirationDate: string | null;
   active: boolean;
   showInCatalog: boolean;
   createdAt: Date;

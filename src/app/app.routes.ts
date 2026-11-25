@@ -52,6 +52,7 @@ export const routes: Routes = [
         ],
       },
       { path: 'estoque', loadComponent: () => import('./pages/stock/stock').then(m => m.Stock) },
+      { path: 'validades', loadComponent: () => import('./pages/expirations/expirations').then(m => m.Expirations) },
       { path: 'caixa', loadComponent: () => import('./pages/cash-register/cash-register').then(m => m.CashRegisterComponent) },
       {
         path: 'pagamentos',

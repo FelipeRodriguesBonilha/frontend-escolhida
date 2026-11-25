@@ -7,6 +7,7 @@ export interface CreateProductDto {
   categoryId: string;
   brandId: string;
   supplierId?: string;
+  expirationDate?: string;
   initialStock?: number;
   minQuantity?: number;
   showInCatalog?: boolean;
