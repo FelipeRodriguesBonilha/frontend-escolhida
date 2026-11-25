@@ -75,8 +75,14 @@ export class Products {
     return this.http.patch<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/${colorId}`, formData);
   }
 
-  convertColorFromProduct(productId: string, data: { barcode: string; colorId?: string; name?: string; colorCode?: string }): Observable<ReturnProductColorDto> {
-    return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/convert`, data);
+  convertColorFromProduct(productId: string, data: { barcode: string; colorId?: string; name?: string; colorCode?: string; image?: File }): Observable<ReturnProductColorDto> {
+    const formData = new FormData();
+    formData.append('barcode', data.barcode);
+    if (data.colorId) formData.append('colorId', data.colorId);
+    if (data.name) formData.append('name', data.name);
+    if (data.colorCode) formData.append('colorCode', data.colorCode);
+    if (data.image) formData.append('image', data.image);
+    return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/convert`, formData);
   }
 
   removeColor(productId: string, colorId: string): Observable<void> {

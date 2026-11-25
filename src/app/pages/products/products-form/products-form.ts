@@ -492,7 +492,8 @@ export class ProductsForm implements OnInit {
       this.productService.convertColorFromProduct(this.productId, {
         barcode,
         name: this.newColorName.trim() || product.name,
-        colorCode: this.newColorCode.trim() || undefined
+        colorCode: this.newColorCode.trim() || undefined,
+        image: this.newColorFile || undefined
       }).subscribe({
         next: (color) => this.onColorAdded(color, 'Produto convertido em variação!'),
         error: (error) => {
@@ -631,7 +632,8 @@ export class ProductsForm implements OnInit {
         barcode,
         colorId,
         name: this.editColorName.trim() || undefined,
-        colorCode: this.editColorCode.trim() || undefined
+        colorCode: this.editColorCode.trim() || undefined,
+        image: this.editColorFile || undefined
       }).subscribe({
         next: (updated) => {
           this.colors = this.colors.map(c => c.id === colorId ? updated : c);
