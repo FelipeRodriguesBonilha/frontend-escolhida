@@ -44,7 +44,7 @@
     <div class="category-dropdown-wrapper relative inline-block min-w-[220px]">
       <button type="button"
               (click)="showCategoryDropdown = !showCategoryDropdown; categorySearch = ''"
-              class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-colors shadow-sm cursor-pointer w-full">
+              class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-variations shadow-sm cursor-pointer w-full">
         <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0">category</mat-icon>
         <span class="flex-1 text-left truncate">{{ selectedCategoryName }}</span>
         <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0 transition-transform"
@@ -67,7 +67,7 @@
             <li>
               <button type="button"
                       (click)="selectCategory(''); showCategoryDropdown = false"
-                      class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-variations"
                       [class.bg-pink-50]="selectedCategoryId === ''"
                       [class.text-pink-600]="selectedCategoryId === ''"
                       [class.font-semibold]="selectedCategoryId === ''">
@@ -78,7 +78,7 @@
               <li>
                 <button type="button"
                         (click)="selectCategory(cat.id); showCategoryDropdown = false"
-                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-variations"
                         [class.bg-pink-50]="selectedCategoryId === cat.id"
                         [class.text-pink-600]="selectedCategoryId === cat.id"
                         [class.font-semibold]="selectedCategoryId === cat.id">
@@ -98,7 +98,7 @@
       <div class="brand-dropdown-wrapper relative inline-block min-w-[200px]">
         <button type="button"
                 (click)="showBrandDropdown = !showBrandDropdown; brandSearch = ''"
-                class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-colors shadow-sm cursor-pointer w-full">
+                class="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:border-[#e91e8c] hover:text-[#e91e8c] transition-variations shadow-sm cursor-pointer w-full">
           <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0">storefront</mat-icon>
           <span class="flex-1 text-left truncate">{{ selectedBrandName }}</span>
           <mat-icon class="!text-base !w-4 !h-4 flex-shrink-0 transition-transform"
@@ -121,7 +121,7 @@
               <li>
                 <button type="button"
                         (click)="selectBrand(''); showBrandDropdown = false"
-                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-variations"
                         [class.bg-pink-50]="selectedBrandId === ''"
                         [class.text-pink-600]="selectedBrandId === ''"
                         [class.font-semibold]="selectedBrandId === ''">
@@ -132,7 +132,7 @@
                 <li>
                   <button type="button"
                           (click)="selectBrand(brand.id); showBrandDropdown = false"
-                          class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-colors"
+                          class="w-full text-left px-4 py-2 text-sm hover:bg-pink-50 hover:text-[#e91e8c] transition-variations"
                           [class.bg-pink-50]="selectedBrandId === brand.id"
                           [class.text-pink-600]="selectedBrandId === brand.id"
                           [class.font-semibold]="selectedBrandId === brand.id">
@@ -151,7 +151,7 @@
 
     <button type="button"
             (click)="togglePromotionFilter()"
-            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer border"
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-variations cursor-pointer border"
             [class.bg-[#e91e8c]]="filterPromotion"
             [class.text-white]="filterPromotion"
             [class.border-[#e91e8c]]="filterPromotion"
@@ -165,7 +165,7 @@
 
     <button type="button"
             (click)="toggleNewFilter()"
-            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-colors cursor-pointer border"
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-variations cursor-pointer border"
             [class.bg-[#e91e8c]]="filterNew"
             [class.text-white]="filterNew"
             [class.border-[#e91e8c]]="filterNew"
@@ -180,7 +180,7 @@
     @if (hasActiveFilters) {
       <button type="button"
               (click)="clearFilters()"
-              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 border border-red-200 rounded-full transition-colors cursor-pointer">
+              class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 border border-red-200 rounded-full transition-variations cursor-pointer">
         <mat-icon class="!text-base !w-4 !h-4">filter_alt_off</mat-icon>
         Limpar filtros
       </button>
@@ -229,10 +229,10 @@
               @if (product.description) {
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
               }
-              @if (product.colors && product.colors.length > 0) {
+              @if (product.variations && product.variations.length > 0) {
                 <div class="flex gap-1.5 flex-wrap mt-1">
-                  @for (color of product.colors; track color.id) {
-                    <span class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block" [style.background]="color.colorCode || '#ccc'" [title]="color.name"></span>
+                  @for (variation of product.variations; track variation.id) {
+                    <span class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block" [style.background]="variation.colorCode || '#ccc'" [title]="variation.name"></span>
                   }
                 </div>
               }
@@ -254,11 +254,11 @@
                 @if (isOutOfStock(product)) {
                   <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (product.colors && product.colors.length > 0) {
+                  @if (product.variations && product.variations.length > 0) {
                     @if (getCartQuantity(product) === 0) {
                       <button mat-stroked-button color="primary" class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case" (click)="openDetail(product); $event.stopPropagation()">
                         <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                        Cores
+                        Variações
                       </button>
                     } @else {
                       <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
@@ -333,13 +333,13 @@
               @if (product.description) {
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
               }
-              @if (product.colors && product.colors.length > 0) {
+              @if (product.variations && product.variations.length > 0) {
                 <div class="flex gap-1.5 flex-wrap mt-1">
-                  @for (color of product.colors; track color.id) {
+                  @for (variation of product.variations; track variation.id) {
                     <span
                       class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block"
-                      [style.background]="color.colorCode || '#ccc'"
-                      [title]="color.name"
+                      [style.background]="variation.colorCode || '#ccc'"
+                      [title]="variation.name"
                     ></span>
                   }
                 </div>
@@ -358,14 +358,14 @@
                 @if (isOutOfStock(product)) {
                   <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (product.colors && product.colors.length > 0) {
+                  @if (product.variations && product.variations.length > 0) {
                     @if (getCartQuantity(product) === 0) {
                       <button mat-stroked-button
                               color="primary"
                               class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
                               (click)="openDetail(product); $event.stopPropagation()">
                         <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                        Cores
+                        Variações
                       </button>
                     } @else {
                       <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
@@ -483,13 +483,13 @@
                 <p class="text-xs text-gray-600 m-0 leading-snug line-clamp-2">{{ product.description }}</p>
               }
 
-              @if (product.colors && product.colors.length > 0) {
+              @if (product.variations && product.variations.length > 0) {
                 <div class="flex gap-1.5 flex-wrap mt-1">
-                  @for (color of product.colors; track color.id) {
+                  @for (variation of product.variations; track variation.id) {
                     <span
                       class="w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 inline-block"
-                      [style.background]="color.colorCode || '#ccc'"
-                      [title]="color.name"
+                      [style.background]="variation.colorCode || '#ccc'"
+                      [title]="variation.name"
                     ></span>
                   }
                 </div>
@@ -514,14 +514,14 @@
                 @if (isOutOfStock(product)) {
                   <span class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-full self-start sm:self-auto">Estoque insuficiente</span>
                 } @else {
-                  @if (product.colors && product.colors.length > 0) {
+                  @if (product.variations && product.variations.length > 0) {
                     @if (getCartQuantity(product) === 0) {
                       <button mat-stroked-button 
                               color="primary" 
                               class="!rounded-full !px-4 !py-2 !text-xs !font-semibold !normal-case"
                               (click)="openDetail(product); $event.stopPropagation()">
                         <mat-icon class="!text-base !mr-1">palette</mat-icon>
-                        Cores
+                        Variações
                       </button>
                     } @else {
                       <div class="flex items-center gap-2 self-start sm:self-auto" (click)="$event.stopPropagation()">
@@ -642,8 +642,8 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold m-0 text-gray-800 leading-tight line-clamp-2">{{ item.product.name }}</p>
-                @if (item.selectedColor) {
-                  <p class="text-xs text-[#e91e8c] font-medium m-0 mt-0.5">{{ item.selectedColor.name }}</p>
+                @if (item.selectedVariation) {
+                  <p class="text-xs text-[#e91e8c] font-medium m-0 mt-0.5">{{ item.selectedVariation.name }}</p>
                 }
                 @if (item.product.inPromotion && item.product.promotionPrice) {
                   <p class="m-0 mt-0.5">
@@ -656,7 +656,7 @@
               </div>
               <button mat-icon-button
                       class="!w-8 !h-8 !flex-shrink-0 !text-gray-400 hover:!text-red-500"
-                      (click)="removeItemFromCart(item.product.id, item.selectedColor?.id)"
+                      (click)="removeItemFromCart(item.product.id, item.selectedVariation?.id)"
                       title="Remover">
                 <mat-icon class="!text-lg">close</mat-icon>
               </button>

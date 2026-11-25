@@ -12,7 +12,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { ConfirmationDialog } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { ToastService } from '../../../core/services/toast/toast.service';
-import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductColorDto, ReturnProductDto, ReturnProductImageDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
+import { CreateProductDto, ReturnBrandDto, ReturnCategoryDto, ReturnProductVariationDto, ReturnProductDto, ReturnProductImageDto, ReturnSupplierDto, UpdateProductDto } from '../../../core/models';
 import { Brands as BrandService } from '../../../core/services/brands/brands';
 import { Categories as CategoryService } from '../../../core/services/categories/categories';
 import { Products as ProductService } from '../../../core/services/products/products';
@@ -61,25 +61,25 @@ export class ProductsForm implements OnInit {
   newFiles: File[] = [];
   newFilePreviews: string[] = [];
 
-  colors: ReturnProductColorDto[] = [];
-  colorImagePreviews = new Map<string, string>();
-  colorSecureUrls = new Map<string, string>();
+  variations: ReturnProductVariationDto[] = [];
+  variationImagePreviews = new Map<string, string>();
+  variationSecureUrls = new Map<string, string>();
 
-  newColorName = '';
-  newColorCode = '';
-  newColorBarcode = '';
-  newColorFile: File | null = null;
-  newColorPreview: string | null = null;
-  isAddingColor = false;
+  newVariationName = '';
+  newVariationCode = '';
+  newVariationBarcode = '';
+  newVariationFile: File | null = null;
+  newVariationPreview: string | null = null;
+  isAddingVariation = false;
 
-  editingColorId: string | null = null;
-  editColorImageRemoved = false;
-  editColorName = '';
-  editColorCode = '';
-  editColorBarcode = '';
-  editColorFile: File | null = null;
-  editColorPreview: string | null = null;
-  isSavingColor = false;
+  editingVariationId: string | null = null;
+  editVariationImageRemoved = false;
+  editVariationName = '';
+  editVariationCode = '';
+  editVariationBarcode = '';
+  editVariationFile: File | null = null;
+  editVariationPreview: string | null = null;
+  isSavingVariation = false;
 
   constructor(
     private fb: FormBuilder,
@@ -183,11 +183,11 @@ export class ProductsForm implements OnInit {
             });
           });
 
-          this.colors = product.colors ?? [];
-          this.colors.forEach(color => {
-            if (color.imageUrl) {
-              this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
-                this.colorSecureUrls.set(color.id, url);
+          this.variations = product.variations ?? [];
+          this.variations.forEach(variation => {
+            if (variation.imageUrl) {
+              this.uploadService.getSecureImageUrl(variation.imageUrl).subscribe(url => {
+                this.variationSecureUrls.set(variation.id, url);
               });
             }
           });
@@ -377,7 +377,7 @@ export class ProductsForm implements OnInit {
     this.imageRemoved = true;
   }
 
-  onNewColorImageSelected(event: Event): void {
+  onNewVariationImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
@@ -389,85 +389,85 @@ export class ProductsForm implements OnInit {
         this.toastService.warning('A imagem deve ter no máximo 5MB');
         return;
       }
-      this.newColorFile = file;
+      this.newVariationFile = file;
       const reader = new FileReader();
-      reader.onload = (e) => { this.newColorPreview = e.target?.result as string; };
+      reader.onload = (e) => { this.newVariationPreview = e.target?.result as string; };
       reader.readAsDataURL(file);
     }
   }
 
-  addColor(): void {
+  addVariation(): void {
     if (!this.productId) return;
-    const barcode = this.newColorBarcode.trim();
+    const barcode = this.newVariationBarcode.trim();
     if (barcode) {
-      this.checkNewColorBarcodeConflict(barcode);
+      this.checkNewVariationBarcodeConflict(barcode);
       return;
     }
-    if (!this.newColorName.trim()) {
-      this.toastService.error('Informe o nome da cor');
+    if (!this.newVariationName.trim()) {
+      this.toastService.error('Informe o nome da variação');
       return;
     }
-    this.submitAddColor();
+    this.submitAddVariation();
   }
 
-  private submitAddColor(): void {
+  private submitAddVariation(): void {
     if (!this.productId) return;
-    this.isAddingColor = true;
-    this.productService.addColor(
+    this.isAddingVariation = true;
+    this.productService.addVariation(
       this.productId,
-      this.newColorName.trim(),
-      this.newColorCode.trim() || undefined,
-      this.newColorBarcode.trim() || undefined,
-      this.newColorFile || undefined
+      this.newVariationName.trim(),
+      this.newVariationCode.trim() || undefined,
+      this.newVariationBarcode.trim() || undefined,
+      this.newVariationFile || undefined
     ).subscribe({
-      next: (color) => this.onColorAdded(color, 'Cor adicionada!'),
+      next: (variation) => this.onVariationAdded(variation, 'Variação adicionada!'),
       error: (error) => {
-        const msg = error?.error?.message || 'Erro ao adicionar cor';
+        const msg = error?.error?.message || 'Erro ao adicionar variação';
         this.toastService.error(msg);
-        this.isAddingColor = false;
+        this.isAddingVariation = false;
       }
     });
   }
 
-  private onColorAdded(color: ReturnProductColorDto, message: string): void {
-    this.colors = [...this.colors, color];
-    if (color.imageUrl) {
-      this.uploadService.getSecureImageUrl(color.imageUrl).subscribe(url => {
-        this.colorSecureUrls.set(color.id, url);
+  private onVariationAdded(variation: ReturnProductVariationDto, message: string): void {
+    this.variations = [...this.variations, variation];
+    if (variation.imageUrl) {
+      this.uploadService.getSecureImageUrl(variation.imageUrl).subscribe(url => {
+        this.variationSecureUrls.set(variation.id, url);
       });
     }
-    this.newColorName = '';
-    this.newColorCode = '';
-    this.newColorBarcode = '';
-    this.newColorFile = null;
-    this.newColorPreview = null;
-    this.isAddingColor = false;
+    this.newVariationName = '';
+    this.newVariationCode = '';
+    this.newVariationBarcode = '';
+    this.newVariationFile = null;
+    this.newVariationPreview = null;
+    this.isAddingVariation = false;
     this.toastService.success(message);
   }
 
-  private checkNewColorBarcodeConflict(barcode: string): void {
-    this.isAddingColor = true;
+  private checkNewVariationBarcodeConflict(barcode: string): void {
+    this.isAddingVariation = true;
     this.productService.getProductByBarcode(barcode).subscribe({
       next: (product) => {
         if (product.barcode === barcode) {
           if (product.id === this.productId) {
             this.toastService.error('Este código de barras já pertence a este produto');
-            this.isAddingColor = false;
+            this.isAddingVariation = false;
             return;
           }
           this.confirmConvertProduct(product, barcode);
           return;
         }
         this.toastService.error('Este código já é uma variação de outro produto');
-        this.isAddingColor = false;
+        this.isAddingVariation = false;
       },
       error: () => {
-        if (!this.newColorName.trim()) {
-          this.toastService.error('Código de barras não encontrado — informe o nome da cor');
-          this.isAddingColor = false;
+        if (!this.newVariationName.trim()) {
+          this.toastService.error('Código de barras não encontrado — informe o nome da variação');
+          this.isAddingVariation = false;
           return;
         }
-        this.submitAddColor();
+        this.submitAddVariation();
       }
     });
   }
@@ -485,44 +485,44 @@ export class ProductsForm implements OnInit {
 
     dialogRef.afterClosed().subscribe(confirmed => {
       if (!confirmed) {
-        this.isAddingColor = false;
+        this.isAddingVariation = false;
         return;
       }
       if (!this.productId) return;
-      this.productService.convertColorFromProduct(this.productId, {
+      this.productService.convertVariationFromProduct(this.productId, {
         barcode,
-        name: this.newColorName.trim() || product.name,
-        colorCode: this.newColorCode.trim() || undefined,
-        image: this.newColorFile || undefined
+        name: this.newVariationName.trim() || product.name,
+        colorCode: this.newVariationCode.trim() || undefined,
+        image: this.newVariationFile || undefined
       }).subscribe({
-        next: (color) => this.onColorAdded(color, 'Produto convertido em variação!'),
+        next: (variation) => this.onVariationAdded(variation, 'Produto convertido em variação!'),
         error: (error) => {
           const msg = error?.error?.message || 'Erro ao converter produto em variação';
           this.toastService.error(msg);
-          this.isAddingColor = false;
+          this.isAddingVariation = false;
         }
       });
     });
   }
 
-  startEditColor(color: ReturnProductColorDto): void {
-    this.editingColorId = color.id;
-    this.editColorName = color.name;
-    this.editColorCode = color.colorCode ?? '';
-    this.editColorBarcode = color.barcode ?? '';
-    this.editColorFile = null;
-    this.editColorPreview = this.colorSecureUrls.get(color.id) || null;
-    this.editColorImageRemoved = false;
+  startEditVariation(variation: ReturnProductVariationDto): void {
+    this.editingVariationId = variation.id;
+    this.editVariationName = variation.name;
+    this.editVariationCode = variation.colorCode ?? '';
+    this.editVariationBarcode = variation.barcode ?? '';
+    this.editVariationFile = null;
+    this.editVariationPreview = this.variationSecureUrls.get(variation.id) || null;
+    this.editVariationImageRemoved = false;
   }
 
-  cancelEditColor(): void {
-    this.editingColorId = null;
-    this.editColorFile = null;
-    this.editColorPreview = null;
-    this.editColorImageRemoved = false;
+  cancelEditVariation(): void {
+    this.editingVariationId = null;
+    this.editVariationFile = null;
+    this.editVariationPreview = null;
+    this.editVariationImageRemoved = false;
   }
 
-  onEditColorImageSelected(event: Event): void {
+  onEditVariationImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
@@ -534,82 +534,82 @@ export class ProductsForm implements OnInit {
         this.toastService.warning('A imagem deve ter no máximo 5MB');
         return;
       }
-      this.editColorFile = file;
+      this.editVariationFile = file;
       const reader = new FileReader();
-      reader.onload = (e) => { this.editColorPreview = e.target?.result as string; };
+      reader.onload = (e) => { this.editVariationPreview = e.target?.result as string; };
       reader.readAsDataURL(file);
     }
   }
 
-  saveColorEdit(): void {
-    if (!this.productId || !this.editingColorId || !this.editColorName.trim()) return;
-    const color = this.colors.find(c => c.id === this.editingColorId);
-    const barcode = this.editColorBarcode.trim();
-    if (barcode && barcode !== color?.barcode) {
-      this.checkEditColorBarcodeConflict(barcode);
+  saveVariationEdit(): void {
+    if (!this.productId || !this.editingVariationId || !this.editVariationName.trim()) return;
+    const variation = this.variations.find(c => c.id === this.editingVariationId);
+    const barcode = this.editVariationBarcode.trim();
+    if (barcode && barcode !== variation?.barcode) {
+      this.checkEditVariationBarcodeConflict(barcode);
       return;
     }
-    this.submitUpdateColor();
+    this.submitUpdateVariation();
   }
 
-  private submitUpdateColor(): void {
-    if (!this.productId || !this.editingColorId) return;
-    this.isSavingColor = true;
-    const colorId = this.editingColorId;
-    this.productService.updateColor(
+  private submitUpdateVariation(): void {
+    if (!this.productId || !this.editingVariationId) return;
+    this.isSavingVariation = true;
+    const variationId = this.editingVariationId;
+    this.productService.updateVariation(
       this.productId,
-      colorId,
-      this.editColorName.trim(),
-      this.editColorCode.trim() || undefined,
-      this.editColorBarcode.trim() || undefined,
-      this.editColorFile || undefined,
-      this.editColorImageRemoved && !this.editColorFile ? true : undefined
+      variationId,
+      this.editVariationName.trim(),
+      this.editVariationCode.trim() || undefined,
+      this.editVariationBarcode.trim() || undefined,
+      this.editVariationFile || undefined,
+      this.editVariationImageRemoved && !this.editVariationFile ? true : undefined
     ).subscribe({
       next: (updated) => {
-        this.colors = this.colors.map(c => c.id === colorId ? updated : c);
+        this.variations = this.variations.map(c => c.id === variationId ? updated : c);
         if (updated.imageUrl) {
           this.uploadService.getSecureImageUrl(updated.imageUrl).subscribe(url => {
-            this.colorSecureUrls.set(updated.id, url);
+            this.variationSecureUrls.set(updated.id, url);
           });
         } else {
-          this.colorSecureUrls.delete(updated.id);
+          this.variationSecureUrls.delete(updated.id);
         }
-        this.cancelEditColor();
-        this.isSavingColor = false;
-        this.toastService.success('Cor atualizada!');
+        this.cancelEditVariation();
+        this.isSavingVariation = false;
+        this.toastService.success('Variação atualizada!');
       },
       error: (error) => {
-        const msg = error?.error?.message || 'Erro ao atualizar cor';
+        const msg = error?.error?.message || 'Erro ao atualizar variação';
         this.toastService.error(msg);
-        this.isSavingColor = false;
+        this.isSavingVariation = false;
       }
     });
   }
 
-  private checkEditColorBarcodeConflict(barcode: string): void {
-    this.isSavingColor = true;
+  private checkEditVariationBarcodeConflict(barcode: string): void {
+    this.isSavingVariation = true;
     this.productService.getProductByBarcode(barcode).subscribe({
       next: (product) => {
         if (product.barcode === barcode) {
           if (product.id === this.productId) {
             this.toastService.error('Este código de barras já pertence a este produto');
-            this.isSavingColor = false;
+            this.isSavingVariation = false;
             return;
           }
           this.confirmConvertProductForEdit(product, barcode);
           return;
         }
         this.toastService.error('Este código já é uma variação de outro produto');
-        this.isSavingColor = false;
+        this.isSavingVariation = false;
       },
-      error: () => this.submitUpdateColor()
+      error: () => this.submitUpdateVariation()
     });
   }
 
   private confirmConvertProductForEdit(product: ReturnProductDto, barcode: string): void {
-    const colorId = this.editingColorId;
-    if (!colorId || !this.productId) {
-      this.isSavingColor = false;
+    const variationId = this.editingVariationId;
+    if (!variationId || !this.productId) {
+      this.isSavingVariation = false;
       return;
     }
 
@@ -625,53 +625,53 @@ export class ProductsForm implements OnInit {
 
     dialogRef.afterClosed().subscribe(confirmed => {
       if (!confirmed || !this.productId) {
-        this.isSavingColor = false;
+        this.isSavingVariation = false;
         return;
       }
-      this.productService.convertColorFromProduct(this.productId, {
+      this.productService.convertVariationFromProduct(this.productId, {
         barcode,
-        colorId,
-        name: this.editColorName.trim() || undefined,
-        colorCode: this.editColorCode.trim() || undefined,
-        image: this.editColorFile || undefined
+        variationId,
+        name: this.editVariationName.trim() || undefined,
+        colorCode: this.editVariationCode.trim() || undefined,
+        image: this.editVariationFile || undefined
       }).subscribe({
         next: (updated) => {
-          this.colors = this.colors.map(c => c.id === colorId ? updated : c);
+          this.variations = this.variations.map(c => c.id === variationId ? updated : c);
           if (updated.imageUrl) {
             this.uploadService.getSecureImageUrl(updated.imageUrl).subscribe(url => {
-              this.colorSecureUrls.set(updated.id, url);
+              this.variationSecureUrls.set(updated.id, url);
             });
           }
-          this.cancelEditColor();
-          this.isSavingColor = false;
+          this.cancelEditVariation();
+          this.isSavingVariation = false;
           this.toastService.success('Produto convertido em variação!');
         },
         error: (error) => {
           const msg = error?.error?.message || 'Erro ao converter produto em variação';
           this.toastService.error(msg);
-          this.isSavingColor = false;
+          this.isSavingVariation = false;
         }
       });
     });
   }
 
-  removeColor(colorId: string): void {
+  removeVariation(variationId: string): void {
     if (!this.productId) return;
-    this.productService.removeColor(this.productId, colorId).subscribe({
+    this.productService.removeVariation(this.productId, variationId).subscribe({
       next: () => {
-        this.colors = this.colors.filter(c => c.id !== colorId);
-        this.colorSecureUrls.delete(colorId);
-        this.toastService.success('Cor removida!');
+        this.variations = this.variations.filter(c => c.id !== variationId);
+        this.variationSecureUrls.delete(variationId);
+        this.toastService.success('Variação removida!');
       },
       error: (error) => {
-        const msg = error?.error?.message || 'Erro ao remover cor';
+        const msg = error?.error?.message || 'Erro ao remover variação';
         this.toastService.error(msg);
       }
     });
   }
 
-  getColorImageUrl(color: ReturnProductColorDto): string {
-    return this.colorSecureUrls.get(color.id) || '';
+  getVariationImageUrl(variation: ReturnProductVariationDto): string {
+    return this.variationSecureUrls.get(variation.id) || '';
   }
 
   getGalleryImageUrl(image: ReturnProductImageDto): string {
@@ -748,7 +748,7 @@ export class ProductsForm implements OnInit {
     return '';
   }
 
-  getProfitMarginColor(): string {
+  getProfitMarginVariation(): string {
     const margin = this.getProfitMargin();
 
     if (margin < 10) return 'text-red-600';

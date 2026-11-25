@@ -9,14 +9,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { ReturnProductDto, ReturnProductColorDto } from '../../core/models';
+import { ReturnProductDto, ReturnProductVariationDto } from '../../core/models';
 import { CatalogBrand, CatalogCategory, CatalogService } from '../../core/services/catalog/catalog.service';
 import { ProductDetailDialog } from './product-detail-dialog/product-detail-dialog';
 
 export interface CartItem {
   product: ReturnProductDto;
   quantity: number;
-  selectedColor: ReturnProductColorDto | null;
+  selectedVariation: ReturnProductVariationDto | null;
 }
 
 @Component({
@@ -275,10 +275,10 @@ export class Catalog implements OnInit {
       panelClass: 'product-detail-dialog',
       data: {
         product,
-        onAddToCart: (quantity: number, color: ReturnProductColorDto | null) => {
-          const key = this.getCartKey(product.id, color?.id ?? null);
+        onAddToCart: (quantity: number, variation: ReturnProductVariationDto | null) => {
+          const key = this.getCartKey(product.id, variation?.id ?? null);
           const existing = this.cart.find(item => 
-            this.getCartKey(item.product.id, item.selectedColor?.id ?? null) === key
+            this.getCartKey(item.product.id, item.selectedVariation?.id ?? null) === key
           );
           if (existing) {
             existing.quantity += quantity;
@@ -286,7 +286,7 @@ export class Catalog implements OnInit {
             this.cart.push({
               product,
               quantity,
-              selectedColor: color,
+              selectedVariation: variation,
             });
           }
           this.showCart = true;
@@ -300,8 +300,8 @@ export class Catalog implements OnInit {
     if (this.showCart) this.showCart = false;
   }
 
-  getCartKey(productId: string, colorId: string | null): string {
-    return colorId ? `${productId}-${colorId}` : productId;
+  getCartKey(productId: string, variationId: string | null): string {
+    return variationId ? `${productId}-${variationId}` : productId;
   }
 
   getCartQuantity(product: ReturnProductDto): number {
@@ -314,7 +314,7 @@ export class Catalog implements OnInit {
     event?.stopPropagation();
     const key = this.getCartKey(product.id, null);
     const existing = this.cart.find(i => 
-      i.product.id === product.id && i.selectedColor === null
+      i.product.id === product.id && i.selectedVariation === null
     );
     if (existing) {
       existing.quantity++;
@@ -322,7 +322,7 @@ export class Catalog implements OnInit {
       this.cart.push({
         product,
         quantity: 1,
-        selectedColor: null,
+        selectedVariation: null,
       });
     }
   }
@@ -338,9 +338,9 @@ export class Catalog implements OnInit {
     }
   }
 
-  removeItemFromCart(productId: string, colorId?: string): void {
-    const key = this.getCartKey(productId, colorId ?? null);
-    this.cart = this.cart.filter(i => this.getCartKey(i.product.id, i.selectedColor?.id ?? null) !== key);
+  removeItemFromCart(productId: string, variationId?: string): void {
+    const key = this.getCartKey(productId, variationId ?? null);
+    this.cart = this.cart.filter(i => this.getCartKey(i.product.id, i.selectedVariation?.id ?? null) !== key);
   }
 
   incrementCartItem(item: CartItem): void {
@@ -351,13 +351,13 @@ export class Catalog implements OnInit {
     if (item.quantity > 1) {
       item.quantity--;
     } else {
-      this.removeItemFromCart(item.product.id, item.selectedColor?.id);
+      this.removeItemFromCart(item.product.id, item.selectedVariation?.id);
     }
   }
 
   updateQuantity(item: CartItem, value: number): void {
     if (value < 1) {
-      this.removeItemFromCart(item.product.id, item.selectedColor?.id);
+      this.removeItemFromCart(item.product.id, item.selectedVariation?.id);
     } else {
       item.quantity = value;
     }
@@ -388,8 +388,8 @@ export class Catalog implements OnInit {
     if (this.cart.length === 0) return;
 
     const lines = this.cart.map(item => {
-      const color = item.selectedColor ? ` (${item.selectedColor.name})` : '';
-      return `• ${item.quantity}x ${item.product.name}${color} - ${this.formatCurrency(item.product.effectivePrice * item.quantity)}`;
+      const variation = item.selectedVariation ? ` (${item.selectedVariation.name})` : '';
+      return `• ${item.quantity}x ${item.product.name}${variation} - ${this.formatCurrency(item.product.effectivePrice * item.quantity)}`;
     });
 
     const total = this.formatCurrency(this.cartTotal);

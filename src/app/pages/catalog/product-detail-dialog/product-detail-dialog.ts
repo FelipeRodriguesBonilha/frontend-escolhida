@@ -3,13 +3,13 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { ReturnProductDto, ReturnProductColorDto } from '../../../core/models';
+import { ReturnProductDto, ReturnProductVariationDto } from '../../../core/models';
 import { CatalogService } from '../../../core/services/catalog/catalog.service';
 import { CommonModule } from '@angular/common';
 
 export interface ProductDetailDialogData {
   product: ReturnProductDto;
-  onAddToCart: (quantity: number, color: ReturnProductColorDto | null) => void;
+  onAddToCart: (quantity: number, variation: ReturnProductVariationDto | null) => void;
 }
 
 @Component({
@@ -26,7 +26,7 @@ export interface ProductDetailDialogData {
   styleUrl: './product-detail-dialog.scss',
 })
 export class ProductDetailDialog {
-  selectedColor: ReturnProductColorDto | null = null;
+  selectedVariation: ReturnProductVariationDto | null = null;
   quantity = 1;
   imageIndex = 0;
   images: string[] = [];
@@ -36,7 +36,7 @@ export class ProductDetailDialog {
     @Inject(MAT_DIALOG_DATA) public data: ProductDetailDialogData,
     private catalogService: CatalogService
   ) {
-    this.selectedColor = null;
+    this.selectedVariation = null;
     this.images = this.buildImages();
   }
 
@@ -48,7 +48,7 @@ export class ProductDetailDialog {
     } else if (this.data.product.imageUrl) {
       imgs.push(this.getImageUrl(this.data.product.imageUrl));
     }
-    (this.data.product.colors ?? []).forEach(c => {
+    (this.data.product.variations ?? []).forEach(c => {
       if (c.imageUrl) imgs.push(this.getImageUrl(c.imageUrl));
     });
     return imgs;
@@ -56,8 +56,8 @@ export class ProductDetailDialog {
 
   get canAddToCart(): boolean {
     if (this.isOutOfStock) return false;
-    if (this.data.product.colors && this.data.product.colors.length > 0) {
-      return this.selectedColor !== null;
+    if (this.data.product.variations && this.data.product.variations.length > 0) {
+      return this.selectedVariation !== null;
     }
     return true;
   }
@@ -76,10 +76,10 @@ export class ProductDetailDialog {
     return this.catalogService.getPublicImageUrl(imageUrl);
   }
 
-  selectColor(color: ReturnProductColorDto): void {
-    this.selectedColor = color;
-    if (color.imageUrl) {
-      const idx = this.images.indexOf(this.getImageUrl(color.imageUrl));
+  selectVariation(variation: ReturnProductVariationDto): void {
+    this.selectedVariation = variation;
+    if (variation.imageUrl) {
+      const idx = this.images.indexOf(this.getImageUrl(variation.imageUrl));
       if (idx >= 0) {
         this.imageIndex = idx;
       }
@@ -91,7 +91,7 @@ export class ProductDetailDialog {
   }
 
   addToCart(): void {
-    this.data.onAddToCart(this.quantity, this.selectedColor);
+    this.data.onAddToCart(this.quantity, this.selectedVariation);
     this.dialogRef.close();
   }
 

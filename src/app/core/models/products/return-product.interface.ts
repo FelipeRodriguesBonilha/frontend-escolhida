@@ -2,7 +2,7 @@ import { ReturnBrandDto } from "../brands/return-brand.interface";
 import { ReturnCategoryDto } from "../categories/return-category.interface";
 import { ReturnStockDto } from "../stock/return-stock.interface";
 import { ReturnSupplierDto } from "../suppliers/return-supplier.interface";
-import { ReturnProductColorDto } from "./return-product-color.interface";
+import { ReturnProductVariationDto } from "./return-product-variation.interface";
 import { ReturnProductImageDto } from "./return-product-image.interface";
 
 
@@ -29,6 +29,6 @@ export interface ReturnProductDto {
   brand?: ReturnBrandDto;
   supplier?: ReturnSupplierDto;
   stock?: ReturnStockDto;
-  colors: ReturnProductColorDto[];
+  variations: ReturnProductVariationDto[];
   images: ReturnProductImageDto[];
 }

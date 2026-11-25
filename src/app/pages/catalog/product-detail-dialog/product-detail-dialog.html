@@ -84,24 +84,24 @@
         </div>
       }
 
-      @if (data.product.colors && data.product.colors.length > 0) {
+      @if (data.product.variations && data.product.variations.length > 0) {
         <div>
-          <p class="text-sm mb-2.5 m-0 font-medium" [class.text-gray-700]="selectedColor" [class.text-red-600]="!selectedColor">
-            Cor: <strong>{{ selectedColor?.name || 'Selecione uma cor *' }}</strong>
+          <p class="text-sm mb-2.5 m-0 font-medium" [class.text-gray-700]="selectedVariation" [class.text-red-600]="!selectedVariation">
+            Variação: <strong>{{ selectedVariation?.name || 'Selecione uma variação *' }}</strong>
           </p>
           <div class="flex gap-2 flex-wrap items-center">
-            @for (color of data.product.colors; track color.id) {
+            @for (variation of data.product.variations; track variation.id) {
               <button mat-stroked-button
-                      [class.!bg-[#fce4f3]]="selectedColor?.id === color.id"
-                      [class.!border-[#e91e8c]]="selectedColor?.id === color.id"
-                      [class.!text-[#e91e8c]]="selectedColor?.id === color.id"
-                      [class.!font-semibold]="selectedColor?.id === color.id"
+                      [class.!bg-[#fce4f3]]="selectedVariation?.id === variation.id"
+                      [class.!border-[#e91e8c]]="selectedVariation?.id === variation.id"
+                      [class.!text-[#e91e8c]]="selectedVariation?.id === variation.id"
+                      [class.!font-semibold]="selectedVariation?.id === variation.id"
                       class="!flex !items-center !gap-1.5 !rounded-full !px-3 !py-1.5 !text-xs !normal-case"
-                      (click)="selectColor(color)"
-                      [title]="color.name">
+                      (click)="selectVariation(variation)"
+                      [title]="variation.name">
                 <span class="inline-block w-[18px] h-[18px] rounded-full border-2 border-white outline outline-1 outline-gray-200 align-middle mr-1.5" 
-                      [style.backgroundColor]="color.colorCode || '#ccc'"></span>
-                <span class="whitespace-nowrap">{{ color.name }}</span>
+                      [style.backgroundVariation]="variation.colorCode || '#ccc'"></span>
+                <span class="whitespace-nowrap">{{ variation.name }}</span>
               </button>
             }
           </div>
@@ -136,7 +136,7 @@
         </div>
 
         @if (!canAddToCart) {
-          <p class="text-sm text-red-600 text-center m-0 font-semibold">Selecione uma cor para continuar</p>
+          <p class="text-sm text-red-600 text-center m-0 font-semibold">Selecione uma variação para continuar</p>
         } @else {
           <p class="text-sm text-gray-600 text-center m-0">Clique em "Adicionar ao pedido" e envie pelo WhatsApp</p>
         }

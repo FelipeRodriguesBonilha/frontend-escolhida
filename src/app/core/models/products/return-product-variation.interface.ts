@@ -1,4 +1,4 @@
-export interface ReturnProductColorDto {
+export interface ReturnProductVariationDto {
   id: string;
   productId: string;
   name: string;

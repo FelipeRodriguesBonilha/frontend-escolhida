@@ -303,7 +303,7 @@ export class Sales implements OnInit {
     this.filteredProducts = this.products.filter(product =>
       product.name.toLowerCase().includes(lowerQuery) ||
       product.barcode?.includes(lowerQuery) ||
-      product.colors?.some(color => color.barcode?.includes(lowerQuery))
+      product.variations?.some(variation => variation.barcode?.includes(lowerQuery))
     );
   }
 

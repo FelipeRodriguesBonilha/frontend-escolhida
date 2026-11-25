@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateProductDto, PaginatedResponse, ReturnProductColorDto, ReturnProductDto, ReturnProductImageDto, UpdateProductDto } from '../../models';
+import { CreateProductDto, PaginatedResponse, ReturnProductVariationDto, ReturnProductDto, ReturnProductImageDto, UpdateProductDto } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -56,37 +56,37 @@ export class Products {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/products/${id}/permanent`);
   }
 
-  addColor(productId: string, name: string, colorCode?: string, barcode?: string, image?: File): Observable<ReturnProductColorDto> {
+  addVariation(productId: string, name: string, colorCode?: string, barcode?: string, image?: File): Observable<ReturnProductVariationDto> {
     const formData = new FormData();
     formData.append('name', name);
     if (colorCode) formData.append('colorCode', colorCode);
     if (barcode) formData.append('barcode', barcode);
     if (image) formData.append('image', image);
-    return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors`, formData);
+    return this.http.post<ReturnProductVariationDto>(`${this.apiUrl}/products/${productId}/variations`, formData);
   }
 
-  updateColor(productId: string, colorId: string, name: string, colorCode?: string, barcode?: string, image?: File, removeImage?: boolean): Observable<ReturnProductColorDto> {
+  updateVariation(productId: string, variationId: string, name: string, colorCode?: string, barcode?: string, image?: File, removeImage?: boolean): Observable<ReturnProductVariationDto> {
     const formData = new FormData();
     formData.append('name', name);
     if (colorCode) formData.append('colorCode', colorCode);
     if (barcode) formData.append('barcode', barcode);
     if (image) formData.append('image', image);
     else if (removeImage) formData.append('removeImage', 'true');
-    return this.http.patch<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/${colorId}`, formData);
+    return this.http.patch<ReturnProductVariationDto>(`${this.apiUrl}/products/${productId}/variations/${variationId}`, formData);
   }
 
-  convertColorFromProduct(productId: string, data: { barcode: string; colorId?: string; name?: string; colorCode?: string; image?: File }): Observable<ReturnProductColorDto> {
+  convertVariationFromProduct(productId: string, data: { barcode: string; variationId?: string; name?: string; colorCode?: string; image?: File }): Observable<ReturnProductVariationDto> {
     const formData = new FormData();
     formData.append('barcode', data.barcode);
-    if (data.colorId) formData.append('colorId', data.colorId);
+    if (data.variationId) formData.append('variationId', data.variationId);
     if (data.name) formData.append('name', data.name);
     if (data.colorCode) formData.append('colorCode', data.colorCode);
     if (data.image) formData.append('image', data.image);
-    return this.http.post<ReturnProductColorDto>(`${this.apiUrl}/products/${productId}/colors/convert`, formData);
+    return this.http.post<ReturnProductVariationDto>(`${this.apiUrl}/products/${productId}/variations/convert`, formData);
   }
 
-  removeColor(productId: string, colorId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/products/${productId}/colors/${colorId}`);
+  removeVariation(productId: string, variationId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/${productId}/variations/${variationId}`);
   }
 
   setMainImage(productId: string, imageId: string): Observable<ReturnProductImageDto[]> {
