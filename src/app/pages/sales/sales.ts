@@ -302,7 +302,8 @@ export class Sales implements OnInit {
     const lowerQuery = query.toLowerCase();
     this.filteredProducts = this.products.filter(product =>
       product.name.toLowerCase().includes(lowerQuery) ||
-      product.barcode?.includes(lowerQuery)
+      product.barcode?.includes(lowerQuery) ||
+      product.colors?.some(color => color.barcode?.includes(lowerQuery))
     );
   }
 

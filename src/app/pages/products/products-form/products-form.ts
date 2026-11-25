@@ -64,6 +64,7 @@ export class ProductsForm implements OnInit {
 
   newColorName = '';
   newColorCode = '';
+  newColorBarcode = '';
   newColorFile: File | null = null;
   newColorPreview: string | null = null;
   isAddingColor = false;
@@ -72,6 +73,7 @@ export class ProductsForm implements OnInit {
   editColorImageRemoved = false;
   editColorName = '';
   editColorCode = '';
+  editColorBarcode = '';
   editColorFile: File | null = null;
   editColorPreview: string | null = null;
   isSavingColor = false;
@@ -397,6 +399,7 @@ export class ProductsForm implements OnInit {
       this.productId,
       this.newColorName.trim(),
       this.newColorCode.trim() || undefined,
+      this.newColorBarcode.trim() || undefined,
       this.newColorFile || undefined
     ).subscribe({
       next: (color) => {
@@ -408,6 +411,7 @@ export class ProductsForm implements OnInit {
         }
         this.newColorName = '';
         this.newColorCode = '';
+        this.newColorBarcode = '';
         this.newColorFile = null;
         this.newColorPreview = null;
         this.isAddingColor = false;
@@ -425,6 +429,7 @@ export class ProductsForm implements OnInit {
     this.editingColorId = color.id;
     this.editColorName = color.name;
     this.editColorCode = color.colorCode ?? '';
+    this.editColorBarcode = color.barcode ?? '';
     this.editColorFile = null;
     this.editColorPreview = this.colorSecureUrls.get(color.id) || null;
     this.editColorImageRemoved = false;
@@ -465,6 +470,7 @@ export class ProductsForm implements OnInit {
       colorId,
       this.editColorName.trim(),
       this.editColorCode.trim() || undefined,
+      this.editColorBarcode.trim() || undefined,
       this.editColorFile || undefined,
       this.editColorImageRemoved && !this.editColorFile ? true : undefined
     ).subscribe({

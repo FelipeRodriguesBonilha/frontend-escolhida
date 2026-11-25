@@ -155,7 +155,7 @@
                     @if (editingColorId === color.id) {
                       <div class="border-2 border-pink-300 rounded-lg p-4 space-y-3 bg-white">
                         <p class="text-sm font-semibold text-pink-700">Editando Cor</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <mat-form-field class="w-full">
                             <mat-label>Nome da Cor *</mat-label>
                             <input matInput
@@ -163,6 +163,14 @@
                                    [ngModelOptions]="{standalone: true}"
                                    placeholder="Ex: Vermelho, Azul...">
                             <mat-icon matSuffix>label</mat-icon>
+                          </mat-form-field>
+                          <mat-form-field class="w-full">
+                            <mat-label>Código de Barras (opcional)</mat-label>
+                            <input matInput
+                                   [(ngModel)]="editColorBarcode"
+                                   [ngModelOptions]="{standalone: true}"
+                                   placeholder="Código da variação...">
+                            <mat-icon matSuffix>qr_code</mat-icon>
                           </mat-form-field>
                           <mat-form-field class="w-full">
                             <mat-label>Código Hex (opcional)</mat-label>
@@ -236,6 +244,9 @@
                         }
                         <div class="flex-1 min-w-0">
                           <p class="font-medium text-gray-800 truncate">{{ color.name }}</p>
+                          @if (color.barcode) {
+                            <p class="text-xs text-gray-500 truncate">Cód: {{ color.barcode }}</p>
+                          }
                           @if (color.colorCode) {
                             <div class="flex items-center gap-1 mt-0.5">
                               <div class="w-3 h-3 rounded-full border border-gray-300"
@@ -260,7 +271,7 @@
 
                   <div class="border-2 border-dashed border-pink-200 rounded-lg p-4 space-y-3 bg-pink-50">
                     <p class="text-sm font-semibold text-pink-700">Adicionar Nova Cor</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <mat-form-field class="w-full">
                         <mat-label>Nome da Cor *</mat-label>
                         <input matInput
@@ -268,6 +279,14 @@
                                [ngModelOptions]="{standalone: true}"
                                placeholder="Ex: Vermelho, Azul...">
                         <mat-icon matSuffix>label</mat-icon>
+                      </mat-form-field>
+                      <mat-form-field class="w-full">
+                        <mat-label>Código de Barras (opcional)</mat-label>
+                        <input matInput
+                               [(ngModel)]="newColorBarcode"
+                               [ngModelOptions]="{standalone: true}"
+                               placeholder="Código da variação...">
+                        <mat-icon matSuffix>qr_code</mat-icon>
                       </mat-form-field>
                       <mat-form-field class="w-full">
                         <mat-label>Código Hex (opcional)</mat-label>
