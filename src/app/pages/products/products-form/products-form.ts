@@ -397,10 +397,14 @@ export class ProductsForm implements OnInit {
   }
 
   addColor(): void {
-    if (!this.productId || !this.newColorName.trim()) return;
+    if (!this.productId) return;
     const barcode = this.newColorBarcode.trim();
     if (barcode) {
       this.checkNewColorBarcodeConflict(barcode);
+      return;
+    }
+    if (!this.newColorName.trim()) {
+      this.toastService.error('Informe o nome da cor');
       return;
     }
     this.submitAddColor();
@@ -457,7 +461,14 @@ export class ProductsForm implements OnInit {
         this.toastService.error('Este código já é uma variação de outro produto');
         this.isAddingColor = false;
       },
-      error: () => this.submitAddColor()
+      error: () => {
+        if (!this.newColorName.trim()) {
+          this.toastService.error('Código de barras não encontrado — informe o nome da cor');
+          this.isAddingColor = false;
+          return;
+        }
+        this.submitAddColor();
+      }
     });
   }
 

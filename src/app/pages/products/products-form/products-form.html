@@ -276,7 +276,7 @@
                     <p class="text-sm font-semibold text-pink-700">Adicionar Nova Cor</p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <mat-form-field class="w-full">
-                        <mat-label>Nome da Cor *</mat-label>
+                        <mat-label>Nome da Cor</mat-label>
                         <input matInput
                                [(ngModel)]="newColorName"
                                [ngModelOptions]="{standalone: true}"
@@ -331,7 +331,7 @@
                       </div>
                       <button type="button"
                               (click)="addColor()"
-                              [disabled]="!newColorName.trim() || isAddingColor"
+                              [disabled]="(!newColorName.trim() && !newColorBarcode.trim()) || isAddingColor"
                               class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
                         @if (isAddingColor) {
                           <mat-spinner diameter="16"></mat-spinner>
