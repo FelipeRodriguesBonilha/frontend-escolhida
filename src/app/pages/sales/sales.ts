@@ -323,7 +323,28 @@ export class Sales implements OnInit {
     });
   }
 
+  private daysUntilExpiration(expirationDate: string): number {
+    const exp = new Date(expirationDate);
+    exp.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((exp.getTime() - today.getTime()) / 86400000);
+  }
+
   addToCart(product: ReturnProductDto): void {
+    if (product.expirationDate) {
+      const days = this.daysUntilExpiration(product.expirationDate);
+      if (days < 0) {
+        this.toastService.error(`Produto "${product.name}" está vencido e não pode ser vendido.`);
+        return;
+      }
+      if (days <= 90) {
+        this.toastService.warning(days === 0
+          ? `Atenção: "${product.name}" vence hoje.`
+          : `Atenção: "${product.name}" vence em ${days} dia${days === 1 ? '' : 's'}.`);
+      }
+    }
+
     const existingItem = this.cartItems.find(item => item.product.id === product.id);
 
     if (existingItem) {

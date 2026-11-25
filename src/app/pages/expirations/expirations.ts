@@ -6,6 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { ReturnProductDto } from '../../core/models';
@@ -24,7 +25,8 @@ type ExpirationFilter = 'expiring' | 'expired' | 'all';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTableModule,
-    MatChipsModule
+    MatChipsModule,
+    MatPaginatorModule
   ],
   templateUrl: './expirations.html',
   styleUrl: './expirations.scss',
@@ -36,12 +38,18 @@ export class Expirations implements OnInit {
   filter: ExpirationFilter = 'expiring';
   searchForm: FormGroup;
   displayedColumns = ['product', 'category', 'stock', 'expirationDate', 'days', 'status'];
+  currentPage = 1;
+  pageSize = 10;
+  pageSizeOptions = [10, 25, 50];
 
   constructor(
     private productService: ProductService,
     private fb: FormBuilder
   ) {
     this.searchForm = this.fb.group({ searchQuery: [''] });
+    this.searchForm.get('searchQuery')?.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+    });
   }
 
   ngOnInit(): void {
@@ -60,6 +68,17 @@ export class Expirations implements OnInit {
 
   setFilter(filter: ExpirationFilter): void {
     this.filter = filter;
+    this.currentPage = 1;
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+  }
+
+  get pagedProducts(): ReturnProductDto[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.products.slice(start, start + this.pageSize);
   }
 
   get products(): ReturnProductDto[] {
