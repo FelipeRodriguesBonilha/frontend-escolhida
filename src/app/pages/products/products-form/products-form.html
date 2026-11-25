@@ -170,7 +170,7 @@
                             <input matInput
                                    [(ngModel)]="editColorBarcode"
                                    [ngModelOptions]="{standalone: true}"
-                                   (keydown.enter)="$event.preventDefault(); saveColorEdit()"
+                                   (keydown.enter)="$event.preventDefault()"
                                    placeholder="Código da variação...">
                             <mat-icon matSuffix>qr_code</mat-icon>
                           </mat-form-field>
@@ -289,7 +289,7 @@
                         <input matInput
                                [(ngModel)]="newColorBarcode"
                                [ngModelOptions]="{standalone: true}"
-                               (keydown.enter)="$event.preventDefault(); addColor()"
+                               (keydown.enter)="$event.preventDefault()"
                                placeholder="Código da variação...">
                         <mat-icon matSuffix>qr_code</mat-icon>
                       </mat-form-field>
