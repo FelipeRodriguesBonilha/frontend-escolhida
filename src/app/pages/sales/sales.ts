@@ -346,6 +346,17 @@ export class Sales implements OnInit {
     }
 
     const existingItem = this.cartItems.find(item => item.product.id === product.id);
+    const available = product.stock?.quantity ?? 0;
+    const requested = (existingItem?.quantity ?? 0) + 1;
+    const minQuantity = product.stock?.minQuantity ?? 0;
+
+    if (requested > available) {
+      this.toastService.error(`Produto "${product.name}" sem estoque suficiente. Disponível: ${available}.`);
+      return;
+    }
+    if (available - requested <= minQuantity) {
+      this.toastService.warning(`Atenção: "${product.name}" ficará abaixo do estoque mínimo após esta venda.`);
+    }
 
     if (existingItem) {
       existingItem.quantity += 1;
