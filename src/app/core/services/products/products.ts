@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { CreateProductDto, PaginatedResponse, ReturnProductVariationDto, ReturnProductDto, ReturnProductImageDto, UpdateProductDto } from '../../models';
+import { CreateProductDto, NfeImportResult, PaginatedResponse, ReturnProductVariationDto, ReturnProductDto, ReturnProductImageDto, UpdateProductDto } from '../../models';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +31,12 @@ export class Products {
 
   getExpirations(days: number = 90): Observable<{ expired: ReturnProductDto[]; expiring: ReturnProductDto[] }> {
     return this.http.get<{ expired: ReturnProductDto[]; expiring: ReturnProductDto[] }>(`${this.apiUrl}/products/expirations`, { params: { days } });
+  }
+
+  importNfe(file: File): Observable<NfeImportResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<NfeImportResult>(`${this.apiUrl}/products/import-nfe`, formData);
   }
 
   getProductByBarcode(barcode: string): Observable<ReturnProductDto> {

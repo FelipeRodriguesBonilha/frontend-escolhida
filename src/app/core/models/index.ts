@@ -12,6 +12,7 @@ export * from './products/update-product.interface';
 export * from './products/return-product.interface';
 export * from './products/return-product-variation.interface';
 export * from './products/return-product-image.interface';
+export * from './products/nfe-import.interface';
 
 export * from './categories/create-category.interface';
 export * from './categories/update-category.interface';

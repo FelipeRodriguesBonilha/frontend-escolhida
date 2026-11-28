@@ -18,6 +18,7 @@ import { Products as ProductService } from '../../core/services/products/product
 import { Upload } from '../../core/services/upload/upload';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { ConfirmationDialog } from '../../shared/components/confirmation-dialog/confirmation-dialog';
+import { ImportNfeDialog } from './import-nfe-dialog/import-nfe-dialog';
 
 @Component({
   selector: 'app-products',
@@ -159,6 +160,19 @@ export class Products implements OnInit {
 
   createProduct(): void {
     this.router.navigate(['/produtos/novo']);
+  }
+
+  openImportDialog(): void {
+    const dialogRef = this.dialog.open(ImportNfeDialog, {
+      width: '520px',
+      disableClose: true
+    });
+    dialogRef.afterClosed().subscribe(changed => {
+      if (changed) {
+        this.toastService.success('Nota importada com sucesso!');
+        this.loadProducts();
+      }
+    });
   }
 
   editProduct(product: ReturnProductDto): void {
