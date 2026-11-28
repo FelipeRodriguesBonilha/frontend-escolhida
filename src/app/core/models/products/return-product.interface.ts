@@ -20,6 +20,7 @@ export interface ReturnProductDto {
   categoryId: string;
   brandId: string;
   supplierId?: string;
+  supplierCode?: string | null;
   imageUrl: string | null;
   expirationDate: string | null;
   active: boolean;
